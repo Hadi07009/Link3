@@ -1,0 +1,41 @@
+﻿<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frmCheckinDataTransfer.aspx.cs" Inherits="modules_HRMS_Details_frmCheckinDataTransfer" %>
+<%@ Register Assembly="ProudMonkey.Common.Controls" Namespace="ProudMonkey.Common.Controls" TagPrefix="cc1" %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register TagPrefix="ew" Namespace="eWorld.UI.Compatibility" Assembly="eWorld.UI.Compatibility" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <cc1:MessageBox ID="MessageBox1" runat="server" />
+    <asp:UpdatePanel ID="updpnl2" runat="server">
+        <ContentTemplate>
+            <asp:Panel ID="PanelLeaveHdr" runat="server" CssClass="cpHeaderContent" Width="100%">
+                <asp:Label ID="lblleave" Text="Data Transfer" runat="server" />
+
+            </asp:Panel>
+            <asp:Panel ID="PanelLeaveDet" runat="server" CssClass="cpBodyContent" Width="100%" Height="100%">
+                <table style="width: 99%; text-align: left">
+                    <tr>
+                        <td>
+                            <asp:Button ID="btnImportData" runat="server" OnClick="btnImportData_Click" Text="Import Data" Width="250px" />
+                        </td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+            </asp:Panel>
+
+        </ContentTemplate>
+        <Triggers>
+            <asp:PostBackTrigger ControlID="btnImportData" />
+        </Triggers>
+    </asp:UpdatePanel>
+</asp:Content>

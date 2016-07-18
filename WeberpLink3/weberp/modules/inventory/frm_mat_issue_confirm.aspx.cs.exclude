@@ -1,0 +1,581 @@
+using System;
+using System.Globalization;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+using LibraryDAL.AccDataSet2TableAdapters;
+
+public partial class frm_mat_issue_confirm : System.Web.UI.Page
+{  
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+        clsStatic.MsgConfirmBox(btnconfirm, "Are you sure to confirm issue above items ?");
+        if (!Page.IsPostBack)
+        {
+            load_all_data();
+        }
+        else
+        {
+
+        }
+    }
+
+    private void load_all_data()
+    {
+        clsMrrData[] mrrdata = (clsMrrData[])Session[clsStatic.sessionMrrDetData];
+        if (mrrdata==null) return;
+        if (mrrdata.Length == 0) return;
+
+        int i;
+        int cnt = mrrdata.Length;
+
+        lblref.Text = mrrdata[0].Ref_no;
+        lbldate.Text = mrrdata[0].Srdate.ToShortDateString();
+        lblfromdept.Text = mrrdata[0].Fromdept;
+        lbltodept.Text = mrrdata[0].Todept;
+        lblreason.Text = mrrdata[0].Reason;
+        lbllocofuse.Text = mrrdata[0].Locofuse;
+        lblissudate.Text = mrrdata[0].Issuedate.ToShortDateString();
+        DataTable dt = new DataTable();
+        dt.Rows.Clear();
+        dt.Columns.Clear();
+
+        dt.Columns.Add("SL", typeof(int));
+        dt.Columns.Add("REF", typeof(string));        
+        dt.Columns.Add("ICODE", typeof(string));
+        dt.Columns.Add("IDET", typeof(string));
+        dt.Columns.Add("UOM", typeof(string));
+        dt.Columns.Add("STORE", typeof(string));
+        dt.Columns.Add("SR QTY", typeof(decimal));
+        dt.Columns.Add("AVL QTY", typeof(decimal));
+        dt.Columns.Add("ISSUE QTY", typeof(decimal));
+        dt.Columns.Add("DBT CODE", typeof(string));
+        dt.Columns.Add("DBT ANAL", typeof(string));       
+
+        for (i = 0; i < cnt; i++)
+        {
+            if(mrrdata[i]==null) break;
+            dt.Rows.Add(mrrdata[i].Seqno, mrrdata[i].Ref_no, mrrdata[i].Icode, mrrdata[i].Idet, mrrdata[i].Uom, mrrdata[i].Store, mrrdata[i].Srqty, mrrdata[i].Availqty, mrrdata[i].Entryqty, mrrdata[i].DbtCode, mrrdata[i].DbtAnal);
+        }
+               
+
+     
+        gdItem.DataSource = dt;
+        gdItem.DataBind();
+
+    }
+
+
+
+
+    private string get_mat_mrr_ref(string mrrtype, DateTime curdate)
+    {
+        string ref_no = "";
+        InSu_Trn_SetTableAdapter set = new InSu_Trn_SetTableAdapter();
+        ErpDataSet.InSu_Trn_SetDataTable dtset = new ErpDataSet.InSu_Trn_SetDataTable();
+
+        dtset = set.GetDataByType_Code("IS", mrrtype);
+
+        string set_ref = dtset[0].Trn_Set_Iq_Next_No;
+
+        double max_ref = Convert.ToDouble(set_ref);
+        ref_no = dtset[0].Trn_Set_Tr_Pfix + string.Format("{0:00}", Convert.ToInt32(curdate.Year.ToString().Substring(2, 2))) + string.Format("{0:00}", curdate.Month) + "-" + string.Format("{0:00000}", max_ref);
+        return ref_no;
+    }
+
+    public static string GetMonthName()
+    {
+        DateTimeFormatInfo info = DateTimeFormatInfo.GetInstance(null);
+        return info.GetAbbreviatedMonthName(DateTime.Now.Month).ToUpper();
+
+    }
+
+
+    private string get_code_type(string glcode)
+    {
+        AccCOATableAdapter gl = new AccCOATableAdapter();
+        AccDataSet.AccCOADataTable dt = new AccDataSet.AccCOADataTable();
+        dt = gl.GetDataByCode(glcode);
+        if (dt.Rows.Count == 0)
+        {
+            return "";
+        }
+        else
+        {
+            return dt[0].Gl_Coa_Type.ToString();
+        }
+    }
+
+    private string get_code_type_budg(string glcode)
+    {
+        budgTableAdapter bug = new budgTableAdapter();
+
+        return bug.GetDataByCoaCode(glcode)[0].Gl_Coa_Type.ToString();
+
+    }
+
+
+    //private string getGrp1(string icode)
+    //{
+    //    InMa_Itm_GrpTableAdapter grp = new InMa_Itm_GrpTableAdapter();
+    //    return grp.GetDataByIcode(icode, "I01")[0].Itm_Grp_Code;
+    //}
+
+    //private string getGrp6(string grp1)
+    //{
+    //    FA_COM_CCGTableAdapter ccg = new FA_COM_CCGTableAdapter();
+    //    ErpDataSet.FA_COM_CCGDataTable dt = new ErpDataSet.FA_COM_CCGDataTable();
+    //    dt = ccg.GetDataByCcgCode(grp1);
+    //    if (dt.Rows.Count == 0) return "-";
+    //    else
+    //        return dt[0].Ccg_Cost_Id;
+
+    //}
+
+    private clsJVdata getjvdata(string poref, string mrr_ref, string pur_type, string plant, string trn_type, string dcode, string com4, string accode, string itmcode, string lcno)
+    {
+        tbl_jv_code_detTableAdapter jcode = new tbl_jv_code_detTableAdapter();
+        SCBL2DataSet.tbl_jv_code_detDataTable dt = new SCBL2DataSet.tbl_jv_code_detDataTable();
+
+        InMa_Itm_DetTableAdapter itmdet = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitm = new ErpDataSet.InMa_Itm_DetDataTable();
+
+        clsJVdata jv = new clsJVdata();
+
+        plant = plant.Substring(0, 2).ToString() + "MPR";
+
+        dt = jcode.GetDataByPurMrr(pur_type, plant);
+        if (dt.Rows.Count == 0) return null;
+
+        if (itmcode != "")
+        {
+            dtitm = itmdet.GetItemByCode(itmcode);
+            if (dtitm.Rows.Count == 0) return null;
+
+            //update for new requirement from azad
+            if (dtitm[0].Itm_Det_Acc_code != "") { itmcode = dtitm[0].Itm_Det_Acc_code; }
+
+        }
+
+       
+
+
+
+        jv.Wrk_trn_type = trn_type;
+        jv.Wrk_narration = pur_type + "//" + poref + "//" + mrr_ref;
+        jv.Adrcode = "";
+        jv.Wrk_match = "";
+
+        switch (pur_type)
+        {
+            case "LPO":
+                if (trn_type == "D")
+                {                    
+                    if (dtitm[0].Itm_Det_Type_flag == "R")
+                    {
+                        jv.Wrk_ac_code = dtitm[0].T_C2.ToString();
+                        jv.Wrk_ac_type = get_code_type(jv.Wrk_ac_code);
+                        jv.Grp1 = itmcode;
+                        jv.Grp2 = "-";
+                        jv.Grp6 = "T13";
+                        jv.Grp7 = "-";
+                    }
+                    else
+                    {
+                        jv.Wrk_ac_code = dtitm[0].T_C2.ToString();
+                        jv.Wrk_ac_type = get_code_type(jv.Wrk_ac_code);
+                        jv.Grp1 = "-";
+                        jv.Grp2 = "-";
+                        jv.Grp6 = "-";
+                        jv.Grp7 = "-";
+                    }
+                    
+                }
+                else
+                {
+                    jv.Wrk_ac_code = accode;
+                    jv.Wrk_ac_type = "S";
+                    jv.Grp1 = "-";
+                    jv.Grp2 = "-";
+                    jv.Grp6 = "-";
+                    jv.Grp7 = "-";
+                }
+
+                break;
+            case "SPO":
+                if (trn_type == "D")
+                {
+                    
+                    if (dtitm[0].Itm_Det_Type_flag == "R")
+                    {
+                        jv.Wrk_ac_code = dtitm[0].T_C2.ToString();
+                        jv.Wrk_ac_type = get_code_type(jv.Wrk_ac_code);
+                        jv.Grp1 = itmcode;
+                        jv.Grp2 = "-";
+                        jv.Grp6 = "T13";
+                        jv.Grp7 = "-";
+                    }
+                    else
+                    {
+                        jv.Wrk_ac_code = dtitm[0].T_C2.ToString();
+                        jv.Wrk_ac_type = get_code_type(jv.Wrk_ac_code);
+                        jv.Grp1 = "-";
+                        jv.Grp2 = "-";
+                        jv.Grp6 = "-";
+                        jv.Grp7 = "-";
+                    }
+                    
+                }
+                else
+                {
+                    jv.Wrk_ac_code = dt[0].crd_acc_code;
+                    jv.Wrk_ac_type = get_code_type_budg(jv.Wrk_ac_code);
+                    jv.Grp1 = dcode;
+                    jv.Grp2 = "-";
+                    jv.Grp6 = "T01";
+                    jv.Grp7 = "-";
+                }
+
+                break;
+            case "FPO":
+
+                if (trn_type == "D")
+                {
+                    
+                    if (dtitm[0].Itm_Det_Type_flag == "R")
+                    {
+                        jv.Wrk_ac_code = dtitm[0].T_C2.ToString();
+                        jv.Wrk_ac_type = get_code_type(jv.Wrk_ac_code);
+                        jv.Grp1 = itmcode;
+                        jv.Grp2 = "-";
+                        jv.Grp6 = "T13";
+                        jv.Grp7 = "-";
+                    }
+                    else
+                    {
+                        jv.Wrk_ac_code = dtitm[0].T_C2.ToString();
+                        jv.Wrk_ac_type = get_code_type(jv.Wrk_ac_code);
+                        jv.Grp1 = "-";
+                        jv.Grp2 = "-";
+                        jv.Grp6 = "-";
+                        jv.Grp7 = "-";
+                    }
+                    
+                }
+                else
+                {
+                    jv.Wrk_ac_code = dt[0].crd_acc_code;
+                    jv.Wrk_ac_type = get_code_type_budg(jv.Wrk_ac_code);
+                    jv.Grp1 = lcno;
+                    jv.Grp2 = itmcode;
+                    jv.Grp6 = "T12";
+                    jv.Grp7 = "T13";
+                }
+
+                break;
+
+            default:
+                return null;
+                
+
+        }
+
+
+        return jv;
+    }
+
+    //private clsItemDetail getitem_det_data(string po_ref, string itmcode)
+    //{
+    //    clsItemDetail itm = new clsItemDetail();
+    //    PuTr_PO_Det_ScblTableAdapter podet = new PuTr_PO_Det_ScblTableAdapter();
+    //    SCBLDataSet.PuTr_PO_Det_ScblDataTable dtdet = new SCBLDataSet.PuTr_PO_Det_ScblDataTable();
+
+    //    switch(po_ref.Substring(0, 1))
+    //    {
+    //        case "L":
+    //            dtdet = podet.GetDetByRefItem(po_ref, itmcode);
+    //            itm.Brand = dtdet[0].PO_Det_Brand;
+    //            itm.Origin = dtdet[0].PO_Det_Origin;
+    //            itm.Packing = dtdet[0].PO_Det_Packing;
+    //            break;
+
+    //        case "S":
+    //            dtdet = podet.GetDetByRefItem(po_ref, itmcode);
+    //            itm.Brand = dtdet[0].PO_Det_Brand;
+    //            itm.Origin = dtdet[0].PO_Det_Origin;
+    //            itm.Packing = dtdet[0].PO_Det_Packing;
+    //            break;
+
+    //        case "F":
+    //            itm.Brand = "";
+    //            itm.Origin = "";
+    //            itm.Packing = "";
+    //            break;
+               
+    //        default:
+    //            break;
+    //    }
+
+
+    //    return itm;
+
+    //}
+
+    protected void btnconfirm_Click(object sender, EventArgs e)
+    {
+        lblmsg.Visible = false;
+        clsMrrData[] mrrdata = (clsMrrData[])Session[clsStatic.sessionMrrDetData];
+        if (mrrdata == null) return;
+        if (mrrdata.Length == 0) return;
+
+        AccTransactionHeaderTableAdapter scfwh = new AccTransactionHeaderTableAdapter();
+        AccTransactionDetailsTableAdapter scfwd = new AccTransactionDetailsTableAdapter();
+        AccTransactionAnalysisTableAdapter scfanal = new AccTransactionAnalysisTableAdapter();
+       
+        InTr_Trn_HdrTableAdapter trnhdr = new InTr_Trn_HdrTableAdapter();
+        InTr_Trn_DetTableAdapter trndet = new InTr_Trn_DetTableAdapter();
+        InTr_Sr_HdrTableAdapter srhdr = new InTr_Sr_HdrTableAdapter();
+        InTr_Sr_DetTableAdapter srdet = new InTr_Sr_DetTableAdapter();
+        SCBLIN.InTr_Sr_HdrDataTable dtsrhdr = new SCBLIN.InTr_Sr_HdrDataTable();
+        SCBLIN.InTr_Sr_DetDataTable dtsrdet = new SCBLIN.InTr_Sr_DetDataTable();
+        InSu_Trn_SetTableAdapter scfset = new InSu_Trn_SetTableAdapter();
+        InMa_Stk_CtlTableAdapter scfstkctl = new InMa_Stk_CtlTableAdapter();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstkctl = new ErpDataSet.InMa_Stk_CtlDataTable();
+        InMa_Itm_StkTableAdapter scfitmstk = new InMa_Itm_StkTableAdapter();        
+        InMa_Stk_ValTableAdapter scfstkval = new InMa_Stk_ValTableAdapter();
+        InMa_Itm_DetTableAdapter itmdet = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitmdet = new ErpDataSet.InMa_Itm_DetDataTable();
+        AccCOATableAdapter coa = new AccCOATableAdapter();
+        AccDataSet.AccCOADataTable dtcoac = new AccDataSet.AccCOADataTable();
+        AccDataSet.AccCOADataTable dtcoad = new AccDataSet.AccCOADataTable();
+        AccCoaGroupCodeSetupTableAdapter coasetup = new AccCoaGroupCodeSetupTableAdapter();
+
+        InMa_Itm_GrpTableAdapter grp = new InMa_Itm_GrpTableAdapter();
+        ErpDataSet.InMa_Itm_GrpDataTable dtgrp = new ErpDataSet.InMa_Itm_GrpDataTable();
+
+        InMa_Grp_CodeTableAdapter code = new InMa_Grp_CodeTableAdapter();
+        ErpDataSet.InMa_Grp_CodeDataTable dtcode = new ErpDataSet.InMa_Grp_CodeDataTable();
+
+
+        string period = mrrdata[0].Issuedate.Year.ToString() + "/" + string.Format("{0:00}", mrrdata[0].Issuedate.Month);
+        string sr_ref_no = mrrdata[0].Ref_no;
+        string oprcode = current.UserId.ToString();
+        dtsrhdr = srhdr.GetDataByRef(sr_ref_no);
+        dtsrdet = srdet.GetDataByRef(sr_ref_no);
+
+        string ocflg, analgrp, trn_code = mrrdata[0].Plant + "SRQ";
+        int i, sub_no = 0;
+        int tot = 0;
+        int cnt = mrrdata.Length;
+        string last_num = scfset.GetDataByType_Code("IS", trn_code)[0].Trn_Set_Iq_Next_No.ToString();
+        string trn_ref_no = mrrdata[0].Plant + "IN" + string.Format("{0:00}", Convert.ToInt32(DateTime.Now.Year.ToString().Substring(2, 2))) + string.Format("{0:00}", DateTime.Now.Month) + "-" + last_num;
+        string next_num = string.Format("{0:00000}", Convert.ToInt32(last_num) + 1);
+        string cstk, grp_code;
+        decimal orgqty, balqty, amount, totamnt = 0, rate, grate, gqty, gamnt;
+        bool trn_flg = true;
+
+        string fate_ref = clsAccounts.GetReferenceNumber("AJV", mrrdata[0].Issuedate);           
+        string c_ac_code, d_ac_code, narrstr;
+        int lno = 0;
+        double trn_jrn_code = Convert.ToDouble(scfwh.GetMaxJrnCode()) + 1;
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(trndet.Connection);
+
+        try
+        {
+
+            trndet.AttachTransaction(myTrn);
+            trnhdr.AttachTransaction(myTrn);
+            srdet.AttachTransaction(myTrn);
+            scfitmstk.AttachTransaction(myTrn);
+            scfstkctl.AttachTransaction(myTrn);
+            scfstkval.AttachTransaction(myTrn);
+            scfset.AttachTransaction(myTrn);
+            scfwh.AttachTransaction(myTrn);
+            scfwd.AttachTransaction(myTrn);
+            scfanal.AttachTransaction(myTrn);
+
+
+            for (i = 0; i < cnt; i++)
+            {
+                if (mrrdata[i] == null) break;
+                tot++;
+                dtsrdet = new SCBLIN.InTr_Sr_DetDataTable();
+                dtsrdet = srdet.GetDataByRefItem(sr_ref_no, mrrdata[i].Icode);
+                
+                orgqty = (decimal)dtsrdet[0].Sr_Det_Org_QTY + mrrdata[i].Entryqty;
+                balqty = (decimal)dtsrdet[0].Sr_Det_Bal_Qty - mrrdata[i].Entryqty;
+
+                if (balqty == 0) { ocflg = "C"; } else { ocflg = "O"; }
+                if (balqty < 0) { trn_flg = false; goto skip_trn; }
+                dtstkctl = new ErpDataSet.InMa_Stk_CtlDataTable();
+                dtstkctl = scfstkctl.GetDataByItemStore(mrrdata[i].Icode, mrrdata[i].Store);
+                if (dtstkctl.Count > 0) { cstk = ((decimal)dtstkctl[0].Stk_Ctl_Cur_Stk - mrrdata[i].Entryqty).ToString(); } else { trn_flg = false; goto skip_trn; }
+                if (Convert.ToDecimal(cstk) < 0) { trn_flg = false; goto skip_trn; }
+
+
+                rate = (dtstkctl[0].Stk_Ctl_Ave_Val / (decimal)dtstkctl[0].Stk_Ctl_Cur_Stk);
+                amount = (mrrdata[i].Entryqty * rate);
+                totamnt += amount;
+
+                gqty = Convert.ToDecimal(scfstkctl.GetTotQty(mrrdata[i].Icode));
+                gamnt = Convert.ToDecimal(scfstkctl.GetTotValue(mrrdata[i].Icode));
+
+                if ((gqty - mrrdata[i].Entryqty) != 0)
+                {
+                    grate = (gamnt - amount) / (gqty -mrrdata[i].Entryqty);
+                }
+                else
+                {
+                    grate = 0;
+                }
+
+                trndet.InsertTrnDet("IS", trn_code, trn_ref_no, (short)tot, "", 0, mrrdata[i].Icode, dtsrdet[0].Sr_Det_Itm_Desc, dtsrdet[0].Sr_Det_Itm_Uom, mrrdata[i].Store, "", dtsrdet[0].Sr_Det_Ref, dtsrdet[0].Sr_Det_Lno, "", DateTime.Now.AddYears(10), DateTime.Now, (double)mrrdata[i].Entryqty, 0, (decimal)dtsrdet[0].Sr_Det_Lin_Rat, amount, amount, rate, amount, mrrdata[i].Entryqty.ToString(), cstk, "0", 0, 0);
+                srdet.UpdateFromIssue((double)orgqty, (double)balqty, ocflg, sr_ref_no, mrrdata[i].Icode);
+                scfitmstk.UpdateForIssue((double)mrrdata[i].Entryqty, grate, mrrdata[i].Icode);
+                scfstkctl.UpdateForMatIssue((double)mrrdata[i].Entryqty, mrrdata[i].Entryqty * rate, mrrdata[i].Entryqty * rate, mrrdata[i].Icode, dtsrdet[0].Sr_Det_Str_Code);
+
+                scfstkval.InsertStkVal("IS", trn_code, trn_ref_no, Convert.ToDateTime(mrrdata[i].Issuedate.ToShortDateString()), dtsrdet[0].Sr_Det_Icode, dtsrdet[0].Sr_Det_Itm_Desc, dtsrdet[0].Sr_Det_Str_Code, rate, rate, rate, (double)mrrdata[i].Entryqty, "", null, null, null);
+
+                //jv
+                dtitmdet = new ErpDataSet.InMa_Itm_DetDataTable();
+                dtitmdet = itmdet.GetItemByCode(mrrdata[i].Icode);
+                if (dtitmdet.Count == 0) { trn_flg = false; goto skip_trn; }
+
+                c_ac_code = dtitmdet[0].T_C2;
+                d_ac_code = mrrdata[i].DbtCode;
+
+                if ((c_ac_code == "") || (d_ac_code == "")) { trn_flg = false; goto skip_trn; }
+
+                dtcoac = new AccDataSet.AccCOADataTable();
+                dtcoac = coa.GetDataByCode(c_ac_code);
+                if (dtcoac.Count == 0) { trn_flg = false; goto skip_trn; }
+
+                dtcoad = new AccDataSet.AccCOADataTable();
+                dtcoad = coa.GetDataByCode(d_ac_code);
+                if (dtcoad.Count == 0) { trn_flg = false; goto skip_trn; }
+
+
+                dtgrp = new ErpDataSet.InMa_Itm_GrpDataTable();
+                dtgrp = grp.GetDataByIcode(mrrdata[i].Icode, "I03");
+
+
+                if (dtgrp.Rows.Count == 0)
+                {
+                    narrstr = mrrdata[i].Idet + " issued " + mrrdata[i].Entryqty.ToString("N2") + " " + mrrdata[i].Uom + " @" + rate.ToString("N2") + " SR NO# " + sr_ref_no;
+                }
+                else
+                {
+                    grp_code = dtgrp[0].Itm_Grp_Code;
+                    dtcode = new ErpDataSet.InMa_Grp_CodeDataTable();
+                    dtcode = code.GetDataByIdCode("I03", grp_code);
+
+                    if (dtcode.Count == 0)
+                    {
+                        narrstr = mrrdata[i].Idet + " issued " + mrrdata[i].Entryqty.ToString("N2") + " " + mrrdata[i].Uom + " @" + rate.ToString("N2") + " SR NO# " + sr_ref_no;
+                    }
+                    else
+                    {
+                        narrstr = dtcode[0].Grp_Code_Name + " // " + mrrdata[i].Idet + " issued " + mrrdata[i].Entryqty.ToString("N2") + " " + mrrdata[i].Uom + " @" + rate.ToString("N2") + " SR NO# " + sr_ref_no;
+                    }
+
+                   
+                }
+
+                
+
+                if(mrrdata[i].DbtAnal.Trim()!="")
+                {
+                    analgrp = coasetup.GetDataByCcgCode(mrrdata[i].DbtAnal.Trim())[0].Ccg_Cost_Id;
+                    sub_no = 1;
+                    scfanal.InsertAna(fate_ref, d_ac_code, lno + 1, sub_no, mrrdata[i].DbtAnal, "", "", "", "", analgrp, "", "", "", "");
+                }
+                else
+                {
+                    sub_no = 0;
+                }
+
+                scfwd.InsertDetail(fate_ref, d_ac_code, trn_jrn_code, lno + 1, narrstr, "D", amount, "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", "", Convert.ToDateTime(mrrdata[i].Issuedate.ToShortDateString()), "", dtcoad[0].Gl_Coa_Type, "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), 0, "", trn_ref_no, sr_ref_no, "", sub_no, 0, "", "", "", "", 0,"");
+                scfwd.InsertDetail(fate_ref, c_ac_code, trn_jrn_code, lno + 2, narrstr, "C", amount, "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", "", Convert.ToDateTime(mrrdata[i].Issuedate.ToShortDateString()), "", dtcoac[0].Gl_Coa_Type, "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), 0, "", trn_ref_no, sr_ref_no, "", 0, 0, "", "", "", "", 0,"");
+
+               
+                lno += 2;
+
+
+            }
+
+            scfwh.InsertHeader(fate_ref, trn_jrn_code, "AJV", "J", period, DateTime.Now, Convert.ToDateTime(mrrdata[0].Issuedate.ToShortDateString()), "BDT", 1, oprcode, oprcode, Convert.ToDateTime(DateTime.Now), "L", "", "", "");
+            trnhdr.InsertTrnHdr("IS", trn_code, trn_ref_no, dtsrhdr[0].Sr_Hdr_Pcode, dtsrhdr[0].Sr_Hdr_Dcode, dtsrhdr[0].Sr_Hdr_Dcode, mrrdata[0].Issuedate, mrrdata[0].Reason, mrrdata[0].Locofuse, "", "", dtsrhdr[0].Sr_Hdr_Com5, dtsrhdr[0].Sr_Hdr_Com6, "", "", "", "", totamnt, "P", period, oprcode, "", "", "", "", "", "", "", "", "", 0, 0, null, null, "", txtcomm.Text);
+            scfset.UpdateNextNum(next_num, "IS", trn_code);
+
+            skip_trn: ;
+
+            if (trn_flg)
+            {
+                myTrn.Commit();
+                //myTrn.Rollback();
+
+            }
+            else
+            {
+                myTrn.Rollback();
+                lblmsg.Visible = true;
+                lblmsg.Text = "Insufficient Qty in Stock / Inventory code Error";
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            trn_flg = false;
+            lblmsg.Visible = true;
+            lblmsg.Text = ex.Message.ToString();     
+            myTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(trndet.Connection, myTrn);
+        }
+
+        if (trn_flg)
+        {
+            Session[clsStatic.sessionMrrDetData] = null;
+            lbllogref.Text = trn_ref_no;
+            ModalPopupExtender5.Show();
+        }
+
+        
+    }
+
+
+    protected void btnCancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("./frm_mat_issue.aspx");
+    }
+    protected void btnok_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("./frm_mat_issue.aspx");
+    }
+    protected void btnprint_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("./frm_mat_issue.aspx?ret_rec_ref=" + lbllogref.Text);
+    }
+    
+}

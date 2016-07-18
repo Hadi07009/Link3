@@ -1,0 +1,742 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDTO;
+using LibraryDAL.SCBL3DataSetTableAdapters;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBLQryTableAdapters;
+using AjaxControlToolkit;
+
+public partial class frm_pay_request_ini : System.Web.UI.Page
+{
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.MsgConfirmBox(btnsend, "Are you sure to submit ?");
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            tbl_data_det.Visible = false;
+            tbl_po_det.Visible = false;            
+            load_po();           
+            load_po_type();
+        }
+        else
+        {
+        }        
+    }
+
+    private void load_po_type()
+    {
+        ListItem lst;
+
+        rdoPotype.Items.Clear();
+        lst = new ListItem();
+        lst.Value = "LPO";
+        lst.Text = "LPO";        
+        lst.Selected = true;
+        rdoPotype.Items.Add(lst);
+             
+
+        lst = new ListItem();
+        lst.Value = "SPO";
+        lst.Text = "SPO (Realised)";
+        rdoPotype.Items.Add(lst);
+               
+
+        autoComplete1.ContextKey = rdoPotype.SelectedValue.ToString() + ":CM";
+    }
+
+   
+
+    private string[] get_plant(string apptype)
+    {
+        User_Role_DefinitionTableAdapter urole = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable udt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        string[] plant_list;
+        udt = urole.GetDataByUserCodeRole(current.UserId.ToString(), apptype);
+
+        if (udt.Rows.Count > 0)
+            plant_list = udt[0].plant_list.Split(',');
+        else
+            return null;
+
+        return plant_list;
+    }
+
+    private void load_po()
+    {
+        PuTr_PO_Hdr_ScblTableAdapter acc = new PuTr_PO_Hdr_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Hdr_ScblDataTable dt = new SCBLDataSet.PuTr_PO_Hdr_ScblDataTable();
+
+        ListItem lst;
+
+        //ddlpolist.Items.Clear();
+        //ddlpolist.Items.Add("");
+
+        string plnts = "";
+        int i, len, cnt, indx;
+        string[] plant_list = get_plant("PAYREQINI");
+
+        if (plant_list == null)
+        {
+            lblplant.Text = "";
+            return;
+        }
+
+        len = plant_list.Length;
+
+        for (i = 0; i < len; i++)
+        {
+            if (plant_list[i].ToString() != "")
+                plnts = plnts + plant_list[i].ToString() + ", ";
+        }
+        
+        lblplant.Text = "Plants: " + plnts;
+
+
+    }
+
+    private void generate_detail_data(string po_ref)
+    {
+        tbl_payment_request_detTableAdapter pay = new tbl_payment_request_detTableAdapter();
+        tbl_tac_logTableAdapter log = new tbl_tac_logTableAdapter();
+        SCBLDataSet.tbl_tac_logDataTable dtlog = new SCBLDataSet.tbl_tac_logDataTable();
+
+        quotation_detTableAdapter quo = new quotation_detTableAdapter();
+        SCBLDataSet.quotation_detRow drq;
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        PuTr_PO_Det_ScblTableAdapter det = new PuTr_PO_Det_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Det_ScblDataTable dtdet = new SCBLDataSet.PuTr_PO_Det_ScblDataTable();
+        SCBLDataSet.PuTr_PO_Hdr_ScblRow hdr_dr;
+
+        LibraryDAL.SCBL2DataSetTableAdapters.tbl_mat_rec_retTableAdapter mat = new LibraryDAL.SCBL2DataSetTableAdapters.tbl_mat_rec_retTableAdapter();
+        SCBL2DataSet.tbl_mat_rec_retDataTable dtmat = new SCBL2DataSet.tbl_mat_rec_retDataTable();
+
+
+        int cnt = 0;
+        int gcnt, scnt, pcnt;
+        string tac_ref, genstr, spestr, paystr;
+        decimal tot_mrr = 0;
+        hdr_dr = hdr.GetHdrDataByRef(po_ref)[0];
+
+        lblref.Text = hdr_dr.PO_Hdr_Ref.ToString();
+        lblreqtype.Text = hdr_dr.PO_Hdr_Code.ToString();
+
+        if(hdr_dr.PO_Hdr_Ref.ToString().Substring(0, 1)=="L")
+            lblpurtype.Text = "LPO";
+        else
+            if (hdr_dr.PO_Hdr_Ref.ToString().Substring(0, 1) == "S")
+                lblpurtype.Text = "SPO";
+        else
+            lblpurtype.Text = "FPO";
+
+        lblparty.Text = hdr_dr.PO_Hdr_Pcode.ToString() + ": " + hdr_dr.PO_Hdr_Com1.ToString();
+        lblamount.Text = hdr_dr.PO_Hdr_Value.ToString("N2");
+        lblinward.Text = NumerictowordClass.FNumber(hdr_dr.PO_Hdr_Value.ToString("N2"));
+        lblstatus.Text = hdr_dr.PO_Hdr_Status;
+
+        lblpoval.Text = hdr_dr.PO_Hdr_Value.ToString("N2");
+
+        // add detail data;
+
+        celdetail.Controls.Clear();
+        dtdet = det.GetDetByRef(hdr_dr.PO_Hdr_Ref);
+
+        foreach (SCBLDataSet.PuTr_PO_Det_ScblRow det_dr in dtdet.Rows)
+        {
+            cnt++;
+
+            ClientSide_modules_commercial_usercontrols_ctl_po_item_mrr_view ctldet = (ClientSide_modules_commercial_usercontrols_ctl_po_item_mrr_view)LoadControl("./usercontrols/ctl_po_item_mrr_view.ascx");
+
+            Label lblsl = (Label)ctldet.FindControl("lblsl");
+            Label lblproduct = (Label)ctldet.FindControl("lblproduct");
+            Label lblrate = (Label)ctldet.FindControl("lblrate");
+            Label lblqty = (Label)ctldet.FindControl("lblqty");
+            Label lbliamount = (Label)ctldet.FindControl("lbliamount");
+            Label lbliinward = (Label)ctldet.FindControl("lbliinward");
+
+            LinkButton lnkmpr = (LinkButton)ctldet.FindControl("lnkmprref");
+            LinkButton lnkcs = (LinkButton)ctldet.FindControl("lnkcsref");
+
+            HtmlTableCell celspe = (HtmlTableCell)ctldet.FindControl("celspe");
+            HtmlTableCell celbrand = (HtmlTableCell)ctldet.FindControl("celbrand");
+            HtmlTableCell celorigin = (HtmlTableCell)ctldet.FindControl("celorigin");
+            HtmlTableCell celpacking = (HtmlTableCell)ctldet.FindControl("celpacking");
+            GridView gr = (GridView)ctldet.FindControl("gdItem");
+
+            ctldet.ID = "celdetail_" + celdetail.Controls.Count.ToString();
+
+            lblsl.Text = cnt.ToString() + ".";
+            lblproduct.Text = det_dr.PO_Det_Icode.ToString() + ": " + det_dr.PO_Det_Itm_Desc.ToString();
+            lblrate.Text = det_dr.PO_Det_Lin_Rat.ToString("N2");
+            lblqty.Text = det_dr.PO_Det_Lin_Qty.ToString("N2");
+            lbliamount.Text = det_dr.PO_Det_Lin_Amt.ToString("N2");
+            lbliinward.Text = NumerictowordClass.FNumber(det_dr.PO_Det_Lin_Amt.ToString("N2"));
+            
+            lnkmpr.Text = det_dr.PO_Det_Pr_Ref;
+            lnkcs.Text = det_dr.PO_Det_Quo_Ref;
+            lnkmpr.Enabled = false;
+            lnkcs.Enabled = false;
+
+
+            if (lblpurtype.Text == "LPO")
+            {
+                drq = quo.GetDataByRefParty(det_dr.PO_Det_Quo_Ref, hdr_dr.PO_Hdr_Dcode.ToString())[0];
+                celspe.InnerText = drq.specification;
+                celbrand.InnerText = drq.product_brand;
+                celorigin.InnerText = drq.origin;
+                celpacking.InnerText = drq.packing;
+            }
+
+            DataTable dt = new DataTable();
+            dt.Columns.Clear();            
+            dt.Columns.Add("REF NO", typeof(string));
+            dt.Columns.Add("QTY", typeof(string));
+            dt.Columns.Add("RATE", typeof(string));
+            dt.Columns.Add("AMOUNT", typeof(string));
+            dt.Columns.Add("BRAND", typeof(string));
+            dt.Columns.Add("ORIGIN", typeof(string));
+            dt.Columns.Add("PACKING", typeof(string));
+            dt.Columns.Add("DATE TIME", typeof(DateTime));
+
+            dtmat = new SCBL2DataSet.tbl_mat_rec_retDataTable();
+            dtmat = mat.GetDataByPorefSl(po_ref, det_dr.PO_Det_Lno);
+
+            foreach (SCBL2DataSet.tbl_mat_rec_retRow dtr in dtmat.Rows)
+            {
+                switch (dtr.trn_type)
+                {
+                    case "OK":
+                       
+                        break;
+                    case "INSPECTION":
+                       
+                        break;
+                    case "CONFIRM":
+                        tot_mrr += dtr.itm_rec_ret_qty * dtr.po_line_rate;
+                        dt.Rows.Add(dtr.trn_ref_no, dtr.itm_rec_ret_qty.ToString("N2"), dtr.po_line_rate.ToString("N2"), (dtr.itm_rec_ret_qty * dtr.po_line_rate).ToString("N2"), dtr.brand, dtr.origin, dtr.packing, dtr.trn_datetime);
+                        break;
+                    default:
+                        
+                        break;
+
+                }
+
+               
+            }
+
+            gr.DataSource = dt;
+            gr.DataBind();
+
+            celdetail.Controls.Add(ctldet);
+        }
+               
+        lblmrrval.Text = tot_mrr.ToString("N2");
+        lblapproved_amount.Text = Convert.ToDecimal(pay.GetTotAppAmnt(hdr_dr.PO_Hdr_Ref, "APP")).ToString("N2");
+        lblbillable_amount.Text = (Convert.ToDecimal(lblmrrval.Text) - Convert.ToDecimal(lblapproved_amount.Text)).ToString("N2");
+        txtreqamount.Text = lblbillable_amount.Text;
+        cldinvdate.SelectedValue = Convert.ToDateTime(DateTime.Now.ToShortDateString());
+
+        genstr = "";
+        spestr = "";
+        paystr = "";
+        gcnt = 0;
+        scnt = 0;
+        pcnt = 0;
+        tac_ref = hdr_dr.PO_Hdr_Ref.ToString();
+
+        dtlog = log.GetDataByRef(tac_ref);
+
+        foreach (SCBLDataSet.tbl_tac_logRow drlog in dtlog.Rows)
+        {
+            switch (drlog.tac_type)
+            {
+                case "gen":
+                    {
+                        gcnt++;
+                        genstr = genstr + gcnt.ToString() + ". " + drlog.content_det.ToString() + "<br />";
+                        break;
+                    }
+
+                case "spe":
+                    {
+                        scnt++;
+                        spestr = spestr + scnt.ToString() + ". " + drlog.content_det.ToString() + "<br />";
+                        break;
+                    }
+
+                case "pay":
+                    {
+                        pcnt++;
+                        paystr = paystr + pcnt.ToString() + ". " + drlog.content_det.ToString() + "<br />";
+                        break;
+                    }
+
+            }
+        }
+        celgent.InnerHtml = genstr;
+        celspet.InnerHtml = spestr;
+        celpayt.InnerHtml = paystr;
+
+    }
+    private void get_pay_history(string po_ref)
+    {
+        App_Type_DetTableAdapter app = new App_Type_DetTableAdapter();
+        SCBLDataSet.App_Type_DetDataTable dtapp = new SCBLDataSet.App_Type_DetDataTable();
+
+
+
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Hdr_ScblRow hdr_dr;
+
+        tbl_payment_request_detTableAdapter reqdet = new tbl_payment_request_detTableAdapter();
+        SCBL3DataSet.tbl_payment_request_detDataTable dtreqdet = new SCBL3DataSet.tbl_payment_request_detDataTable();
+        dtPostedpaymentTableAdapter post = new dtPostedpaymentTableAdapter();
+        SCBLQry.dtPostedpaymentDataTable dtpost = new SCBLQry.dtPostedpaymentDataTable();
+
+        dtSavedpaymentTableAdapter saved = new dtSavedpaymentTableAdapter();
+        SCBLQry.dtSavedpaymentDataTable dtsaved = new SCBLQry.dtSavedpaymentDataTable();
+        string sts = "";
+
+        hdr_dr = hdr.GetHdrDataByRef(po_ref)[0];
+
+
+        DataTable dtadv = new DataTable();
+        DataTable dtreq = new DataTable();
+        DataTable dtpay = new DataTable();
+
+        //adv detail
+        dtadv.Columns.Add("PO REF", typeof(string));
+        dtadv.Columns.Add("SAVE/POST", typeof(string));
+        dtadv.Columns.Add("AMOUNT", typeof(string));
+        dtadv.Columns.Add("TRN TYPE", typeof(string));
+        dtadv.Columns.Add("VOUCHER NO", typeof(string));
+        dtadv.Columns.Add("AC CODE", typeof(string));
+        dtadv.Columns.Add("ANALYSIS 1", typeof(string));
+        dtadv.Columns.Add("ANALYSIS 2", typeof(string));
+
+
+        dtpost = new SCBLQry.dtPostedpaymentDataTable();
+        dtsaved = new SCBLQry.dtSavedpaymentDataTable();
+
+        dtpost = post.GetPostAdv(hdr_dr.PO_Hdr_Pcode, hdr_dr.PO_Hdr_Dcode, hdr_dr.PO_Hdr_Ref);
+        dtsaved = saved.GetSavedAdv(hdr_dr.PO_Hdr_Pcode, hdr_dr.PO_Hdr_Dcode, hdr_dr.PO_Hdr_Ref);
+
+        foreach (SCBLQry.dtPostedpaymentRow dr in dtpost.Rows)
+        {
+            dtadv.Rows.Add(hdr_dr.PO_Hdr_Ref, "POST", dr.Trn_Amount.ToString("N2"), dr.Trn_Trn_type, dr.Trn_Ref_No, dr.Trn_Ac_Code, dr.Trn_AnaGroupDefinationCode1, dr.Trn_AnaGroupDefinationCode2);
+        }
+
+        foreach (SCBLQry.dtSavedpaymentRow dr in dtsaved.Rows)
+        {
+            dtadv.Rows.Add(hdr_dr.PO_Hdr_Ref, "SAVE", dr.Trn_Amount.ToString("N2"), dr.Trn_Trn_type, dr.Trn_Ref_No, dr.Trn_Ac_Code, dr.Trn_AnaGroupDefinationCode1, dr.Trn_AnaGroupDefinationCode2);
+        }
+
+        gdpayadv.DataSource = dtadv;
+        gdpayadv.DataBind();
+
+        // req detail
+
+        dtreq.Columns.Add("REQ REF", typeof(string));
+        dtreq.Columns.Add("REQ DATE", typeof(string));
+        dtreq.Columns.Add("PO REF", typeof(string));
+        dtreq.Columns.Add("REQ AMOUNT", typeof(string));
+        dtreq.Columns.Add("CAR AMOUNT", typeof(string));
+        dtreq.Columns.Add("LOAD/UNLOAD AMOUNT", typeof(string));
+        dtreq.Columns.Add("OTHER AMOUNT", typeof(string));
+        dtreq.Columns.Add("JV REF", typeof(string));
+        dtreq.Columns.Add("STATUS", typeof(string));
+                
+        dtreqdet = reqdet.GetDataByPoRef(hdr_dr.PO_Hdr_Ref);
+
+        foreach(SCBL3DataSet.tbl_payment_request_detRow dr in dtreqdet.Rows)
+        {
+            switch (dr.pay_status)
+            {
+                case "RUN":
+                    dtapp = new SCBLDataSet.App_Type_DetDataTable();
+                    dtapp = app.GetDataByAppName(dr.pay_pending);
+                    sts = "Pending for: ";
+                    if (dtapp.Rows.Count > 0)
+                    {
+                        sts = sts + dtapp[0].app_name + ":" + dtapp[0].app_desc;
+                    }
+                    
+                    break;
+
+                case "APP":
+                    sts = "APPROVED";
+                    break;
+
+                case "REJ":
+                    sts = "REJECTED";
+                    break;
+
+                default:
+                    sts = dr.pay_status;
+                    break;
+
+            }
+
+            dtreq.Rows.Add(dr.pay_ref_no, dr.req_datetime.ToShortDateString(), dr.po_ref_no, dr.req_amount.ToString("N2"), dr.carr_amount.ToString("N2"), dr.load_unload_amount.ToString("N2"), dr.other_amount.ToString("N2"), dr.jv_ref_no, sts);
+        }
+
+
+        gdpayreq.DataSource = dtreq;
+        gdpayreq.DataBind();
+
+        //pay detail
+
+        dtpay.Columns.Add("PO REF", typeof(string));
+        dtpay.Columns.Add("SAVE/POST", typeof(string));
+        dtpay.Columns.Add("AMOUNT", typeof(string));
+        dtpay.Columns.Add("TRN TYPE", typeof(string));
+        dtpay.Columns.Add("TRN DC NO", typeof(string));
+        dtpay.Columns.Add("TRN GRN NO", typeof(string));
+        dtpay.Columns.Add("VOUCHER NO", typeof(string));
+        dtpay.Columns.Add("AC CODE", typeof(string));
+        dtpay.Columns.Add("ANALYSIS 1", typeof(string));
+        dtpay.Columns.Add("ANALYSIS 2", typeof(string));
+
+        dtpost = new SCBLQry.dtPostedpaymentDataTable();
+        dtsaved = new SCBLQry.dtSavedpaymentDataTable();
+
+        dtpost = post.GetPostPayment(hdr_dr.PO_Hdr_Pcode, hdr_dr.PO_Hdr_Dcode, hdr_dr.PO_Hdr_Ref);
+        dtsaved = saved.GetSavedPayment(hdr_dr.PO_Hdr_Pcode, hdr_dr.PO_Hdr_Dcode, hdr_dr.PO_Hdr_Ref);
+
+        foreach (SCBLQry.dtPostedpaymentRow dr in dtpost.Rows)
+        {
+            dtpay.Rows.Add(hdr_dr.PO_Hdr_Ref, "POST", dr.Trn_Amount.ToString("N2"), dr.Trn_Trn_type, dr.Trn_Dc_No, dr.Trn_GRN_No, dr.Trn_Ref_No, dr.Trn_Ac_Code, dr.Trn_AnaGroupDefinationCode1, dr.Trn_AnaGroupDefinationCode2);
+        }
+
+        foreach (SCBLQry.dtSavedpaymentRow dr in dtsaved.Rows)
+        {
+            dtpay.Rows.Add(hdr_dr.PO_Hdr_Ref, "SAVE", dr.Trn_Amount.ToString("N2"), dr.Trn_Trn_type, dr.Trn_Dc_No, dr.Trn_GRN_No, dr.Trn_Ref_No, dr.Trn_Ac_Code, dr.Trn_AnaGroupDefinationCode1, dr.Trn_AnaGroupDefinationCode2);
+        }
+
+        gdpayment.DataSource = dtpay;
+        gdpayment.DataBind();
+
+
+
+    }
+  
+    private string get_flow_tepmate(string req_type, string cash_type, decimal totval)
+    {
+        App_Flow_DefinitionTableAdapter app = new App_Flow_DefinitionTableAdapter();
+        SCBLDataSet.App_Flow_DefinitionDataTable dt = new SCBLDataSet.App_Flow_DefinitionDataTable();
+
+        //req_type = req_type.Substring(0, 2) + "MPR";
+
+        string tem_id = "";
+        dt = app.GetTemplateForWO("PAYREQ", totval);
+
+        if (dt.Rows.Count > 0)
+            tem_id = dt[0].flow_id.ToString();
+
+
+        return tem_id;
+    }
+    
+    private string get_pend_for(string selval)
+    {
+        string pend_for = "";
+        tbl_app_ruleTableAdapter tbl = new tbl_app_ruleTableAdapter();
+        try
+        {
+            pend_for = tbl.GetDataByTypeSeq(selval, 1)[0].app_id.ToString();
+        }
+        catch
+        {
+            pend_for = "";
+        }
+        return pend_for;
+    }
+
+
+    private bool check_req_validity(string po_ref, string potype)
+    {
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        tbl_payment_request_detTableAdapter pay = new tbl_payment_request_detTableAdapter();
+       
+        bool flg = true;        
+        if (hdr.GetHdrDataByRef(po_ref)[0].PO_Hdr_Status.ToString() != "APP") flg = false;
+       
+
+        if (pay.GetDataByPoStatus(po_ref, "RUN").Rows.Count > 0) flg = false;
+
+        return flg;
+    }
+
+    private string get_new_ref()
+    {
+        string ref_no = "";
+        tbl_payment_request_detTableAdapter pay = new tbl_payment_request_detTableAdapter();
+        int maxref = Convert.ToInt32(pay.GetMaxRef()) + 1;
+        ref_no = "PAY-" + string.Format("{0:00000}", maxref);
+        return ref_no;
+    }
+
+    private string save_file()
+    {
+        LibraryDAL.SCBL2DataSetTableAdapters.tbl_file_detailTableAdapter fl = new LibraryDAL.SCBL2DataSetTableAdapters.tbl_file_detailTableAdapter();
+
+        string retstr = "";
+
+        string ref_no, fpath, floc, orgfilename;
+        string uid = current.UserId.ToString();
+
+        double max_ref = Convert.ToDouble(fl.GetmaxSL());
+        int nFileLen;
+       
+        HttpPostedFile myFile = updoc.PostedFile;
+        if (myFile != null)
+        {
+            nFileLen = myFile.ContentLength;
+
+            if ((myFile.ContentType == "application/pdf") && (nFileLen > 0) && (nFileLen < 5000001))
+            {
+                try
+                {
+                    ref_no = "DOC-" + string.Format("{0:00000000}", max_ref + 1);
+                    orgfilename = updoc.FileName;
+                    fpath = Server.MapPath("~/Upload") + "\\";
+                    floc = fpath + ref_no + ".pdf";
+                    myFile.SaveAs(floc);
+
+                    fl.InsertFileDet(ref_no, "", txtref_no.Text, "", "", "PAY", "", uid, DateTime.Now, "PDF", (decimal)nFileLen, orgfilename, ref_no + ".pdf", floc, floc, floc);
+
+                    retstr = ref_no;
+                }
+                catch
+                {
+                    retstr = "";
+                }
+            }
+        }
+
+        return retstr;
+    }
+
+    
+    protected void btnsend_Click(object sender, EventArgs e)
+    {
+        lblerror.Visible = false;
+
+        decimal carramnt, loadamnt, otramnt;
+
+        if (txtreqamount.Text == "") 
+        {
+            lblerror.Text = "Amount Error";
+            lblerror.Visible = true; return; 
+        }
+        if (Convert.ToDecimal(txtreqamount.Text) == 0)
+        {
+            lblerror.Text = "Amount Error";
+            lblerror.Visible = true; return;
+        }
+
+        if (Convert.ToDecimal(txtreqamount.Text) > Convert.ToDecimal(lblbillable_amount.Text))
+        {
+            lblerror.Text = "Amount Error";
+            lblerror.Visible = true; return;
+        }
+
+        if (txtinvno.Text=="")
+        {
+            lblerror.Text = "Invoice No ?";
+            lblerror.Visible = true; return;
+        }
+
+
+        if (txtcaramount.Text == "")
+        {
+            carramnt = 0;
+        }
+        else
+        {
+            carramnt = Convert.ToDecimal(txtcaramount.Text);
+        }
+
+        if (txtloadamount.Text == "")
+        {
+            loadamnt = 0;
+        }
+        else
+        {
+            loadamnt = Convert.ToDecimal(txtloadamount.Text);
+        }
+
+        if (txtotheramount.Text == "")
+        {
+            otramnt = 0;
+        }
+        else
+        {
+            otramnt = Convert.ToDecimal(txtotheramount.Text);
+        }
+
+        bool flg = false;
+
+
+        string[] tmp = txtpodet.Text.Split(':');
+        if (tmp.Length < 3) { return; }
+
+        string selpo = tmp[0];
+        string party_name = tmp[2];
+        
+        tbl_payment_request_detTableAdapter pay = new tbl_payment_request_detTableAdapter();
+                               
+        if (check_req_validity(selpo, rdoPotype.SelectedValue.ToString()) == false)
+        {
+            Response.Write("Not Valid for Payment Request");
+            return;
+        }
+                        
+        string uid = current.UserId.ToString();
+        string uname = current.UserName.ToString();
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+        string desig = usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+
+        string req_type;
+        string pur_type = rdoPotype.SelectedValue.ToString();              
+
+        decimal totval= Convert.ToDecimal(lblpoval.Text);
+              
+        req_type = tmp[1].ToString();
+        if (lblstatus.Text != "APP")
+        {
+            Response.Write("PO Not Valid");
+            return;
+        }
+       
+        string tem_id = get_flow_tepmate(req_type, pur_type, totval);
+        string next_app_id = get_pend_for(tem_id);
+
+        string ref_no = get_new_ref();
+
+        string fileid = save_file();
+        if ((updoc.HasFile) && (fileid == ""))
+        {
+            lblerror.Text = "File Not Uploding ?";
+            lblerror.Visible = true; return;
+        }
+
+
+        if ((tem_id == "") || (next_app_id == "")) { lblerror.Text = "Flow Not Assigned"; lblerror.Visible = false; return; }
+               
+        string role_as = "PAYREQINI";        
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();        
+        SqlTransaction myTrn = HelperTA.OpenTransaction(pay.Connection);
+       
+        try
+        {
+            pay.AttachTransaction(myTrn);         
+            comm.AttachTransaction(myTrn);
+
+            pay.InsertReqData(ref_no, "RUN", "", next_app_id, tem_id, party_name, selpo, Convert.ToDecimal(lblpoval.Text), Convert.ToDecimal(lblmrrval.Text), Convert.ToDecimal(lblapproved_amount.Text), uid, DateTime.Now, Convert.ToDecimal(txtreqamount.Text), 0, Convert.ToDecimal(txtreqamount.Text), carramnt, loadamnt, otramnt, txtinvno.Text, cldinvdate.SelectedDate, fileid, txtcomments.Text, 0, 0, "", "", 0, 0, "", "", 0, "", "", 0, 0, "", "", "", "", "", "", "", "", "");
+            comm.InsertComments(ref_no, 1, DateTime.Now, uid, uname, desig, 1, role_as, "PAYMENT", txtcomments.Text, "", next_app_id);
+                       
+            //myTrn.Rollback();
+            myTrn.Commit();           
+            flg = true;
+        }
+        catch
+        {
+            myTrn.Rollback();           
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(pay.Connection, myTrn);
+           
+        }
+
+        if (flg)
+        {
+
+            string sid, sname, msub, mbody;
+            clsEmailReceiver[] rec_det = new clsEmailReceiver[20];
+            int remailcnt = 0;
+            dsLinkoffice.tblUserInfoRow  udr;
+            LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+            User_Role_DefinitionTableAdapter roleta = new User_Role_DefinitionTableAdapter();
+            SCBLDataSet.User_Role_DefinitionDataTable roledt = new SCBLDataSet.User_Role_DefinitionDataTable();
+
+            udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+
+            msub = "A Payment request submitted and pending for you [" + lblref.Text + "]";
+            mbody = "\n\n " + "A Payment request submitted and pending for you [" + lblref.Text + "]";
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cml/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+            roledt = roleta.GetDataByRole(next_app_id);
+
+            foreach (SCBLDataSet.User_Role_DefinitionRow rdr in roledt.Rows)
+            {
+                rec_det[remailcnt] = new clsEmailReceiver();
+                rec_det[remailcnt].Rname = rdr.user_name;
+                rec_det[remailcnt].Rid = usrdal.GetUserByCode(rdr.user_id)[0].UserEmail;
+                remailcnt++;
+            }
+            clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+
+        }
+
+        Response.Redirect(Request.Url.AbsoluteUri);
+
+    }
+    protected void txtpodet_TextChanged(object sender, EventArgs e)
+    {
+        tbl_data_det.Visible = false;
+        tbl_po_det.Visible = false;
+       
+        string[] tmp = txtpodet.Text.Split(':');
+        if (tmp.Length < 3) {  return; }
+
+        string selpo = tmp[0];
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();        
+        tbl_payment_request_detTableAdapter pay = new tbl_payment_request_detTableAdapter();
+
+       
+        if (hdr.GetHdrDataByRef(selpo).Rows.Count == 0) return;            
+        tbl_data_det.Visible = true;
+        tbl_po_det.Visible = true;
+        generate_detail_data(selpo);
+        txtref_no.Text = get_new_ref();
+        get_pay_history(selpo);
+
+        btnsend.Visible = false; 
+        if (pay.GetDataByPoStatus(selpo, "RUN").Rows.Count == 0)         
+        {
+            if (Convert.ToDecimal(lblbillable_amount.Text) > 0)
+            {
+                btnsend.Visible = true;
+            }
+        }
+        
+    }
+
+  
+    
+    protected void rdoPotype_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        tbl_data_det.Visible = false;
+        autoComplete1.ContextKey = rdoPotype.SelectedValue.ToString() + ":CM";
+        txtpodet.Text = "";
+        txtpodet.Focus();
+    }
+}

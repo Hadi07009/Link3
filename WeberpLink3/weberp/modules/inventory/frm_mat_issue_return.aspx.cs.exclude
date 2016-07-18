@@ -1,0 +1,305 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLQryTableAdapters;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+
+public partial class frm_mat_issue_return : System.Web.UI.Page
+{  
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+       
+        if (!Page.IsPostBack)
+        {
+            if (Request.QueryString.Count > 0)
+            {
+                Session[clsStatic.sessionQueryString] = Request.QueryString["ret_rec_ref"].ToString();
+                RegisterStartupScript("click", "<script>window.open('./frm_mat_trn_print.aspx');</script>");
+                
+            }
+                      
+            tbldet.Visible = false;
+        }
+        else
+        {
+
+        }
+    }
+
+    
+          
+
+    private void load_single_sr(string selval)
+    {
+        
+
+        
+    }
+
+    protected void gdItem_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            TextBox txtqty = ((TextBox)e.Row.FindControl("TextBox1"));
+            TextBox txtcrd = ((TextBox)e.Row.FindControl("TextBox2"));
+            TextBox txtanal = ((TextBox)e.Row.FindControl("TextBox3"));
+            DropDownList ddlstore = ((DropDownList)e.Row.FindControl("DropDownList1"));
+
+            ((CheckBox)e.Row.FindControl("CheckBox1")).Attributes.Add("onClick", "ShowHideField(this," + txtqty.ClientID + "," + txtcrd.ClientID + "," + txtanal.ClientID + "," + ddlstore.ClientID + ")");
+
+        }
+    }
+      
+
+  
+  
+
+    protected void btnProceed_Click(object sender, EventArgs e)
+    {
+        //InTr_Sr_DetTableAdapter det = new InTr_Sr_DetTableAdapter();
+
+        if ((gdItem.Rows.Count < 1) || (gdItem.Visible == false)) return;
+
+      
+
+        //InTr_Trn_HdrTableAdapter intrhdr = new InTr_Trn_HdrTableAdapter();
+        //ErpDataSet.InTr_Trn_HdrDataTable dthdr = new ErpDataSet.InTr_Trn_HdrDataTable();
+
+
+        clsMrrData[] mrrdata = new clsMrrData[100];
+        bool entry_check = true;
+        int cnt = 0;
+        
+        CheckBox chksel;
+        Label lblref, lblicode, lblidet, lbluom, lblissueqty, lbllineno;
+        TextBox txtissueqty, txtcrdcode, txtcrdanal;
+        DropDownList ddlstore;
+        string plant = "CM";
+        decimal issqty;
+        
+        
+        foreach (GridViewRow gr in gdItem.Rows)
+        {
+            chksel = new CheckBox();
+            lblref = new Label();
+            lblicode = new Label();
+            lblidet = new Label();
+            ddlstore = new DropDownList();
+            lbluom = new Label();
+            lblissueqty = new Label();
+            txtcrdcode = new TextBox();
+            txtcrdanal = new TextBox();              
+            lbllineno = new Label();
+            txtissueqty = new TextBox();
+            
+            chksel = (CheckBox)gr.FindControl("CheckBox1");
+            lblref = (Label)gr.FindControl("Label1");
+            lblicode = (Label)gr.FindControl("Label2");
+            lblidet = (Label)gr.FindControl("Label3");
+            lbluom = (Label)gr.FindControl("Label4");
+            ddlstore = (DropDownList)gr.FindControl("DropDownList1");
+            txtissueqty = (TextBox)gr.FindControl("TextBox1");
+            lblissueqty = (Label)gr.FindControl("Label6");
+            txtcrdcode = (TextBox)gr.FindControl("TextBox2");
+            txtcrdanal = (TextBox)gr.FindControl("TextBox3"); 
+           
+            lbllineno = (Label)gr.FindControl("Label7");
+            
+
+
+            if (chksel.Checked)
+            {
+                try
+                {                    
+                    //availqty = Convert.ToDecimal(det.GetDataByRefItem(lblref.Text, lblicode.Text)[0].Sr_Det_Bal_Qty);
+                    issqty = Convert.ToDecimal(txtissueqty.Text);
+
+                    if (ddlstore.Text == "")
+                    {
+                        entry_check = false;
+                        break;
+                    }
+
+                    if (issqty == 0) 
+                    {
+                        entry_check = false;
+                    }
+                    else
+                    {
+                        mrrdata[cnt] = new clsMrrData();
+                        mrrdata[cnt].Seqno = cnt + 1;
+                        mrrdata[cnt].Ref_no = lblref.Text;
+                        mrrdata[cnt].Icode = lblicode.Text;
+                        mrrdata[cnt].Idet = lblidet.Text;
+                        mrrdata[cnt].Uom = lbluom.Text;
+                        mrrdata[cnt].Store = ddlstore.SelectedValue.ToString();
+                        mrrdata[cnt].Srqty = Convert.ToDecimal(lblissueqty.Text);                        
+                        mrrdata[cnt].Entryqty = Convert.ToDecimal(txtissueqty.Text);
+                        mrrdata[cnt].Fromdept = lblfromdept.Text;
+                        mrrdata[cnt].Todept = lbltodept.Text;                        
+                        mrrdata[cnt].Plant = plant;
+                        mrrdata[cnt].Issuedate = Convert.ToDateTime(lbldate.Text);
+                        mrrdata[cnt].DbtCode = txtcrdcode.Text;
+                        mrrdata[cnt].DbtAnal = txtcrdanal.Text;
+
+                        mrrdata[cnt].LineNo = Convert.ToInt32(lbllineno.Text);
+                        cnt++;
+                    }
+                }
+                catch
+                {
+                    entry_check = false;
+                }
+            }
+        }
+
+        if ((!entry_check) || (cnt == 0)) return;
+
+        Session[clsStatic.sessionMrrDetData] = mrrdata;
+        Response.Redirect("./frm_mat_issue_ret_confirm.aspx");
+    }
+
+    protected void txtissue_TextChanged(object sender, EventArgs e)
+    {
+        tbldet.Visible = false;
+        string[] tmp = txtissue.Text.Split(':');
+        if (tmp.Length < 2) return;
+
+        InTr_Sr_DetTableAdapter srdet = new InTr_Sr_DetTableAdapter();
+        SCBLIN.InTr_Sr_DetDataTable dtsrdet = new SCBLIN.InTr_Sr_DetDataTable();
+
+        InTr_Trn_HdrTableAdapter hdr = new InTr_Trn_HdrTableAdapter();
+        ErpDataSet.InTr_Trn_HdrDataTable dthdr = new ErpDataSet.InTr_Trn_HdrDataTable();
+
+        InMa_Str_LocTableAdapter loc = new InMa_Str_LocTableAdapter();
+        ErpDataSet.InMa_Str_LocDataTable dtloc = new ErpDataSet.InMa_Str_LocDataTable();
+
+        ListItem lst;
+        dthdr = hdr.GetDataByRef(tmp[0]);
+        if (dthdr.Rows.Count == 0) return;
+        tbldet.Visible = true;
+
+        InTr_Trn_DetTableAdapter det = new InTr_Trn_DetTableAdapter();
+        ErpDataSet.InTr_Trn_DetDataTable dtdet = new ErpDataSet.InTr_Trn_DetDataTable();
+        dtdet = det.GetDataByRef(tmp[0]);
+                            
+        double avlitm;
+        int indx = 0;
+        CheckBox chksel;
+        Label lblref;
+        Label lblicode;
+        Label lblidet;
+        Label lbluom;        
+        Label lblissqty;        
+        
+        Label lineno;
+        TextBox txtretqty, txtcrdcode, txtcrdanal;
+        DropDownList ddlstore;
+
+        dtloc = loc.GetAllStore();
+        dthdr = hdr.GetDataByRef(tmp[0]);
+
+        lbldate.Text = dthdr[0].Trn_Hdr_DATE.ToShortDateString();
+        lblfromdept.Text = dthdr[0].Trn_Hdr_Pcode.ToString();
+        lbltodept.Text = dthdr[0].Trn_Hdr_Dcode.ToString();
+
+
+        dtdet = det.GetDataByRef(tmp[0]);
+
+        gdItem.DataSource = dtdet;
+        gdItem.DataBind();
+
+
+        foreach (ErpDataSet.InTr_Trn_DetRow dr in dtdet.Rows)
+        {
+            chksel = new CheckBox();
+            lblref = new Label();
+            lblicode = new Label();
+            lblidet = new Label();
+            lbluom = new Label();
+            ddlstore = new DropDownList();
+            lblissqty = new Label();           
+            txtcrdcode = new TextBox();
+            txtcrdanal = new TextBox();
+
+            lineno = new Label();
+            txtretqty = new TextBox();
+
+            chksel = (CheckBox)gdItem.Rows[indx].FindControl("CheckBox1");
+            lblref = (Label)gdItem.Rows[indx].FindControl("Label1");
+            lblicode = (Label)gdItem.Rows[indx].FindControl("Label2");
+            lblidet = (Label)gdItem.Rows[indx].FindControl("Label3");
+            lbluom = (Label)gdItem.Rows[indx].FindControl("Label4");
+            ddlstore = (DropDownList)gdItem.Rows[indx].FindControl("DropDownList1");
+            lblissqty = (Label)gdItem.Rows[indx].FindControl("Label6");
+            txtcrdcode = (TextBox)gdItem.Rows[indx].FindControl("TextBox2");
+            txtcrdanal = (TextBox)gdItem.Rows[indx].FindControl("TextBox3");
+            lineno = (Label)gdItem.Rows[indx].FindControl("Label7");
+            txtretqty = (TextBox)gdItem.Rows[indx].FindControl("TextBox1");
+
+
+            lblref.Text = dr.Trn_Det_Ref.ToString();
+            lblicode.Text = dr.Trn_Det_Icode.ToString();
+            lblidet.Text = dr.Trn_Det_Itm_Desc.ToString();
+            lbluom.Text = dr.Trn_Det_Itm_Uom.ToString();            
+            lblissqty.Text = dr.Trn_Det_Lin_Qty.ToString("N2");
+
+            ddlstore.Items.Clear();
+            ddlstore.Items.Add("");
+
+            foreach (ErpDataSet.InMa_Str_LocRow drs in dtloc.Rows)
+            {
+                lst = new ListItem();
+                lst.Text = drs.Str_Loc_Id;
+                lst.Value = drs.Str_Loc_Id;
+                ddlstore.Items.Add(lst);
+            }
+
+
+            dtsrdet = new SCBLIN.InTr_Sr_DetDataTable();
+            dtsrdet = srdet.GetDataByRefItem(dr.Trn_Det_Ord_Ref, dr.Trn_Det_Icode);
+
+            if (dtsrdet.Rows.Count > 0)
+            {
+                txtcrdcode.Text = dtsrdet[0].T_C1.ToString();
+                txtcrdanal.Text = dtsrdet[0].T_C2.ToString();
+            }
+            else             
+            {
+                txtcrdcode.Text = "";
+                txtcrdanal.Text = "";
+            }
+
+            lineno.Text = dr.Trn_Det_Lno.ToString();
+
+            avlitm = dr.Trn_Det_Lin_Qty;
+            
+            txtretqty.Text = avlitm.ToString("N2");
+            txtretqty.Style.Add("visibility", "hidden");
+            txtcrdcode.Style.Add("visibility", "hidden");
+            txtcrdanal.Style.Add("visibility", "hidden");
+            ddlstore.Style.Add("visibility", "hidden");
+            indx++;
+        }
+        
+
+
+    }
+}

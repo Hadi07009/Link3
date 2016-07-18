@@ -1,0 +1,391 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using LibraryDAL;
+using LibraryDAL.ErpDataSetTableAdapters;
+
+public partial class frm_itm_grp_create : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        //current.UserId = "MON";
+        //current.UserName = "Monjurul";
+
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btnupdate, "Are you sure to add ?");
+        
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            clear_all();
+            load_all_data();
+            optgrp.SelectedValue = "1";
+            load_ist_data();
+            
+        }
+
+    }
+
+
+    private void load_ist_data()
+    {
+        btnupdate.Visible = true;
+        lblfirst.Visible = false;
+        lbl2nd.Visible = false;
+        ddlggp1.Visible = false;
+        ddlggp2.Visible = false;
+
+        InMa_Grp_CodeTableAdapter grp = new InMa_Grp_CodeTableAdapter();
+        ErpDataSet.InMa_Grp_CodeDataTable dtgrp = new ErpDataSet.InMa_Grp_CodeDataTable();
+        DataTable dt = new DataTable();
+        dt.Columns.Add("GROUP NO", typeof(string));
+        dt.Columns.Add("1ST GROUP", typeof(string));
+        dt.Columns.Add("2ND GROUP", typeof(string));
+        dt.Columns.Add("GROUP CODE", typeof(string));
+        dt.Columns.Add("GROUP NAME", typeof(string));
+        dt.Columns.Add("SHORT NAME", typeof(string));
+
+
+        dtgrp = grp.GetDataByCode("I01", "", "");
+
+        foreach (ErpDataSet.InMa_Grp_CodeRow dr in dtgrp.Rows)
+        {
+            dt.Rows.Add(dr.Grp_Code_Id, dr.Grp_Forst_Code, dr.Grp_Second_Code, dr.Grp_Code, dr.Grp_Code_Name, dr.Grp_Code_Sht);
+        }
+
+        gdgrp.DataSource = dt;
+        gdgrp.DataBind();
+
+    }
+
+    private void load_second_data()
+    {
+        lblfirst.Visible = true;
+        lbl2nd.Visible = false;
+        ddlggp1.Visible = true;
+        ddlggp2.Visible = false;
+
+        InMa_Grp_CodeTableAdapter grp = new InMa_Grp_CodeTableAdapter();
+        ErpDataSet.InMa_Grp_CodeDataTable dtgrp = new ErpDataSet.InMa_Grp_CodeDataTable();
+        ListItem lst;
+
+        dtgrp = grp.GetDataByCode("I01","","");
+
+        ddlggp1.Items.Clear();
+        ddlggp1.Items.Add("");
+
+        foreach (ErpDataSet.InMa_Grp_CodeRow dr in dtgrp.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Grp_Code;
+            lst.Text = dr.Grp_Code + ":" + dr.Grp_Code_Name;
+            ddlggp1.Items.Add(lst);
+        }
+
+        
+        gdgrp.DataSource = null;
+        gdgrp.DataBind();
+
+    }
+
+    private void load_third_data()
+    {
+        lblfirst.Visible = true;
+        lbl2nd.Visible = true;
+        ddlggp1.Visible = true;
+        ddlggp2.Visible = true;
+
+        InMa_Grp_CodeTableAdapter grp = new InMa_Grp_CodeTableAdapter();
+        ErpDataSet.InMa_Grp_CodeDataTable dtgrp = new ErpDataSet.InMa_Grp_CodeDataTable();
+        ListItem lst;
+
+        dtgrp = grp.GetDataByCode("I01", "", "");
+
+        ddlggp2.Items.Clear();
+
+        ddlggp1.Items.Clear();
+        ddlggp1.Items.Add("");
+
+
+        foreach (ErpDataSet.InMa_Grp_CodeRow dr in dtgrp.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Grp_Code;
+            lst.Text = dr.Grp_Code + ":" + dr.Grp_Code_Name;
+            ddlggp1.Items.Add(lst);
+        }
+
+
+        gdgrp.DataSource = null;
+        gdgrp.DataBind();
+
+    }
+
+    private void load_all_data()
+    {
+        InMa_Grp_CodeTableAdapter grp = new InMa_Grp_CodeTableAdapter();
+        ErpDataSet.InMa_Grp_CodeDataTable dtgrp = new ErpDataSet.InMa_Grp_CodeDataTable();
+        DataTable dt = new DataTable();
+        dt.Columns.Add("GROUP NO", typeof(string));
+        dt.Columns.Add("1ST GROUP", typeof(string));
+        dt.Columns.Add("2ND GROUP", typeof(string));
+        dt.Columns.Add("GROUP CODE", typeof(string));
+        dt.Columns.Add("GROUP NAME", typeof(string));
+        dt.Columns.Add("SHORT NAME", typeof(string));
+
+
+        dtgrp = grp.GetAllData();
+
+        foreach (ErpDataSet.InMa_Grp_CodeRow dr in dtgrp.Rows)
+        {
+            dt.Rows.Add(dr.Grp_Code_Id, dr.Grp_Forst_Code, dr.Grp_Second_Code, dr.Grp_Code, dr.Grp_Code_Name, dr.Grp_Code_Sht);
+        }
+
+        gdall.DataSource = dt;
+        gdall.DataBind();
+
+
+    }
+
+    private void clear_all()
+    {
+
+        txtcode.Text = "";
+        txtname.Text = "";
+        txtshort.Text = "";
+      
+    }
+
+ 
+    
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        InMa_Grp_CodeTableAdapter grp = new InMa_Grp_CodeTableAdapter();
+        ErpDataSet.InMa_Grp_CodeDataTable dtgrp = new ErpDataSet.InMa_Grp_CodeDataTable();
+        DataTable dt = new DataTable();
+
+        if (txtcode.Text.Length < 2) return;
+        if (txtname.Text.Length < 2) return;
+
+        string grpid = "";
+        string grpfcode = "";
+        string grpscond = "";
+        
+
+        switch (optgrp.SelectedItem.Value.ToString())
+        {
+             
+            case "1":
+                grpid = "I01";
+                break;
+
+            case "2":
+                if (ddlggp1.SelectedValue.ToString() == "") return;
+                grpid = "I02";
+                grpfcode = ddlggp1.SelectedValue.ToString();
+                break;
+
+            case "3":
+                if (ddlggp1.SelectedValue.ToString() == "") return;
+                if (ddlggp2.SelectedValue.ToString() == "") return;
+                grpid = "I03";
+                grpfcode = ddlggp1.SelectedValue.ToString();
+                grpscond = ddlggp2.SelectedValue.ToString();
+                break;
+
+            default:
+                break;
+        }
+        grp.DeleteGrp(grpid, grpfcode, grpscond, txtcode.Text);
+        grp.InsertGrp(grpid, grpfcode, grpscond, txtcode.Text, txtname.Text, txtshort.Text, DateTime.Now, "", "", "", 0);
+        
+        dt.Columns.Add("GROUP NO", typeof(string));
+        dt.Columns.Add("1ST GROUP", typeof(string));
+        dt.Columns.Add("2ND GROUP", typeof(string));
+        dt.Columns.Add("GROUP CODE", typeof(string));
+        dt.Columns.Add("GROUP NAME", typeof(string));
+        dt.Columns.Add("SHORT NAME", typeof(string));
+
+        dtgrp = grp.GetDataByCode(grpid, grpfcode, grpscond);
+
+        foreach (ErpDataSet.InMa_Grp_CodeRow dr in dtgrp.Rows)
+        {
+            dt.Rows.Add(dr.Grp_Code_Id, dr.Grp_Forst_Code, dr.Grp_Second_Code, dr.Grp_Code, dr.Grp_Code_Name, dr.Grp_Code_Sht);
+        }
+
+        gdgrp.DataSource = dt;
+        gdgrp.DataBind();
+        load_all_data();
+        clear_all();
+    }
+
+
+    protected void ddlggp2_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        btnupdate.Visible = false;
+        clear_all();
+        InMa_Grp_CodeTableAdapter grp = new InMa_Grp_CodeTableAdapter();
+        ErpDataSet.InMa_Grp_CodeDataTable dtgrp = new ErpDataSet.InMa_Grp_CodeDataTable();
+        DataTable dt = new DataTable();
+        dtgrp = grp.GetDataByCode("I03", ddlggp1.SelectedValue.ToString(), ddlggp2.SelectedValue.ToString());
+        
+
+        switch (optgrp.SelectedItem.Value.ToString())
+        {
+
+            case "3":
+                btnupdate.Visible = true;
+
+                dt.Columns.Add("GROUP NO", typeof(string));
+                dt.Columns.Add("1ST GROUP", typeof(string));
+                dt.Columns.Add("2ND GROUP", typeof(string));
+                dt.Columns.Add("GROUP CODE", typeof(string));
+                dt.Columns.Add("GROUP NAME", typeof(string));
+                dt.Columns.Add("SHORT NAME", typeof(string));
+                
+
+                foreach (ErpDataSet.InMa_Grp_CodeRow dr in dtgrp.Rows)
+                {
+                    dt.Rows.Add(dr.Grp_Code_Id, dr.Grp_Forst_Code, dr.Grp_Second_Code, dr.Grp_Code, dr.Grp_Code_Name, dr.Grp_Code_Sht);
+                }
+
+                gdgrp.DataSource = dt;
+                gdgrp.DataBind();
+                
+                break;
+                         
+
+            default:
+                break;
+        }
+    }
+    protected void ddlggp1_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        btnupdate.Visible = false;
+        clear_all();
+        InMa_Grp_CodeTableAdapter grp = new InMa_Grp_CodeTableAdapter();
+        ErpDataSet.InMa_Grp_CodeDataTable dtgrp = new ErpDataSet.InMa_Grp_CodeDataTable();
+        DataTable dt = new DataTable();
+        dtgrp = grp.GetDataByCode("I02", ddlggp1.SelectedValue.ToString(),"");
+        ListItem lst;
+
+        switch (optgrp.SelectedItem.Value.ToString())
+        {
+           
+            case "2":
+                btnupdate.Visible = true;
+              
+                dt.Columns.Add("GROUP NO", typeof(string));
+                dt.Columns.Add("1ST GROUP", typeof(string));
+                dt.Columns.Add("2ND GROUP", typeof(string));
+                dt.Columns.Add("GROUP CODE", typeof(string));
+                dt.Columns.Add("GROUP NAME", typeof(string));
+                dt.Columns.Add("SHORT NAME", typeof(string));
+                                
+
+                foreach (ErpDataSet.InMa_Grp_CodeRow dr in dtgrp.Rows)
+                {
+                    dt.Rows.Add(dr.Grp_Code_Id, dr.Grp_Forst_Code, dr.Grp_Second_Code, dr.Grp_Code, dr.Grp_Code_Name, dr.Grp_Code_Sht);
+                }
+
+                gdgrp.DataSource = dt;
+                gdgrp.DataBind();
+
+
+
+                break;
+
+            case "3":
+
+                lst = new ListItem();
+
+                ddlggp2.Items.Clear();
+                ddlggp2.Items.Add("");
+
+                foreach (ErpDataSet.InMa_Grp_CodeRow dr in dtgrp.Rows)
+                {
+                    lst = new ListItem();
+                    lst.Value = dr.Grp_Code;
+                    lst.Text = dr.Grp_Code + ":" + dr.Grp_Code_Name;
+                    ddlggp2.Items.Add(lst);
+                }
+
+                gdgrp.DataSource = null;
+                gdgrp.DataBind();
+
+                break;
+
+            default:
+                break;
+        }
+    }
+    protected void optgrp_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        btnupdate.Visible = false;
+        clear_all();
+        ddlggp1.Items.Clear();
+        ddlggp2.Items.Clear();
+        gdgrp.DataSource = null;
+        gdgrp.DataBind();
+
+        switch (optgrp.SelectedItem.Value.ToString())
+        {
+            case "1":
+                load_ist_data();
+                break;
+
+            case "2":
+                load_second_data();
+                break;
+
+            case "3":
+                load_third_data();
+                break;
+
+            default:
+                break;
+        }
+    }
+    protected void gdgrp_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (gdgrp.SelectedIndex > -1)
+        {
+            InMa_Grp_CodeTableAdapter grp = new InMa_Grp_CodeTableAdapter();
+            ErpDataSet.InMa_Grp_CodeDataTable dtgrp = new ErpDataSet.InMa_Grp_CodeDataTable();
+            DataTable dt = new DataTable();
+            string grpid = gdgrp.Rows[gdgrp.SelectedIndex].Cells[1].Text.Replace("&nbsp;", "");
+            string grpfcode = gdgrp.Rows[gdgrp.SelectedIndex].Cells[2].Text.Replace("&nbsp;", "");
+            string grpscond = gdgrp.Rows[gdgrp.SelectedIndex].Cells[3].Text.Replace("&nbsp;", "");
+            string grpcode = gdgrp.Rows[gdgrp.SelectedIndex].Cells[4].Text.Replace("&nbsp;", "");
+
+            grp.DeleteGrp(grpid, grpfcode, grpscond, grpcode);
+
+            dt.Columns.Add("GROUP NO", typeof(string));
+            dt.Columns.Add("1ST GROUP", typeof(string));
+            dt.Columns.Add("2ND GROUP", typeof(string));
+            dt.Columns.Add("GROUP CODE", typeof(string));
+            dt.Columns.Add("GROUP NAME", typeof(string));
+            dt.Columns.Add("SHORT NAME", typeof(string));
+
+            dtgrp = grp.GetDataByCode(grpid, grpfcode, grpscond);
+
+            foreach (ErpDataSet.InMa_Grp_CodeRow dr in dtgrp.Rows)
+            {
+                dt.Rows.Add(dr.Grp_Code_Id, dr.Grp_Forst_Code, dr.Grp_Second_Code, dr.Grp_Code, dr.Grp_Code_Name, dr.Grp_Code_Sht);
+            }
+
+            gdgrp.DataSource = dt;
+            gdgrp.DataBind();
+
+            load_all_data();
+        }
+    }
+}
+

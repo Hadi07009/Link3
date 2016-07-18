@@ -1,0 +1,949 @@
+using System;
+using System.IO;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDTO;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBL3DataSetTableAdapters;
+using LibraryDAL.FpiDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+using LibraryDAL.dsLinkofficeTableAdapters;
+using System.Net.Mail;
+public partial class frm_fpi_custom_clearing_entry : System.Web.UI.Page
+{
+   
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+        clsStatic.MsgConfirmBox(btn_save, "Are you sure to save ? ");
+        clsStatic.MsgConfirmBox(btn_save_forward, "Are you sure to Forward ? ");
+        clsStatic.MsgConfirmBox(btn_complete, "Are you sure to Forward ? ");
+        
+        if (!Page.IsPostBack)
+        {
+            load_pending();          
+
+        }
+    }
+
+    private void load_info(string selval, int con_no)
+    {
+
+
+        tbl_fpi_custom_clearingTableAdapter tacustom = new tbl_fpi_custom_clearingTableAdapter();
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcustom = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+        tbl_fpi_consignment_infoTableAdapter cons = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtcon = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+
+        dtcon = cons.GetDataByRefCon(selval, con_no);
+
+        if (dtcon.Rows.Count == 0)
+        {
+            tblmaster.Visible = false;
+            return;
+        }
+        else
+        {
+
+            ctl_fpi_mpr_item_view1.load_all(dtcon[0].mpr_ref_no, dtcon[0].item_code);
+            ctl_fpi_download1.load_all(dtcon[0].ref_no);
+            ctl_fpi_pi_entry_view1.load_details(dtcon[0].ref_no);
+            ctl_fpi_lc_entry_view1.load_data(dtcon[0].ref_no);
+            ctl_fpi_import_consignment_view1.load_data(dtcon[0].ref_no, dtcon[0].consign_no);
+
+            load_fpi_data(dtcon[0].ref_no, dtcon[0].consign_no, dtcon[0].bill_of_lading_quantity);
+        }
+             
+    }
+
+    private void clear_all()
+    {
+
+        txt_lc_number.Text = "";
+        txt_LC_value.Text = "";
+        txt_invoice_value.Text = "";
+        dt_lc_date.SelectedDate = DateTime.Now;
+        dt_lc_expire_date.SelectedDate = DateTime.Now;
+        dt_shipment_date.SelectedDate = DateTime.Now;
+        txt_LC_amendment_value.Text = "";
+        txt_currency_invoice.Text = "";
+        txt_exchange_rate.Text = "";
+        lbl_total_value.Text = "";
+        txt_payment_terms.Text = "";
+        dtmaturitydate.SelectedDate = DateTime.Now;
+        txt_duty.Text = "";
+        txt_regular_duty.Text = "";
+        txt_supplimentary_duty.Text = "";
+        txt_vat.Text = "";
+        txt_ait.Text = "";
+        txt_atv.Text = "";
+        txt_PSI.Text = "";
+        txt_df_vat.Text = "";
+        txt_port_dues.Text = "";
+        txt_stevedoring.Text = "";
+        txt_stevedoring_charge.Text = "";
+        txt_boc.Text = "";
+        txt_shipping_agent_name.Text = "";
+        txt_shipping_charge.Text = "";
+        txt_freight_name.Text = "";
+        txt_freight_NOC_charge.Text = "";
+        txt_surveyor_charge.Text = "";
+        txt_rate.Text = "";
+        lbl_total_fee.Text = "";
+        txt_carrying_rate.Text = "";
+        lbl_total_carrying_cost.Text = "";
+        txt_others_cost.Text = "";
+        txt_reason_for.Text = "";
+        lbl_total_cost.Text = "";
+        lbl_net_cost.Text = "";
+        lbl_rate.Text = "";
+        txt_comments.Text = "";
+        txt_duty_pro.Text = "";
+        txt_regular_duty_provisional.Text = "";
+        txt_supplimentary_duty_provisional.Text = "";
+        txt_vat_provitional.Text = "";
+        txt_ait_provitional.Text = "";
+        txt_atv_provitional.Text = "";
+        txt_PSI_pro.Text = "";
+        txt_df_vat_provitional.Text = "";
+        txt_port_dues_provitional.Text = "";
+        txt_stevedoring_charge_provitional.Text = "";
+        txt_boc_provitional.Text = "";
+        txt_shipping_charge_provitional.Text = "";
+        txt_freight_NOC_charge_provitional.Text = "";
+        txt_surveyor_charge_provitional.Text = "";
+        txt_rate_provitional.Text = "";
+        lbl_total_fee_provitional.Text = "";
+        txt_carrying_rate_provitional.Text = "";
+        lbl_total_carrying_cost_provitional.Text = "";
+        txt_others_cost_provitional.Text = "";
+        lbl_total_cost_provitional.Text = "";
+        lbl_net_cost_provitional.Text = "";
+        lbl_rate_provitional.Text = "";
+        lbl_vat.Text = "";
+        lbl_ait.Text = "";
+        lbl_atv.Text = "";
+        lbl_vat_provitional.Text = "";
+        lbl_ait_provitional.Text = "";
+        lbl_atv_provitional.Text = "";
+    }
+
+    private void lock_unlock(bool enability)
+    {
+       // txt_lc_number.Enabled = enability;
+        lbl_consign_no.Enabled = enability;
+        lbl_consign_qty.Enabled = enability;
+       
+        txt_LC_value.Enabled  = enability;
+        txt_invoice_value.Enabled  = enability;
+        dt_lc_date.Enabled  = enability;
+        dt_lc_expire_date.Enabled  = enability;
+        dt_shipment_date.Enabled  = enability;
+        txt_LC_amendment_value.Enabled  = enability;
+        txt_currency_invoice.Enabled  = enability;
+        txt_exchange_rate.Enabled  = enability;
+        lbl_total_value.Enabled  = enability;
+        txt_payment_terms.Enabled  = enability;
+        dtmaturitydate.Enabled  = enability;
+
+        //txt_duty.Enabled  = enability;
+        //txt_regular_duty.Enabled  = enability;
+        //txt_supplimentary_duty.Enabled  = enability;
+        //txt_vat.Enabled  = enability;
+        //txt_ait.Enabled  = enability;
+        //txt_atv.Enabled  = enability;
+        //txt_PSI.Enabled  = enability;
+        //txt_df_vat.Enabled  = enability;
+        //txt_port_dues.Enabled  = enability;
+        //txt_stevedoring.Enabled  = enability;
+        //txt_stevedoring_charge.Enabled  = enability;
+        //txt_boc.Enabled  = enability;
+        //txt_shipping_agent_name.Enabled  = enability;
+        //txt_shipping_charge.Enabled  = enability;
+        //txt_freight_name.Enabled  = enability;
+        //txt_freight_NOC_charge.Enabled  = enability;
+        //txt_surveyor_charge.Enabled  = enability;
+        //txt_rate.Enabled  = enability;
+        //lbl_total_fee.Enabled  = enability;
+        //txt_carrying_rate.Enabled  = enability;
+        //lbl_total_carrying_cost.Enabled  = enability;
+        //txt_others_cost.Enabled  = enability;
+        //txt_reason_for.Enabled  = enability;
+        //lbl_total_cost.Enabled  = enability;
+        //lbl_net_cost.Enabled  = enability;
+        //lbl_rate.Enabled  = enability;
+        //txt_comments.Enabled  = enability;
+
+        txt_duty_pro.Enabled  = enability;
+        txt_regular_duty_provisional.Enabled  = enability;
+        txt_supplimentary_duty_provisional.Enabled  = enability;
+        txt_vat_provitional.Enabled  = enability;
+        txt_ait_provitional.Enabled  = enability;
+        txt_atv_provitional.Enabled  = enability;
+        txt_PSI_pro.Enabled  = enability;
+        txt_df_vat_provitional.Enabled  = enability;
+        txt_port_dues_provitional.Enabled  = enability;
+        txt_stevedoring_charge_provitional.Enabled  = enability;
+        txt_boc_provitional.Enabled  = enability;
+        txt_shipping_charge_provitional.Enabled  = enability;
+        txt_freight_NOC_charge_provitional.Enabled  = enability;
+        txt_surveyor_charge_provitional.Enabled  = enability;
+        txt_rate_provitional.Enabled = enability;
+        lbl_total_fee_provitional.Enabled  = enability;
+        txt_carrying_rate_provitional.Enabled  = enability;
+        lbl_total_carrying_cost_provitional.Enabled  = enability;
+        txt_others_cost_provitional.Enabled  = enability;
+        lbl_total_cost_provitional.Enabled  = enability;
+        lbl_net_cost_provitional.Enabled  = enability;
+        lbl_rate_provitional.Enabled  = enability;
+        lbl_vat.Enabled  = enability;
+        lbl_ait.Enabled  = enability;
+        lbl_atv.Enabled  = enability;
+        lbl_vat_provitional.Enabled  = enability;
+        lbl_ait_provitional.Enabled  = enability;
+        lbl_atv_provitional.Enabled  = enability;
+
+    }
+
+    private void load_fpi_data(string fpi_ref, int con_no, decimal lad_qty)
+    {
+        lock_unlock(true);
+        btn_save_forward.Visible = false;
+        btn_complete.Visible = false;
+
+        tbl_fpi_custom_clearingTableAdapter tacustom = new tbl_fpi_custom_clearingTableAdapter();
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcustom = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+
+        //custom_clearing_with_acccoaTableAdapter tacustom = new custom_clearing_with_acccoaTableAdapter ();
+        //FpiDataSet.custom_clearing_with_acccoaDataTable dtcustom =new FpiDataSet.custom_clearing_with_acccoaDataTable ();
+
+
+        dtcustom = tacustom.GetDataByRefCon(fpi_ref, con_no);
+
+        if (dtcustom.Rows.Count == 0)
+        {                      
+            lbl_consign_no.Text = con_no.ToString();
+            lbl_consign_qty.Text = lad_qty.ToString("N2");
+            clear_all();
+            return;
+        }
+        else
+        {
+            if (dtcustom[0].ctg_status == "")
+            {
+                btn_save_forward.Visible = true;
+               
+                
+            }
+            else
+            {
+                lock_unlock(false);
+                btn_complete.Visible = true;
+            }
+
+            lbl_consign_no.Text = dtcustom[0].consign_number.ToString();
+            lbl_consign_qty.Text = dtcustom[0].consign_quantity.ToString("N2");
+            txt_lc_number.Text = dtcustom[0].lc_number;
+            txt_LC_value.Text = dtcustom[0].lc_value.ToString();
+            txt_invoice_value.Text = dtcustom[0].invoice_value.ToString();
+            dt_lc_date.SelectedDate = dtcustom[0].lc_date;
+            dt_lc_expire_date.SelectedDate = dtcustom[0].lc_expire_date;
+            dt_shipment_date.SelectedDate = dtcustom[0].shipment_date;
+            txt_LC_amendment_value.Text = dtcustom[0].lc_amendment_value.ToString("N2");
+            txt_currency_invoice.Text = dtcustom[0].currency.ToString();
+            txt_exchange_rate.Text = dtcustom[0].exchange_rate.ToString("N2");
+            lbl_total_value.Text = dtcustom[0].total_value.ToString("N2");
+            txt_payment_terms.Text = dtcustom[0].payment_terms.ToString();
+            dtmaturitydate.SelectedDate = dtcustom[0].maturity_date;
+            txt_duty.Text = dtcustom[0].duty.ToString("N2");
+            txt_regular_duty.Text = dtcustom[0].regular_duty.ToString("N2");
+            txt_supplimentary_duty.Text = dtcustom[0].suppliment_duty.ToString("N2");
+            txt_vat.Text = dtcustom[0].vat.ToString("N2");
+            txt_ait.Text = dtcustom[0].ait.ToString("N2");
+            txt_atv.Text = dtcustom[0].atv.ToString("N2");
+            txt_PSI.Text = dtcustom[0].psi.ToString("N2");
+            txt_df_vat.Text = dtcustom[0].df_vat.ToString("N2");
+            txt_port_dues.Text = dtcustom[0].port_dues.ToString("N2");
+            txt_stevedoring.Text = dtcustom[0].stevedoring_service_provider.ToString();
+            txt_stevedoring_charge.Text = dtcustom[0].stevedoring_charge.ToString("N2");
+            txt_boc.Text = dtcustom[0].boc.ToString("N2");
+            txt_shipping_agent_name.Text = dtcustom[0].shipping_agnt_name.ToString();
+            txt_shipping_charge.Text = dtcustom[0].shipping_agnt_charge.ToString("N2");
+            txt_freight_name.Text = dtcustom[0].freight_forword_name.ToString();
+            txt_freight_NOC_charge.Text = dtcustom[0].noc_charge.ToString("N2");
+            txt_surveyor_charge.Text = dtcustom[0].surveyor_charge.ToString("N2");
+            txt_rate.Text = dtcustom[0].cf_agnt_fee.ToString("N2");
+            lbl_total_fee.Text = dtcustom[0].total_cf_fee.ToString("N2");
+            txt_carrying_rate.Text = dtcustom[0].carrying_rate.ToString("N2");
+            lbl_total_carrying_cost.Text = dtcustom[0].total_carrying_cost.ToString("N2");
+            txt_others_cost.Text = dtcustom[0].other_cost.ToString("N2");
+            txt_reason_for.Text = dtcustom[0].reason_for_other_cost.ToString();
+            lbl_total_cost.Text = dtcustom[0].total_cost.ToString("N2");
+            lbl_net_cost.Text = dtcustom[0].net_cost.ToString("N2");
+            lbl_rate.Text = dtcustom[0].rate_per_quantity.ToString("N2");
+            txt_comments.Text = dtcustom[0].comments.ToString();
+            txt_duty_pro.Text = dtcustom[0].duty_pro.ToString("N2");
+            txt_regular_duty_provisional.Text = dtcustom[0].regular_duty_pro.ToString("N2");
+            txt_supplimentary_duty_provisional.Text = dtcustom[0].suppliment_duty.ToString("N2");
+            txt_vat_provitional.Text = dtcustom[0].vat_pro.ToString("N2");
+            txt_ait_provitional.Text = dtcustom[0].ait_pro.ToString("N2");
+            txt_atv_provitional.Text = dtcustom[0].atv_pro.ToString("N2");
+            txt_PSI_pro.Text = dtcustom[0].psi_pro.ToString("N2");
+            txt_df_vat_provitional.Text = dtcustom[0].df_vat_pro.ToString("N2");
+            txt_port_dues_provitional .Text = dtcustom[0].port_dues_pro.ToString("N2");
+            txt_stevedoring_charge_provitional.Text = dtcustom[0].stevedoring_charge_pro.ToString("N2");
+            txt_boc_provitional.Text = dtcustom[0].boc_charge_pro.ToString("N2");
+            txt_shipping_charge_provitional.Text = dtcustom[0].shipping_agnt_charge_pro.ToString("N2");
+            txt_freight_NOC_charge_provitional.Text = dtcustom[0].noc_charge_pro.ToString("N2");
+            txt_surveyor_charge_provitional.Text = dtcustom[0].surveyor_charge_pro.ToString("N2");
+            txt_rate_provitional.Text = dtcustom[0].cf_agnt_fee_pro.ToString();
+            lbl_total_fee_provitional.Text = dtcustom[0].total_cf_fee_pro.ToString();
+            txt_carrying_rate_provitional .Text = dtcustom[0].carrying_rate_pro.ToString();
+            lbl_total_carrying_cost_provitional.Text = dtcustom[0].total_carrying_cost_pro.ToString();
+            txt_others_cost_provitional.Text = dtcustom[0].other_cost_pro.ToString();
+            lbl_total_cost_provitional.Text = dtcustom[0].total_cost_pro.ToString();
+            lbl_net_cost_provitional.Text = dtcustom[0].net_cost_pro.ToString();
+            lbl_rate_provitional.Text = dtcustom[0].rate_per_quantity_pro.ToString();
+            lbl_vat.Text = dtcustom[0].vat.ToString("N2");
+            lbl_ait.Text = dtcustom[0].ait.ToString("N2");
+            lbl_atv.Text = dtcustom[0].atv.ToString("N2");
+            lbl_vat_provitional.Text = dtcustom[0].vat_pro.ToString("N2");
+            lbl_ait_provitional.Text = dtcustom[0].ait_pro.ToString("N2");
+            lbl_atv_provitional.Text = dtcustom[0].atv_pro.ToString("N2");
+        }
+    }
+
+    private void load_pending()
+    {
+        tbl_fpi_consignment_infoTableAdapter cons = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtcon = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+        InMa_Itm_DetTableAdapter idet = new InMa_Itm_DetTableAdapter();
+        ListItem lst;
+
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcust;
+        tbl_fpi_custom_clearingTableAdapter cust = new tbl_fpi_custom_clearingTableAdapter();
+        string lc_no = "";
+
+        string my_app = "CUSENT";
+
+        if (my_app == "") { Response.Redirect("./frm_com_inbox.aspx"); }
+
+        dtcon = cons.GetDataByStatus("APP");
+
+        if (dtcon.Rows.Count == 0)
+        {
+            Response.Redirect("./frm_com_inbox.aspx");
+        }
+
+        lblpcount.Text = dtcon.Rows.Count.ToString();
+
+        ddlpolist.Items.Clear();
+        ddlpolist.Items.Add("");
+
+        foreach (LibraryDAL.FpiDataSet.tbl_fpi_consignment_infoRow dr in dtcon.Rows)
+        {
+            lst = new ListItem();
+            dtcust = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+            dtcust = cust.GetDataByRefCon(dr.ref_no.ToString(), 1);
+
+            if (dtcust.Rows.Count == 0) lc_no = ""; else lc_no = dtcust[0].lc_number;
+
+            lst.Value = dr.ref_no.ToString() + ":" + dr.consign_no.ToString();
+            lst.Text = dr.ref_no.ToString() + ":" + dr.consign_no.ToString() + ":" + dr.item_code.ToString() + ":" + idet.GetItemByCode(dr.item_code)[0].Itm_Det_desc + ":" + dr.Vessel_name.ToString() + ":" + lc_no;
+            ddlpolist.Items.Add(lst);
+        }
+        ddlchange();
+
+
+    }
+  
+  
+    protected void ddlpolist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        ddlchange();
+    }
+
+    private void ddlchange()
+    {
+        tbl_fpi_consignment_infoTableAdapter cons = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtcon = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+         if (ddlpolist.SelectedItem.Text.Split(':').Length < 3)
+         {
+             tblmaster.Visible = false;
+             return;
+         }
+         string selval = ddlpolist.SelectedItem.Value.Split(':')[0];
+         int con_no = Convert.ToInt32(ddlpolist.SelectedItem.Value.Split(':')[1]);
+         dtcon = cons.GetDataByRefCon(selval, con_no);
+        if (dtcon.Rows.Count == 0)
+        {
+            tblmaster.Visible = false;
+            return;
+        }
+        else
+        {                
+            tblmaster.Visible = true;
+
+            load_info(selval, con_no);
+        }
+         
+    }
+
+    
+    protected void txt_exchange_rate_TextChanged(object sender, EventArgs e)
+    {
+        exc_rate();
+    }
+
+    private void exc_rate()
+    {
+        decimal invval, exrate;
+
+        invval = (txt_invoice_value.Text == "" ? 0 : Convert.ToDecimal(txt_invoice_value.Text));
+        exrate = (txt_exchange_rate.Text == "" ? 0 : Convert.ToDecimal(txt_exchange_rate.Text));
+        lbl_total_value.Text = (invval * exrate).ToString("N2");
+    }
+
+
+    private void total_CF_Cost()
+    { 
+    decimal consign_value,cf_rate;
+
+    consign_value = (lbl_consign_qty.Text == "" ? 0 : Convert.ToDecimal(lbl_consign_qty.Text));
+    cf_rate = (txt_rate.Text == "" ? 0 : Convert.ToDecimal(txt_rate.Text));
+    lbl_total_fee.Text  = (consign_value * cf_rate).ToString("N2");
+        
+    
+    }
+
+
+    private void total_CF_Cost_pro()
+    {
+        decimal consign_value, cf_rate;
+
+        consign_value = (lbl_consign_qty.Text == "" ? 0 : Convert.ToDecimal(lbl_consign_qty.Text));
+        cf_rate = (txt_rate_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_rate_provitional.Text));
+       lbl_total_fee_provitional.Text  = (consign_value * cf_rate).ToString("N2");
+    }
+
+
+    private void total_carrying_Cost()
+    {
+
+        decimal consign_value, carrying_rate;
+
+        consign_value = (lbl_consign_qty.Text == "" ? 0 : Convert.ToDecimal(lbl_consign_qty.Text));
+        carrying_rate = (txt_carrying_rate.Text == "" ? 0 : Convert.ToDecimal(txt_carrying_rate.Text));
+       lbl_total_carrying_cost.Text  = (consign_value * carrying_rate).ToString("N2");
+
+    }
+
+
+    private void total_carrying_Cost_pro()
+    {
+
+        decimal consign_value, carrying_rate;
+
+        consign_value = (lbl_consign_qty.Text == "" ? 0 : Convert.ToDecimal(lbl_consign_qty.Text));
+        carrying_rate = (txt_carrying_rate_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_carrying_rate_provitional.Text));
+        lbl_total_carrying_cost_provitional.Text = (consign_value * carrying_rate).ToString("N2");
+
+    }
+
+
+    private void actual_update()
+    {
+        decimal duty, reg_duty, suppliment_duty, vat, ait, atv, psi, df_vat, port_dues, steve_charge, boc, shiping_agnt_charge, noc_charge, surveyor_charge, tot_cf_fee, tot_crrying_cost, other_cost, total_cost, net_total_cost, rate, total_value, bl_quantity;
+
+
+        duty = (txt_duty.Text == "" ? 0 : Convert.ToDecimal(txt_duty.Text));
+        reg_duty = (txt_regular_duty.Text == "" ? 0 : Convert.ToDecimal(txt_regular_duty.Text));
+        suppliment_duty = (txt_supplimentary_duty.Text == "" ? 0 : Convert.ToDecimal(txt_supplimentary_duty.Text));
+        vat = (txt_vat.Text == "" ? 0 : Convert.ToDecimal(txt_vat.Text));
+        ait = (txt_ait.Text == "" ? 0 : Convert.ToDecimal(txt_ait.Text));
+        atv = (txt_atv.Text == "" ? 0 : Convert.ToDecimal(txt_atv.Text));
+        psi = (txt_PSI.Text == "" ? 0 : Convert.ToDecimal(txt_PSI.Text));
+        df_vat = (txt_df_vat.Text == "" ? 0 : Convert.ToDecimal(txt_df_vat.Text));
+        port_dues = (txt_port_dues.Text == "" ? 0 : Convert.ToDecimal(txt_port_dues.Text));
+        steve_charge = (txt_stevedoring_charge.Text == "" ? 0 : Convert.ToDecimal(txt_stevedoring_charge.Text));
+        boc = (txt_boc.Text == "" ? 0 : Convert.ToDecimal(txt_boc.Text));
+        shiping_agnt_charge = (txt_shipping_charge.Text == "" ? 0 : Convert.ToDecimal(txt_shipping_charge.Text));
+        noc_charge = (txt_freight_NOC_charge.Text == "" ? 0 : Convert.ToDecimal(txt_freight_NOC_charge.Text));
+        surveyor_charge = (txt_surveyor_charge.Text == "" ? 0 : Convert.ToDecimal(txt_surveyor_charge.Text));
+        tot_cf_fee = (lbl_total_fee.Text == "" ? 0 : Convert.ToDecimal(lbl_total_fee.Text));
+        tot_crrying_cost = (lbl_total_carrying_cost.Text == "" ? 0 : Convert.ToDecimal(lbl_total_carrying_cost.Text));
+        other_cost = (txt_others_cost.Text == "" ? 0 : Convert.ToDecimal(txt_others_cost.Text));
+
+        total_value =Convert.ToDecimal (lbl_total_value.Text);
+        total_cost = duty + reg_duty + suppliment_duty + vat + ait + atv + psi + df_vat + port_dues + steve_charge + boc + shiping_agnt_charge + noc_charge + surveyor_charge + tot_cf_fee + tot_crrying_cost + other_cost + total_value;
+        
+        lbl_total_cost.Text = total_cost.ToString("N2");
+        lbl_vat.Text = vat.ToString("N2");
+        lbl_ait.Text = ait.ToString("N2");
+        lbl_atv.Text = atv.ToString("N2");
+        net_total_cost = (total_cost) - (vat + ait + atv);
+        lbl_net_cost.Text = net_total_cost.ToString("N2");
+        bl_quantity = Convert.ToDecimal(lbl_consign_qty.Text);
+        rate = net_total_cost / bl_quantity;
+        lbl_rate.Text = rate.ToString("N2");
+
+    }
+
+    private void prob_update()
+    {
+
+        decimal duty_pro, reg_duty_pro, suppliment_duty_pro, vat_pro, ait_pro, atv_pro, psi_pro, df_vat_pro, port_dues_pro, steve_charge_pro, boc_pro, shiping_agnt_charge_pro, noc_charge_pro, surveyor_charge_pro, tot_cf_fee_pro, tot_arrying_cost_pro, other_cost_pro, total_value_pro, total_cost_pro, net_total_cost_pro, bl_quantity_pro, rate_pro;
+        duty_pro = (txt_duty_pro.Text == "" ? 0 : Convert.ToDecimal(txt_duty_pro.Text));
+        reg_duty_pro = (txt_regular_duty_provisional.Text == "" ? 0 : Convert.ToDecimal(txt_regular_duty_provisional.Text));
+        suppliment_duty_pro = (txt_supplimentary_duty_provisional.Text == "" ? 0 : Convert.ToDecimal(txt_supplimentary_duty_provisional.Text));
+        vat_pro = (txt_vat_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_vat_provitional.Text));
+        ait_pro = (txt_ait_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_ait_provitional.Text));
+        atv_pro = (txt_atv_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_atv_provitional.Text));
+        psi_pro = (txt_PSI_pro.Text == "" ? 0 : Convert.ToDecimal(txt_PSI_pro.Text));
+        df_vat_pro = (txt_df_vat_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_df_vat_provitional.Text));
+        port_dues_pro = (txt_port_dues_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_port_dues_provitional.Text));
+        steve_charge_pro = (txt_stevedoring_charge_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_stevedoring_charge_provitional.Text));
+        boc_pro = (txt_boc_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_boc_provitional.Text));
+        shiping_agnt_charge_pro = (txt_shipping_charge_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_shipping_charge_provitional.Text));
+        noc_charge_pro = (txt_freight_NOC_charge_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_freight_NOC_charge_provitional.Text));
+        surveyor_charge_pro = (txt_surveyor_charge_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_surveyor_charge_provitional.Text));
+        tot_cf_fee_pro = (lbl_total_fee_provitional.Text == "" ? 0 : Convert.ToDecimal(lbl_total_fee_provitional.Text));
+        tot_arrying_cost_pro = (lbl_total_carrying_cost_provitional.Text == "" ? 0 : Convert.ToDecimal(lbl_total_carrying_cost_provitional.Text));
+        other_cost_pro = (txt_others_cost_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_others_cost_provitional.Text));
+
+        total_value_pro = Convert.ToDecimal(lbl_total_value.Text);
+
+        total_cost_pro = duty_pro + reg_duty_pro + suppliment_duty_pro + vat_pro + ait_pro + atv_pro + psi_pro + df_vat_pro + port_dues_pro + steve_charge_pro + boc_pro + shiping_agnt_charge_pro + noc_charge_pro + surveyor_charge_pro + tot_cf_fee_pro + tot_arrying_cost_pro + other_cost_pro + total_value_pro;
+        lbl_total_cost_provitional.Text = total_cost_pro.ToString("N2");
+        lbl_vat_provitional .Text = vat_pro.ToString("N2");
+        lbl_ait_provitional.Text = ait_pro.ToString("N2");
+        lbl_atv_provitional.Text = atv_pro.ToString("N2");
+        net_total_cost_pro = (total_cost_pro) - (vat_pro + ait_pro + atv_pro);
+        lbl_net_cost_provitional.Text = net_total_cost_pro.ToString("N2");
+        bl_quantity_pro = Convert.ToDecimal(lbl_consign_qty.Text);
+        rate_pro = net_total_cost_pro / bl_quantity_pro;
+        lbl_rate_provitional.Text = rate_pro.ToString("N2");
+    }
+    private void common_update()
+    {
+        exc_rate();
+        total_CF_Cost();
+        total_CF_Cost_pro();
+        total_carrying_Cost();
+        total_carrying_Cost_pro();
+        prob_update();
+        actual_update();
+        
+    }
+
+   
+    protected void btn_save_Click(object sender, EventArgs e)
+    {
+        tbl_fpi_custom_clearingTableAdapter tacustom = new tbl_fpi_custom_clearingTableAdapter();
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcustom = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+
+        AccCoaGroupCodeSetupTableAdapter acc = new AccCoaGroupCodeSetupTableAdapter();
+        AccDataSet.AccCoaGroupCodeSetupDataTable dtacc = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+
+        dtacc = acc.GetDataByCcgCode(txt_lc_number.Text.Split(':')[0]);
+        if (dtacc.Rows.Count == 0)
+        {
+            clsStatic.MsgConfirmBox("Please Enter Valid LC Number");
+            return;
+        }
+
+        common_update();
+
+        string selval = ddlpolist.SelectedItem.Value.Split(':')[0];
+        int con_no = Convert.ToInt32(ddlpolist.SelectedItem.Value.Split(':')[1]);
+
+        try
+        {
+            dtcustom = tacustom.GetDataByRefCon(selval, con_no);
+           if (dtcustom.Rows.Count > 0)
+           {
+               update_data(1);
+
+           }
+           else
+           {
+
+               save_data();
+           }
+
+           clsStatic.MsgConfirmBox("Saved Successfully");
+           ddlchange();
+
+        }
+
+        catch (Exception ex)
+        {
+           string message = ex.Message;
+           clsStatic.MsgConfirmBox(message);
+        }
+    }
+
+    protected void btn_save_forward_Click(object sender, EventArgs e)
+    {
+        AccCoaGroupCodeSetupTableAdapter acc = new AccCoaGroupCodeSetupTableAdapter();
+        AccDataSet.AccCoaGroupCodeSetupDataTable dtacc = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+
+        dtacc = acc.GetDataByCcgCode(txt_lc_number.Text.Split(':')[0]);
+        if (dtacc.Rows.Count == 0)
+        {
+            clsStatic.MsgConfirmBox("Please Enter Valid LC Number");
+            return;
+        }
+
+
+        common_update();
+        update_data(2);
+        load_pending();          
+        ddlchange();
+        
+    }
+    protected void btn_complete_Click(object sender, EventArgs e)
+    {
+
+        AccCoaGroupCodeSetupTableAdapter acc = new AccCoaGroupCodeSetupTableAdapter();
+        AccDataSet.AccCoaGroupCodeSetupDataTable dtacc = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+
+        dtacc = acc.GetDataByCcgCode(txt_lc_number.Text.Split(':')[0]);
+        if (dtacc.Rows.Count == 0)
+        {
+            clsStatic.MsgConfirmBox("Please Enter Valid LC Number");
+            return;
+        }
+
+
+        common_update();
+        string selval = ddlpolist.SelectedItem.Value.Split(':')[0];
+        int con_no = Convert.ToInt32(ddlpolist.SelectedItem.Value.Split(':')[1]);
+
+        tbl_fpi_consignment_infoTableAdapter con = new tbl_fpi_consignment_infoTableAdapter();
+        update_data(2);
+        
+        Response.Redirect(Request.Url.AbsoluteUri);
+    }
+
+    private void update_data(int type)
+    {
+
+        tbl_fpi_custom_clearingTableAdapter tacustom = new tbl_fpi_custom_clearingTableAdapter();
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcustom = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+
+        tbl_fpi_consignment_infoTableAdapter cons = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtcon = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+        AccCoaGroupCodeSetupTableAdapter coagrp = new AccCoaGroupCodeSetupTableAdapter();
+
+        string selval = ddlpolist.SelectedItem.Value.Split(':')[0];
+        int con_no = Convert.ToInt32(ddlpolist.SelectedItem.Value.Split(':')[1]);
+        dtcon = cons.GetDataByRefCon(selval, con_no);
+
+        if (dtcon.Rows.Count == 0) return;
+        string ref_no = dtcon[0].ref_no;
+        string mpr_ref_no = dtcon[0].mpr_ref_no;
+        string itm_code = dtcon[0].item_code;
+        string status = dtcon[0].status;
+
+
+
+        decimal duty, reg_duty, suppliment_duty, vat, ait, atv, psi, df_vat, port_dues, steve_charge, boc, shiping_agnt_charge, noc_charge, surveyor_charge, cf_rate, total_cf_fee, carrying_rate, tot_crrying_cost, other_cost, total_cost, net_cost, rate;
+
+        string lc_no = txt_lc_number.Text.Trim().Split(':')[0];
+        if (coagrp.GetDataByCcgCode(lc_no).Rows.Count == 0) { lc_no = ""; }
+
+        DateTime lc_date = dt_lc_date.SelectedDate;
+        DateTime lc_expire_date = dt_lc_expire_date.SelectedDate;
+        DateTime shipment_date = dt_shipment_date.SelectedDate;
+        decimal lc_value = Convert.ToDecimal(txt_LC_value.Text.Trim());
+    
+        decimal lc_amendment_value = (txt_LC_amendment_value.Text == "" ? 0 : Convert.ToDecimal(txt_LC_amendment_value.Text));
+
+        decimal invoice_value = (txt_invoice_value.Text == "" ? 0 : Convert.ToDecimal(txt_invoice_value.Text));
+        string currency_invoice = txt_currency_invoice.Text.Trim();
+        decimal exchange_rate = (txt_exchange_rate.Text == "" ? 0 : Convert.ToDecimal(txt_exchange_rate.Text));
+        decimal total_value_invoice = Convert.ToDecimal(lbl_total_value.Text);
+        string pay_terms = txt_payment_terms.Text.Trim();
+        DateTime maturity_date = dtmaturitydate.SelectedDate;
+        decimal consign_value = (lbl_consign_qty.Text == "" ? 0 : Convert.ToDecimal(lbl_consign_qty.Text));
+
+        int consign_number = (lbl_consign_no.Text == "" ? 0 : Convert.ToInt32(lbl_consign_no.Text));
+
+        duty = (txt_duty.Text == "" ? 0 : Convert.ToDecimal(txt_duty.Text));
+        reg_duty = (txt_regular_duty.Text == "" ? 0 : Convert.ToDecimal(txt_regular_duty.Text));
+        suppliment_duty = (txt_supplimentary_duty.Text == "" ? 0 : Convert.ToDecimal(txt_supplimentary_duty.Text));
+        vat = (txt_vat.Text == "" ? 0 : Convert.ToDecimal(txt_vat.Text));
+        ait = (txt_ait.Text == "" ? 0 : Convert.ToDecimal(txt_ait.Text));
+        atv = (txt_atv.Text == "" ? 0 : Convert.ToDecimal(txt_atv.Text));
+        psi = (txt_PSI.Text == "" ? 0 : Convert.ToDecimal(txt_PSI.Text));
+        df_vat = (txt_df_vat.Text == "" ? 0 : Convert.ToDecimal(txt_df_vat.Text));
+        port_dues = (txt_port_dues.Text == "" ? 0 : Convert.ToDecimal(txt_port_dues.Text));
+        string stevedoring = txt_stevedoring.Text.Trim();
+        steve_charge = (txt_stevedoring_charge.Text == "" ? 0 : Convert.ToDecimal(txt_stevedoring_charge.Text));
+        boc = (txt_boc.Text == "" ? 0 : Convert.ToDecimal(txt_boc.Text));
+        string shiping_agnt_name = txt_shipping_agent_name.Text.Trim();
+        shiping_agnt_charge = (txt_shipping_charge.Text == "" ? 0 : Convert.ToDecimal(txt_shipping_charge.Text));
+        string freght_forward_name = txt_freight_name.Text.Trim();
+        noc_charge = (txt_freight_NOC_charge.Text == "" ? 0 : Convert.ToDecimal(txt_freight_NOC_charge.Text));
+        surveyor_charge = (txt_surveyor_charge.Text == "" ? 0 : Convert.ToDecimal(txt_surveyor_charge.Text));
+        cf_rate = (txt_rate.Text == "" ? 0 : Convert.ToDecimal(txt_rate.Text));
+        total_cf_fee = (lbl_total_fee.Text == "" ? 0 : Convert.ToDecimal(lbl_total_fee.Text));
+        carrying_rate = (txt_carrying_rate.Text == "" ? 0 : Convert.ToDecimal(txt_carrying_rate.Text));
+        tot_crrying_cost = (lbl_total_carrying_cost.Text == "" ? 0 : Convert.ToDecimal(lbl_total_carrying_cost.Text));
+        other_cost = (txt_others_cost.Text == "" ? 0 : Convert.ToDecimal(txt_others_cost.Text));
+        string reson_for_cost = txt_reason_for.Text.Trim();
+        total_cost = (lbl_total_cost.Text == "" ? 0 : Convert.ToDecimal(lbl_total_cost.Text));
+        net_cost = (lbl_net_cost.Text == "" ? 0 : Convert.ToDecimal(lbl_net_cost.Text));
+        rate = (lbl_rate.Text == "" ? 0 : Convert.ToDecimal(lbl_rate.Text));
+
+        // for provitional
+
+        decimal duty_pro, reg_duty_pro, suppliment_duty_pro, vat_pro, ait_pro, atv_pro, psi_pro, df_vat_pro, port_dues_pro, steve_charge_pro, boc_pro, shiping_agnt_charge_pro, noc_charge_pro, surveyor_charge_pro, cf_agnt_fee_pro, tot_cf_fee_pro, carrying_rate_pro, tot_crrying_cost_pro, other_cost_pro, total_value_pro, total_cost_pro, net_total_cost_pro, rate_pro;
+        duty_pro = (txt_duty_pro.Text == "" ? 0 : Convert.ToDecimal(txt_duty_pro.Text));
+        reg_duty_pro = (txt_regular_duty_provisional.Text == "" ? 0 : Convert.ToDecimal(txt_regular_duty_provisional.Text));
+        suppliment_duty_pro = (txt_supplimentary_duty_provisional.Text == "" ? 0 : Convert.ToDecimal(txt_supplimentary_duty_provisional.Text));
+        vat_pro = (txt_vat_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_vat_provitional.Text));
+        ait_pro = (txt_ait_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_ait_provitional.Text));
+        atv_pro = (txt_atv_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_atv_provitional.Text));
+        psi_pro = (txt_PSI_pro.Text == "" ? 0 : Convert.ToDecimal(txt_PSI_pro.Text));
+        df_vat_pro = (txt_df_vat_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_df_vat_provitional.Text));
+        port_dues_pro = (txt_port_dues_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_port_dues_provitional.Text));
+        steve_charge_pro = (txt_stevedoring_charge_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_stevedoring_charge_provitional.Text));
+        boc_pro = (txt_boc_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_boc_provitional.Text));
+        shiping_agnt_charge_pro = (txt_shipping_charge_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_shipping_charge_provitional.Text));
+        noc_charge_pro = (txt_freight_NOC_charge_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_freight_NOC_charge_provitional.Text));
+        surveyor_charge_pro = (txt_surveyor_charge_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_surveyor_charge_provitional.Text));
+        cf_agnt_fee_pro = (txt_rate_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_rate_provitional.Text));
+        tot_cf_fee_pro = (lbl_total_fee_provitional.Text == "" ? 0 : Convert.ToDecimal(lbl_total_fee_provitional.Text));
+        carrying_rate_pro = (txt_carrying_rate_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_carrying_rate_provitional.Text));
+        tot_crrying_cost_pro = (lbl_total_carrying_cost_provitional.Text == "" ? 0 : Convert.ToDecimal(lbl_total_carrying_cost_provitional.Text));
+        other_cost_pro = (txt_others_cost_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_others_cost_provitional.Text));
+        total_cost_pro = (lbl_total_cost_provitional.Text == "" ? 0 : Convert.ToDecimal(lbl_total_cost_provitional.Text));
+        net_total_cost_pro = (lbl_net_cost_provitional.Text == "" ? 0 : Convert.ToDecimal(lbl_net_cost_provitional.Text));
+        rate_pro = (lbl_rate_provitional.Text == "" ? 0 : Convert.ToDecimal(lbl_rate_provitional.Text));
+
+        if (type == 1)
+        {
+            tacustom.UpdateQueryForSave(current.UserId, DateTime.Now, lc_no, lc_date, lc_expire_date, shipment_date, lc_value, lc_amendment_value, invoice_value, currency_invoice, exchange_rate, total_value_invoice, pay_terms, maturity_date, duty, reg_duty, suppliment_duty, vat, ait, atv, psi, df_vat, port_dues, stevedoring, steve_charge, boc, shiping_agnt_name, shiping_agnt_charge, freght_forward_name, noc_charge, surveyor_charge, cf_rate, total_cf_fee, carrying_rate, tot_crrying_cost, other_cost, reson_for_cost, total_cost, net_cost, rate, txt_comments.Text.Trim(), duty_pro, reg_duty_pro, suppliment_duty_pro, vat_pro, ait_pro, atv_pro, psi_pro, df_vat_pro, port_dues_pro, steve_charge_pro, boc_pro, shiping_agnt_charge_pro, noc_charge_pro, surveyor_charge_pro, cf_agnt_fee_pro, tot_cf_fee_pro, carrying_rate_pro, tot_crrying_cost_pro, other_cost_pro, total_cost_pro, net_total_cost_pro, rate_pro, ref_no, con_no);
+        }
+        else 
+        {
+            tacustom.UpdateQueryForProForward(current.UserId, "RUN", DateTime.Now, lc_no, lc_date, lc_expire_date, shipment_date, lc_value, lc_amendment_value, invoice_value, currency_invoice, exchange_rate, total_value_invoice, pay_terms, maturity_date, duty, reg_duty, suppliment_duty, vat, ait, atv, psi, df_vat, port_dues, stevedoring, steve_charge, boc, shiping_agnt_name, shiping_agnt_charge, freght_forward_name, noc_charge, surveyor_charge, cf_rate, total_cf_fee, carrying_rate, tot_crrying_cost, other_cost, reson_for_cost, total_cost, net_cost, rate, txt_comments.Text.Trim(), duty_pro, reg_duty_pro, suppliment_duty_pro, vat_pro, ait_pro, atv_pro, psi_pro, df_vat_pro, port_dues_pro, steve_charge_pro, boc_pro, shiping_agnt_charge_pro, noc_charge_pro, surveyor_charge_pro, cf_agnt_fee_pro, tot_cf_fee_pro, carrying_rate_pro, tot_crrying_cost_pro, other_cost_pro, total_cost_pro, net_total_cost_pro, rate_pro, ref_no, con_no);
+            cons.UpdateStatus("RUN", ref_no, con_no);
+
+            mail_send(ref_no, con_no, lc_no);
+        }
+       
+    }
+
+    private void mail_send(string fpi_ref, int consignno, string lc_no)
+    {
+        //mailsend
+        tblUserInfoTableAdapter usr = new tblUserInfoTableAdapter();
+        dsLinkoffice.tblUserInfoDataTable dtusr = new dsLinkoffice.tblUserInfoDataTable();
+
+        User_Role_DefinitionTableAdapter role = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable roledt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        string usercode = current.UserId.ToString();
+        roledt = role.GetDataByRole("CUSAPP");
+
+        string ms;
+
+
+        ms = System.Configuration.ConfigurationSettings.AppSettings["smtpserver"].ToString();
+
+        SmtpClient smtp = new SmtpClient(ms);
+        MailMessage msg = new MailMessage();
+        string mbody;
+        msg.From = new MailAddress("masud.mis@sevencircle-bd.com", "SSCML LC Module");
+
+
+        //msg.To.Add(new MailAddress("monju@link3.net", "M Monjurul Islam"));
+        //msg.To.Add(new MailAddress("masud.mis@sevencircle-bd.com", "MIS SCBL"));        
+
+        foreach (SCBLDataSet.User_Role_DefinitionRow dr in roledt.Rows)
+        {
+            dtusr = new dsLinkoffice.tblUserInfoDataTable();
+            dtusr = usr.GetDataByUserId(dr.user_id, current.CompanyCode);
+
+            if (dtusr.Rows.Count > 0)
+            {
+                if (dtusr[0].UserEmail != "")
+                {
+                    msg.To.Add(new MailAddress(dtusr[0].UserEmail, dtusr[0].UserName));
+                }
+            }
+
+        }
+
+        msg.Subject = "Custom clearing information entry";
+
+
+        mbody = "\n\n " + "A custom clearing information pending for your approval. Brief information as bellow :";
+        mbody += "\n\n   FPI REF NO           : " + fpi_ref;
+        mbody += "\n Congignment No          : " + consignno.ToString();
+        mbody += "\n LC No                  : " + lc_no;
+
+
+        mbody += "\n\n\n\n\n";
+
+        mbody += "\n " + "To view details please login in at http://203.76.114.131/cml/cmlcom/frmLogin.aspx ";
+        mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+
+
+        msg.Body = mbody;
+        smtp.Send(msg);
+
+
+    }
+
+
+    private void save_data()
+    {
+
+        tbl_fpi_custom_clearingTableAdapter tacustom = new tbl_fpi_custom_clearingTableAdapter();
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcustom = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+
+        tbl_fpi_consignment_infoTableAdapter cons = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtcon = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+
+
+
+
+        string selval = ddlpolist.SelectedItem.Value.Split(':')[0];
+        int con_no = Convert.ToInt32(ddlpolist.SelectedItem.Value.Split(':')[1]);
+        dtcon = cons.GetDataByRefCon(selval, con_no);
+
+        if (dtcon.Rows.Count == 0) return;
+        string ref_no = dtcon[0].ref_no;
+        string mpr_ref_no = dtcon[0].mpr_ref_no;
+        string itm_code = dtcon[0].item_code;
+        
+       
+
+
+        decimal duty, reg_duty, suppliment_duty, vat, ait, atv, psi, df_vat, port_dues, steve_charge, boc, shiping_agnt_charge, noc_charge, surveyor_charge, cf_rate, total_cf_fee, carrying_rate, tot_crrying_cost, other_cost, total_cost, net_cost, rate;
+
+        string lc_no = txt_lc_number.Text.Trim();
+        DateTime lc_date = dt_lc_date.SelectedDate;
+        DateTime lc_expire_date = dt_lc_expire_date.SelectedDate;
+        DateTime shipment_date = dt_shipment_date.SelectedDate;
+        decimal lc_value = Convert.ToDecimal(txt_LC_value.Text.Trim());
+        decimal lc_amendment_value = (txt_LC_amendment_value.Text == "" ? 0 : Convert.ToDecimal(txt_LC_amendment_value.Text));
+        decimal invoice_value = (txt_invoice_value.Text == "" ? 0 : Convert.ToDecimal(txt_invoice_value.Text));
+        string currency_invoice = txt_currency_invoice.Text.Trim();
+        decimal exchange_rate = (txt_exchange_rate.Text == "" ? 0 : Convert.ToDecimal(txt_exchange_rate.Text));
+        decimal total_value_invoice  = Convert.ToDecimal(lbl_total_value.Text);
+        string pay_terms = txt_payment_terms.Text.Trim();
+        DateTime maturity_date = dtmaturitydate.SelectedDate;
+        decimal consign_value = (lbl_consign_qty.Text == "" ? 0 : Convert.ToDecimal(lbl_consign_qty.Text));
+
+        int consign_number = (lbl_consign_no.Text == "" ? 0 : Convert.ToInt32(lbl_consign_no.Text));
+
+
+       // lbl_total_fee.Text 
+
+        duty = (txt_duty.Text == "" ? 0 : Convert.ToDecimal(txt_duty.Text));
+        reg_duty = (txt_regular_duty.Text == "" ? 0 : Convert.ToDecimal(txt_regular_duty.Text));
+        suppliment_duty = (txt_supplimentary_duty.Text == "" ? 0 : Convert.ToDecimal(txt_supplimentary_duty.Text));
+        vat = (txt_vat.Text == "" ? 0 : Convert.ToDecimal(txt_vat.Text));
+        ait = (txt_ait.Text == "" ? 0 : Convert.ToDecimal(txt_ait.Text));
+        atv = (txt_atv.Text == "" ? 0 : Convert.ToDecimal(txt_atv.Text));
+        psi = (txt_PSI.Text == "" ? 0 : Convert.ToDecimal(txt_PSI.Text));
+        df_vat = (txt_df_vat.Text == "" ? 0 : Convert.ToDecimal(txt_df_vat.Text));
+        port_dues = (txt_port_dues.Text == "" ? 0 : Convert.ToDecimal(txt_port_dues.Text));
+        string stevedoring = txt_stevedoring.Text.Trim();
+        steve_charge = (txt_stevedoring_charge.Text == "" ? 0 : Convert.ToDecimal(txt_stevedoring_charge.Text));
+        boc = (txt_boc.Text == "" ? 0 : Convert.ToDecimal(txt_boc.Text));
+        string shiping_agnt_name = txt_shipping_agent_name.Text.Trim();
+        shiping_agnt_charge = (txt_shipping_charge.Text == "" ? 0 : Convert.ToDecimal(txt_shipping_charge.Text));
+        string freght_forward_name = txt_freight_name.Text.Trim();
+        noc_charge = (txt_freight_NOC_charge.Text == "" ? 0 : Convert.ToDecimal(txt_freight_NOC_charge.Text));
+        surveyor_charge = (txt_surveyor_charge.Text == "" ? 0 : Convert.ToDecimal(txt_surveyor_charge.Text));
+        cf_rate = (txt_rate.Text == "" ? 0 : Convert.ToDecimal(txt_rate.Text));
+        total_cf_fee = (lbl_total_fee.Text == "" ? 0 : Convert.ToDecimal(lbl_total_fee.Text));
+        carrying_rate = (txt_carrying_rate.Text == "" ? 0 : Convert.ToDecimal(txt_carrying_rate.Text));
+        tot_crrying_cost = (lbl_total_carrying_cost.Text == "" ? 0 : Convert.ToDecimal(lbl_total_carrying_cost.Text));
+        other_cost = (txt_others_cost.Text == "" ? 0 : Convert.ToDecimal(txt_others_cost.Text));
+        string reson_for_cost = txt_reason_for.Text.Trim();
+        total_cost = (lbl_total_cost.Text == "" ? 0 : Convert.ToDecimal(lbl_total_cost.Text));
+        net_cost = (lbl_net_cost.Text == "" ? 0 : Convert.ToDecimal(lbl_net_cost.Text));
+        rate = (lbl_rate.Text == "" ? 0 : Convert.ToDecimal(lbl_rate.Text));
+
+        // for provitional
+
+        decimal duty_pro, reg_duty_pro, suppliment_duty_pro, vat_pro, ait_pro, atv_pro, psi_pro, df_vat_pro, port_dues_pro, steve_charge_pro, boc_pro, shiping_agnt_charge_pro, noc_charge_pro, surveyor_charge_pro, cf_agnt_fee_pro, tot_cf_fee_pro, carrying_rate_pro, tot_crrying_cost_pro, other_cost_pro, total_value_pro, total_cost_pro, net_total_cost_pro, rate_pro;
+        duty_pro = (txt_duty_pro.Text == "" ? 0 : Convert.ToDecimal(txt_duty_pro.Text));
+        reg_duty_pro = (txt_regular_duty_provisional.Text == "" ? 0 : Convert.ToDecimal(txt_regular_duty_provisional.Text));
+        suppliment_duty_pro = (txt_supplimentary_duty_provisional.Text == "" ? 0 : Convert.ToDecimal(txt_supplimentary_duty_provisional.Text));
+        vat_pro = (txt_vat_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_vat_provitional.Text));
+        ait_pro = (txt_ait_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_ait_provitional.Text));
+        atv_pro = (txt_atv_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_atv_provitional.Text));
+        psi_pro = (txt_PSI_pro.Text == "" ? 0 : Convert.ToDecimal(txt_PSI_pro.Text));
+        df_vat_pro = (txt_df_vat_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_df_vat_provitional.Text));
+        port_dues_pro = (txt_port_dues_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_port_dues_provitional.Text));
+        steve_charge_pro = (txt_stevedoring_charge_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_stevedoring_charge_provitional.Text));
+        boc_pro = (txt_boc_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_boc_provitional.Text));
+        shiping_agnt_charge_pro = (txt_shipping_charge_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_shipping_charge_provitional.Text));
+        noc_charge_pro = (txt_freight_NOC_charge_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_freight_NOC_charge_provitional.Text));
+        surveyor_charge_pro = (txt_surveyor_charge_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_surveyor_charge_provitional.Text));
+        cf_agnt_fee_pro = (txt_rate_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_rate_provitional.Text));
+        tot_cf_fee_pro = (lbl_total_fee_provitional.Text == "" ? 0 : Convert.ToDecimal(lbl_total_fee_provitional.Text));
+        carrying_rate_pro = (txt_carrying_rate_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_carrying_rate_provitional.Text));
+        tot_crrying_cost_pro = (lbl_total_carrying_cost_provitional.Text == "" ? 0 : Convert.ToDecimal(lbl_total_carrying_cost_provitional.Text));
+        other_cost_pro = (txt_others_cost_provitional.Text == "" ? 0 : Convert.ToDecimal(txt_others_cost_provitional.Text));
+        total_cost_pro = (lbl_total_cost_provitional.Text == "" ? 0 : Convert.ToDecimal(lbl_total_cost_provitional.Text));
+        net_total_cost_pro = (lbl_net_cost_provitional.Text == "" ? 0 : Convert.ToDecimal(lbl_net_cost_provitional.Text));
+        rate_pro = (lbl_rate_provitional.Text == "" ? 0 : Convert.ToDecimal(lbl_rate_provitional.Text));
+
+       
+
+
+        tacustom.Insert_tbl_fpi_custom_clearing_info(ref_no, mpr_ref_no, itm_code, current.UserId, consign_number, consign_value, "INI", "", "", "", DateTime.Now, lc_no, lc_date, lc_expire_date, shipment_date, lc_value, lc_amendment_value, invoice_value, currency_invoice, exchange_rate, total_value_invoice, pay_terms, maturity_date, duty, reg_duty, suppliment_duty, vat, ait, atv, psi, df_vat, port_dues, stevedoring, steve_charge, boc, shiping_agnt_name, shiping_agnt_charge, freght_forward_name, noc_charge, surveyor_charge, cf_rate, total_cf_fee, carrying_rate, tot_crrying_cost, other_cost, reson_for_cost, total_cost, net_cost, rate, txt_comments.Text.Trim(), duty_pro, reg_duty_pro, suppliment_duty_pro, vat_pro, ait_pro, atv_pro, psi_pro, df_vat_pro, port_dues_pro, steve_charge_pro, boc_pro, shiping_agnt_charge_pro, noc_charge_pro, surveyor_charge_pro, cf_agnt_fee_pro, tot_cf_fee_pro, carrying_rate_pro, tot_crrying_cost_pro, other_cost_pro, total_cost_pro, net_total_cost_pro, rate_pro);
+
+    }
+
+    protected void txt_invoice_value_TextChanged(object sender, EventArgs e)
+    {
+        exc_rate();
+    }
+    protected void btn_calculate_Click(object sender, EventArgs e)
+    {
+        common_update();
+    }
+  
+    protected void txt_rate_TextChanged(object sender, EventArgs e)
+    {
+        total_CF_Cost();
+    }
+    protected void txt_carrying_rate_TextChanged(object sender, EventArgs e)
+    {
+        total_carrying_Cost();
+    }
+    protected void txt_rate_provitional_TextChanged(object sender, EventArgs e)
+    {
+        total_CF_Cost_pro();
+    }
+    protected void txt_carrying_rate_provitional_TextChanged(object sender, EventArgs e)
+    {
+        total_carrying_Cost_pro();
+    }
+}
+
+
+
+
+

@@ -1,0 +1,211 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Data.SqlClient;
+using CrystalDecisions.CrystalReports.Engine;
+using CrystalDecisions.Shared;
+using Dataaccess;
+using LibraryDAL;
+using LibraryDAL.dsInventory;
+using LibraryDAL.dsInventory.dsInventoryMasterTableAdapters;
+
+public partial class modules_FixedAsset_Report_frmStockReportValue : System.Web.UI.Page
+{
+    public SqlConnection con;
+    public SqlCommand cmd;
+    public SqlDataReader dr;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!Page.IsPostBack)
+        {
+            try
+            {
+                var taItem = new InMa_Itm_DetTableAdapter();
+                var taStore = new InMa_Str_LocTableAdapter();
+
+                cboItem.DataSource = taItem.GetInventoryItem();
+                cboItem.DataTextField = "Itm_Det_desc";
+                cboItem.DataValueField = "Itm_Det_Icode";
+                cboItem.DataBind();
+                cboItem.Items.Insert(0, "All");
+                cboItem.SelectedIndex = 0;
+
+                cboStore.DataSource = taStore.GetData();
+                cboStore.DataTextField = "Str_Loc_Name";
+                cboStore.DataValueField = "Str_Loc_Id";
+                cboStore.DataBind();
+                cboStore.Items.Insert(0, "All");
+                cboStore.SelectedIndex = 0;
+                DateTime dt = DateTime.Now;
+                txtdate.Text = dt.ToString("dd/MM/yyyy");
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+    }
+
+    
+
+  private void parameterpass(ParameterFields myParams, string pname, string value)
+    {
+        ParameterField param = new ParameterField();
+        ParameterDiscreteValue dis1 = new ParameterDiscreteValue();
+        param.ParameterFieldName = pname;
+        dis1.Value = value;
+        param.CurrentValues.Add(dis1);
+        myParams.Add(param);
+
+    }
+
+
+    protected void btnShow_Click(object sender, EventArgs e)
+    {
+        AlterViewState();
+        clsRptReport rpt = new clsRptReport();
+
+        
+        ParameterFields myParams = new ParameterFields();
+               
+       // rpt.Rptselectionformulla = "";
+        
+        if (cboStore.SelectedValue.ToString() != "All")
+        {
+            parameterpass(myParams, "prm_tot", Session["TotalAmountStoreWise"].ToString());
+            rpt.Rptselectionformulla = "{ViewStockvalue.itm_det_str_code}='" + cboStore.SelectedValue.ToString() + "'";
+        }
+        else
+        {
+            parameterpass(myParams, "prm_tot", Session["TotalAmount"].ToString());            
+        }
+
+        // rpt.Rptselectionformulla = "({view_consumption_report.Trn_Hdr_Type}='IS' and {view_consumption_report.Trn_Hdr_HRPB_Flag}='P'  and {view_consumption_report.Trn_Hdr_DATE} in " + "datetime('" + fdate + "') to " + "datetime('" + tdate + "'))";
+
+        rpt.FileName = "CryStockValue.rpt";
+        
+        rpt.ParametersFields = myParams;
+                
+
+        Session["rpt"] = rpt;
+
+        RegisterStartupScript("click", "<script>window.open('frm_rpt_viewer.aspx');</script>");
+    
+
+
+       // Page.ClientScript.RegisterStartupScript(this.GetType(), "OpenWindow", "window.open('frmStockValue.aspx?session_id_no=" + category + "&strcode=" + cboStore.SelectedItem.Value + "','_newtab');", true);
+
+        return;
+        string category = "";
+
+
+        if (cboStore.Text.ToString() != "")
+            Session["Store"] = "Stock Report for " + cboStore.SelectedItem.Text.ToString();
+        else
+            Session["Store"] = "";
+        if (cboItem.SelectedItem.Text == "All")
+        {
+            if (cboStore.SelectedItem.Text == "All")
+            {
+               
+                Page.ClientScript.RegisterStartupScript(this.GetType(), "OpenWindow", "window.open('frmStockValue.aspx?session_id_no=" + category + "','_newtab');", true);
+            }
+        }
+        if (cboItem.SelectedItem.Text == "All")
+        {
+            if (cboStore.SelectedItem.Text != "All")
+            {
+                Session["AstoreDd"] = cboStore.SelectedItem.Value;
+                Page.ClientScript.RegisterStartupScript(this.GetType(), "OpenWindow", "window.open('frmStockReportStorewisevalue.aspx?session_id_no=" + Session["AstoreDd"].ToString() + "','_newtab');", true);
+            }
+        }
+    }
+    private void AlterViewState()
+    {
+        L3TConnection comm = new L3TConnection();
+        con = comm.init();
+
+        string query = @"ALTER VIEW last_trn_status AS SELECT itm_det_icode, itm_det_serial_no, MAX(sl_no) AS lasttrn From Inma_itm_serial 
+                            where itm_det_date <=convert(datetime,'" + txtdate.Text + "',103) GROUP BY itm_det_icode, itm_det_serial_no";
+        cmd = new SqlCommand(query, con);
+        cmd.ExecuteNonQuery();
+        con.Close();
+        con.Dispose();
+
+        L3TConnection comm0 = new L3TConnection();
+        con = comm0.init();
+
+        string query0 = @"alter view svv4 as select Trn_Det_Type, Trn_Det_Ref, Trn_Det_Lno,Trn_Det_Icode, Trn_Det_Lin_Rat, trn_det_str_code, trn_det_lin_qty,
+                            (CASE WHEN LEFT(Trn_Det_Type, 1) = 'I' THEN Trn_Det_Lin_Qty * - 1 ELSE Trn_Det_Lin_Qty END) AS Quantity, 
+                            (CASE WHEN LEFT(Trn_Det_Type, 1) = 'I' THEN Trn_Det_Lin_Amt * - 1 ELSE Trn_Det_Lin_Amt END) AS Amount
+                            from InTr_Trn_Det 
+                            inner join InTr_Trn_Hdr on intr_trn_det.Trn_Det_Ref =InTr_Trn_Hdr.Trn_Hdr_Ref 
+                            and intr_trn_det.Trn_Det_Type =InTr_Trn_Hdr.Trn_Hdr_Type and intr_trn_det.Trn_Det_Code  =InTr_Trn_Hdr.Trn_Hdr_Code  
+                            where left(Trn_Det_Type,1) in('R','I') and convert(datetime,convert(char,InTr_Trn_Hdr.Trn_Hdr_DATE),103) <=  convert(datetime,convert(char ,'" +
+                                                                   txtdate.Text + "'),103)";
+        cmd = new SqlCommand(query0, con);
+        cmd.ExecuteNonQuery();
+        con.Close();
+        con.Dispose();
+
+        L3TConnection comm00 = new L3TConnection();
+        con = comm00.init();
+
+        string query00 = @"alter view svv as select Trn_Det_Type, Trn_Det_Ref, Trn_Det_Lno,Trn_Det_Icode, Trn_Det_Lin_Rat, trn_det_str_code, trn_det_lin_qty,
+                            (case when left(Trn_Det_Type,1)='I' then Trn_Det_Lin_Amt*-1 else Trn_Det_Lin_Amt end) as Amount from InTr_Trn_Det 
+                            inner join InTr_Trn_Hdr on intr_trn_det.Trn_Det_Ref =InTr_Trn_Hdr.Trn_Hdr_Ref 
+                            and intr_trn_det.Trn_Det_Type =InTr_Trn_Hdr.Trn_Hdr_Type and intr_trn_det.Trn_Det_Code  =InTr_Trn_Hdr.Trn_Hdr_Code  
+                            where left(Trn_Det_Type,1) in('R','I') and convert(datetime,convert(char,InTr_Trn_Hdr.Trn_Hdr_DATE),103)
+                      between convert(datetime,convert(char ,'20/03/2012'),103)and  convert(datetime,convert(char ,'" + txtdate.Text + "'),103)";
+        cmd = new SqlCommand(query00, con);
+        cmd.ExecuteNonQuery();
+        con.Close();
+        con.Dispose();
+
+        if (cboStore.SelectedItem.Text == "All")
+        {
+            L3TConnection commom1 = new L3TConnection();
+            con = commom1.init();
+
+            string query1 = @"SELECT sum(Sclosing.tt) as TotalAmount FROM Sclosing LEFT OUTER JOIN
+                                InMa_Itm_Det ON Sclosing.trn_Det_Icode = InMa_Itm_Det.Itm_Det_Icode LEFT OUTER JOIN
+                                AccCOA ON InMa_Itm_Det.Itm_Det_Acc_code = AccCOA.Gl_Coa_Code having sum(Sclosing.tt) > 0";
+
+            cmd = new SqlCommand(query1, con);
+            dr = cmd.ExecuteReader();
+            dr.Read();
+            decimal total = Convert.ToDecimal(dr["TotalAmount"]);
+            Session["TotalAmount"] = total.ToString("N2");
+            dr.Close();
+            con.Close();
+            con.Dispose();
+        }
+
+        else
+        { 
+        }
+
+        if (cboStore.SelectedItem.Text != "All")
+        {
+            L3TConnection commom10 = new L3TConnection();
+            con = commom10.init();
+
+            string query10 = @"SELECT sum(Sclosing.tt) as TotalAmount FROM Sclosing LEFT OUTER JOIN
+                                InMa_Itm_Det ON Sclosing.trn_Det_Icode = InMa_Itm_Det.Itm_Det_Icode LEFT OUTER JOIN
+                                AccCOA ON InMa_Itm_Det.Itm_Det_Acc_code = AccCOA.Gl_Coa_Code
+                       where trn_det_str_code='" + cboStore.SelectedItem.Value + "' having sum(Sclosing.tt)>0";
+            cmd = new SqlCommand(query10, con);
+            dr = cmd.ExecuteReader();
+            dr.Read();
+            decimal totalstw = Convert.ToDecimal(dr["TotalAmount"]);
+            Session["TotalAmountStoreWise"] = totalstw.ToString("N2");
+            dr.Close();
+            con.Close();
+            con.Dispose();
+        }
+    }
+}

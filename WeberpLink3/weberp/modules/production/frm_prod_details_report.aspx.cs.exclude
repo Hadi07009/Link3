@@ -1,0 +1,157 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLQryTableAdapters;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.ProdReportDataSetTableAdapters;
+using LibraryDAL.ProdDataSetTableAdapters;
+using CrystalDecisions.Shared;
+
+public partial class frm_prod_details_report : System.Web.UI.Page
+{
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+
+        if (!Page.IsPostBack)
+        {
+
+            get_all_prod(rdolistprodtype.SelectedItem.Value);
+            cldfrdate.SelectedDate = DateTime.Now.AddDays(-15);
+            cldtodate.SelectedDate = DateTime.Now;
+        }
+        else
+        {
+
+        }
+    }
+
+    private void get_all_prod(string protype)
+    {
+        tbl_prod_nameTableAdapter pro = new tbl_prod_nameTableAdapter();
+        ProdDataSet.tbl_prod_nameDataTable dtpro = new ProdDataSet.tbl_prod_nameDataTable();
+        ListItem lst;
+        dtpro = pro.GetDataByProdType(protype);
+
+        ddlprod.Items.Clear();
+        ddlprod.Items.Add("");
+
+        foreach (ProdDataSet.tbl_prod_nameRow dr in dtpro.Rows)
+        {
+            lst = new ListItem();
+            lst.Text = dr.prod_name;
+            lst.Value = dr.prod_id;
+            ddlprod.Items.Add(lst);
+        }
+
+    }
+
+    protected void btnview_Click(object sender, EventArgs e)
+    {
+        SaMa_Rpt_PerTableAdapter rptper = new SaMa_Rpt_PerTableAdapter();
+        SCBLIN.SaMa_Rpt_PerDataTable dtrptper = new SCBLIN.SaMa_Rpt_PerDataTable();
+
+        DateTime fdate = Convert.ToDateTime(cldfrdate.SelectedDate.ToShortDateString());
+        DateTime tdate = Convert.ToDateTime(cldtodate.SelectedDate.ToShortDateString());
+
+
+        LibraryDTO.clsReport rpt = new LibraryDTO.clsReport();
+        ParameterFields myParams = new ParameterFields();
+        string title = "" , headline ="";
+        if (fdate > tdate) return;
+
+      //  rpt.SelectionFormulla = "({View_production_report.prod_date} in datetime('" + fdate + "') to " + "datetime('" + tdate + "')) and {View_production_report.prod_type} = '" + rdolistprodtype.SelectedValue + "'";
+
+
+        rpt.SelectionFormulla = " ({View_production_report.Trn_Hdr_HRPB_Flag} in ['P','B']) and ({View_production_report.prod_date} in " + "datetime('" + fdate + "') to " + "datetime('" + tdate + "'))  and {View_production_report.prod_type} = '" + rdolistprodtype.SelectedValue + "'";
+
+        if (chkproductionname.Checked == false)
+        {
+            rpt.SelectionFormulla += " and {View_production_report.prod_id} = '" + ddlprod.SelectedItem.Value + "'";
+
+        }
+
+        title = rdolistprodtype.SelectedItem.Text + " Cement Production";
+        headline = rdolistprodwise.SelectedItem.Text;  
+
+
+
+        if (rdolistprodwise.SelectedIndex == 0)
+        {
+
+            if (rdolistprodtype.SelectedIndex == 0)
+            {
+                rpt.FileName = "files/reptProduction_details_report_bag.rpt";
+            }
+            else
+            {
+                rpt.FileName = "files/reptProduction_details_report_bulk.rpt";
+            }
+        }
+        else
+        {
+            if (rdolistprodtype.SelectedIndex == 0)
+            {
+                rpt.SelectionFormulla += " and {View_production_report.Trn_Det_Type} = 'IS'";
+                rpt.FileName = "files/reptProduction_details_report_bag_date.rpt";
+            }
+            else
+            {
+                rpt.FileName = "files/reptProduction_details_report_bulk_date.rpt";
+            }
+        }
+
+        parameterpass(myParams, "companytitle", current.CompanyName);
+        parameterpass(myParams, "companyaddress", current.CompanyAddress);
+
+        parameterpass(myParams, "headline", headline);
+        parameterpass(myParams, "title", title);
+
+       parameterpass(myParams, "period", "Period :" + fdate.ToShortDateString() + " To " + tdate.ToShortDateString());
+       
+        rpt.ParametersFields = myParams;
+        rpt.PageZoomFactor = 100;
+
+        current.SessionReport = rpt;
+  
+        RegisterStartupScript("Click", "<script>window.open('./reports/frm_rpt_viewer.aspx');</script>");
+    }
+
+
+    private void parameterpass(ParameterFields myParams, string pname, string value)
+    {
+        ParameterField param = new ParameterField();
+        ParameterDiscreteValue dis1 = new ParameterDiscreteValue();
+
+        param.ParameterFieldName = pname;
+        dis1.Value = value;
+        param.CurrentValues.Add(dis1);
+        myParams.Add(param);
+
+    }
+
+
+    protected void rdolistprodtype_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        get_all_prod(rdolistprodtype.SelectedItem.Value);
+    }
+
+
+    
+
+}

@@ -1,0 +1,352 @@
+using System;
+using System.IO;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDTO;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBL3DataSetTableAdapters;
+using LibraryDAL.FpiDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+
+
+public partial class frm_fpi_entry : System.Web.UI.Page
+{
+   
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btn_submit, "Are you sure to Submit");
+        if (!Page.IsPostBack)
+        {
+            load_pending();
+            load_vessel();
+            load_uom();
+        }
+    }
+    private void load_uom()
+    {
+        LibraryDAL.SCBLINTableAdapters.InMa_UomTableAdapter uom = new LibraryDAL.SCBLINTableAdapters.InMa_UomTableAdapter();
+        SCBLIN.InMa_UomDataTable dtuom = new SCBLIN.InMa_UomDataTable();
+
+
+        dtuom = uom.GetAllData();
+        ListItem lst;
+        txt_unit.Items.Clear();
+        txt_unit.Items.Add("");
+
+        foreach (SCBLIN.InMa_UomRow dr in dtuom.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Uom_Code;
+            lst.Text = dr.Uom_Code + ":" + dr.Uom_Name;
+            txt_unit.Items.Add(lst);
+        }
+    }
+
+    private void load_vessel()
+    {
+        tbl_vessel_detailTableAdapter vdet = new tbl_vessel_detailTableAdapter();
+        FpiDataSet.tbl_vessel_detailDataTable dtves = new FpiDataSet.tbl_vessel_detailDataTable();
+        ListItem lst;
+        dtves = vdet.GetDataByVtype("MV");
+
+       
+        ddlvesselname.Items.Clear();
+        ddlvesselname.Items.Add("");
+
+        foreach (FpiDataSet.tbl_vessel_detailRow drves in dtves.Rows)
+        {
+            lst = new ListItem();
+            lst.Text = drves.vessel_name;
+            lst.Value = drves.vessel_code;
+            ddlvesselname.Items.Add(lst);
+
+        }
+
+
+    }
+
+    private void load_info(string selval)
+    {
+        tbl_consignment_pendingTableAdapter cons = new tbl_consignment_pendingTableAdapter();
+        LibraryDAL.FpiDataSet.tbl_consignment_pendingDataTable dtcon = new LibraryDAL.FpiDataSet.tbl_consignment_pendingDataTable();
+
+
+        dtcon = cons.GetDataByRef_no(selval);
+
+        if (dtcon.Rows.Count == 0)
+        {
+            tblmaster.Visible = false;
+            return;
+        }
+        else
+        {
+            lbl_lc_quantity.Text = dtcon[0].quantity.ToString("N2");
+            lbl_available_quantity.Text = (dtcon[0].quantity - dtcon[0].bl_qty).ToString("N2");
+            ctl_fpi_mpr_item_view1.load_all(dtcon[0].mpr_ref_no, dtcon[0].mpr_itm_code);
+            ctl_fpi_pi_entry_view1.load_details(dtcon[0].ref_no);
+            ctl_fpi_lc_entry_view1.load_data(dtcon[0].ref_no);
+
+        }
+
+        lblconsignment_no.Text = get_consign_number(ddlpolist.SelectedItem.Text.Split(':')[0]).ToString();
+           
+    }
+
+    private void load_pending()
+    {
+        tbl_consignment_pendingTableAdapter cons = new tbl_consignment_pendingTableAdapter();
+        FpiDataSet.tbl_consignment_pendingDataTable dtcon = new FpiDataSet.tbl_consignment_pendingDataTable();
+        ListItem lst;
+
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcust;
+        tbl_fpi_custom_clearingTableAdapter cust = new tbl_fpi_custom_clearingTableAdapter();
+        string lc_no = "";
+
+        string my_app = "CONENT";
+
+        if (my_app == "") { Response.Redirect("./frm_com_inbox.aspx"); }
+
+        dtcon = cons.GetData();
+
+        if (dtcon.Rows.Count == 0)
+        {
+            Response.Redirect("./frm_com_inbox.aspx");
+        }
+
+        lblpcount.Text = dtcon.Rows.Count.ToString();
+
+        ddlpolist.Items.Clear();
+        ddlpolist.Items.Add("");
+
+        foreach (LibraryDAL.FpiDataSet.tbl_consignment_pendingRow dr in dtcon.Rows)
+        {
+            lst = new ListItem();
+            
+            dtcust = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+            dtcust = cust.GetDataByRefCon(dr.ref_no.ToString(), 1);
+            if (dtcust.Rows.Count == 0) lc_no = ""; else lc_no = dtcust[0].lc_number;
+
+
+            lst.Value = dr.ref_no.ToString();
+            lst.Text = dr.ref_no.ToString() + ":" + dr.supp_id + ":" + dr.supplier + ":" + dr.mpr_itm_code + ":" + dr.Item_details.ToString() + ":" + lc_no;
+            ddlpolist.Items.Add(lst);
+        }
+        ddlchange();
+
+    }
+
+    
+
+    private bool chk_validity()
+    {
+        bool flg = false;
+        SCBL2DataSet.PuTr_IN_Det_Scbl2DataTable itm = new SCBL2DataSet.PuTr_IN_Det_Scbl2DataTable();
+        PuTr_IN_Det_Scbl2TableAdapter det = new PuTr_IN_Det_Scbl2TableAdapter();
+
+
+        string itm_det = Session[clsStatic.sessionItemSelForPO].ToString();
+        string[] tmp = itm_det.Split(':');
+        if (tmp.Length < 2) return false;
+        string ref_no = tmp[0];
+        string itm_code = tmp[1];
+
+        itm = det.GetDataByRefItem(ref_no, itm_code);
+        if (itm.Rows.Count == 0) return false;
+
+        if (itm[0].In_Det_Status == "TEN") { flg = true; }
+
+        return flg;
+    }
+
+    private bool chk_entry()
+    {
+        bool flg = true;
+        if (ddlpolist.SelectedItem.Text.Split(':')[0] == "") flg = false;
+        if (txt_bill_of_leading_number.Text  == "") flg = false;
+        if (txt_bill_of_leading_quantity.Text  == "") flg = false;
+        if (txt_unit.Text  == "") flg = false;
+        if (ddlvesselname.Text  == "") flg = false;
+        if (txt_import_rout.Text == "") flg = false;
+        if (txt_import_rotation_no.Text  == "") flg = false;
+        if (txt_shipping_charge.Text == "") flg = false;
+        if (Convert.ToDecimal(txt_bill_of_leading_quantity.Text) == 0) flg = false;
+
+        return flg;
+    }
+
+
+    private int  get_consign_number(string ref_no)
+    {
+     
+        tbl_fpi_consignment_infoTableAdapter cons = new tbl_fpi_consignment_infoTableAdapter();
+        int consign_number = cons.GetDataByRef(ref_no).Rows.Count + 1;
+        return consign_number;
+    }
+
+
+
+    private decimal chk_validity_amount()
+    {
+       
+
+        tbl_consignment_pendingTableAdapter cons = new tbl_consignment_pendingTableAdapter();
+        LibraryDAL.FpiDataSet.tbl_consignment_pendingDataTable dtcon = new LibraryDAL.FpiDataSet.tbl_consignment_pendingDataTable();
+
+        dtcon = cons.GetDataByRef_no(ddlpolist.SelectedItem.Text.Split(':')[0]);
+
+        if (dtcon.Rows.Count == 0)
+        {
+
+            return -1;
+        }
+        else
+        {
+            return (dtcon[0].quantity - dtcon[0].bl_qty);
+            
+        }
+
+    }
+
+
+    protected void btn_submit_Click(object sender, EventArgs e)
+    {
+        string fpiref = ddlpolist.SelectedItem.Text.Split(':')[0];
+        
+        tbl_fpi_consignment_infoTableAdapter con = new tbl_fpi_consignment_infoTableAdapter();
+
+        tbl_fpi_approval_dataTableAdapter fpi = new tbl_fpi_approval_dataTableAdapter();
+       FpiDataSet.tbl_fpi_approval_dataDataTable dtfpi = new FpiDataSet.tbl_fpi_approval_dataDataTable();
+
+        if (chk_entry() == false)
+        {
+            Label1.Text = "Please enter all information";
+            Label1.Visible = true;
+
+            return;
+
+        }
+
+        decimal diff = chk_validity_amount();
+        diff = diff - Convert.ToDecimal(txt_bill_of_leading_quantity.Text);
+        //if (diff < 0)
+        //{
+
+        //    Label1.Text = "BL Quantity Error";
+        //    Label1.Visible = true;
+
+        //    return;
+        
+        //}
+
+        int con_num = get_consign_number(fpiref);
+        dtfpi = fpi.GetDataByRef(fpiref);
+
+        string mpr_ref_no = dtfpi[0].mpr_ref_no;
+        string item_code = dtfpi[0].mpr_itm_code;
+       
+       
+
+        try
+        {
+            if (diff <= 0)
+            {
+                fpi.UpdateConStatus("COM", fpiref);
+            }
+
+            con.Insert_tbl_fpi_consignment_info(fpiref, mpr_ref_no, item_code, "APP", current.UserId, DateTime.Now, con_num, txt_bill_of_leading_number.Text.Trim(), Convert.ToDecimal(txt_bill_of_leading_quantity.Text.Trim()), ddlvesselname.SelectedItem.Text.Trim(), txt_import_rout.Text.Trim(), txt_import_rotation_no.Text.Trim(), Convert.ToDecimal(txt_shipping_charge.Text.Trim()), dt_arrival.SelectedDate, txt_shipping_agent_name.Text.Trim(), txt_stevedoring_service_pro.Text.Trim(), dt_date.SelectedDate, txt_unit.SelectedValue.Trim(), txt_country.Text.Trim(), txt_contact_shipping_agent.Text.Trim(), txt_contact_stevedoring_service_pro.Text.Trim());
+
+            //SEND MAIL
+
+            LibraryDAL.SCBLDataSetTableAdapters.User_Role_DefinitionTableAdapter urole = new User_Role_DefinitionTableAdapter();
+            SCBLDataSet.User_Role_DefinitionDataTable dtrole = new SCBLDataSet.User_Role_DefinitionDataTable();
+
+            dtrole = urole.GetDataByRole("CUSENT");
+
+            string sid, sname, msub, mbody;
+
+
+            clsEmailReceiver[] rec_det = new clsEmailReceiver[dtrole.Rows.Count + 1];
+            dsLinkoffice.tblUserInfoRow udr;
+            LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+
+
+            udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+
+            msub = "A consignment entry completed and pending for custom clearing entry [" + fpiref + "]" + " Consignment No : " + con_num.ToString();
+            mbody = "\n\n " + "A consignment entry completed and pending for custom clearing entry [" + fpiref + "]" + " Consignment No : " + con_num.ToString();
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cm/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+
+            int cnt = 0;
+            foreach (SCBLDataSet.User_Role_DefinitionRow dr in dtrole.Rows)
+            {
+                rec_det[cnt] = new clsEmailReceiver();
+                rec_det[cnt].Rname = dr.user_name;
+                rec_det[cnt].Rid = usrdal.GetUserByCode(dr.user_id)[0].UserEmail;
+                cnt++;
+            }
+
+
+            clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+
+
+
+
+            Response.Redirect(Request.Url.AbsoluteUri);
+        }
+        catch
+        {
+          
+           
+        }
+        finally
+        {
+           
+        }
+
+       
+    }
+    protected void ddlpolist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        ddlchange();
+    }
+
+    private void ddlchange()
+    {
+        tbl_consignment_pendingTableAdapter cons = new tbl_consignment_pendingTableAdapter();
+         LibraryDAL.FpiDataSet.tbl_consignment_pendingDataTable dtcon = new LibraryDAL.FpiDataSet.tbl_consignment_pendingDataTable();
+         string selval = ddlpolist.SelectedItem.Text.Split(':')[0];
+
+         dtcon = cons.GetDataByRef_no(selval);
+        if (dtcon.Rows.Count == 0)
+        {
+            tblmaster.Visible = false;
+            return;
+        }
+        else
+        {                
+            tblmaster.Visible = true;
+
+            load_info(selval);
+        }
+         
+    }
+}
+
+
+
+

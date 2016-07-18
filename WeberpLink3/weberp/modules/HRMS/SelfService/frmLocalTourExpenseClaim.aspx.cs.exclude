@@ -1,0 +1,187 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class modules_HRMS_SelfService_frmLocalTourExpenseClaim : System.Web.UI.Page
+{
+    string _connectionString = System.Configuration.ConfigurationManager.AppSettings["UbasysConnectionString"].ToString();
+    private LocalTourExpenseClaim _objLocalTourExpenseClaim;
+    private LocalTourExpenseClaimController _objLocalTourExpenseClaimController;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            clsStatic.CheckUserAuthentication(true);
+            if (!Page.IsPostBack)
+            {
+                LoadEmployeeInformation(Session[StaticData.sessionUserId].ToString());
+
+            }
+
+        }
+        catch (Exception msgException)
+        {
+
+            MessageBox1.ShowError(msgException.Message);
+        }
+
+    }
+    private void LoadEmployeeInformation(string employeeCode)
+    {
+        try
+        {
+            CommonMethods objCommonMethods = new CommonMethods();
+            var dt = DataProcess.GetData(_connectionString, objCommonMethods.SqlEmployeeInformation(employeeCode));
+            if (dt.Rows.Count > 0)
+            {
+                lblId.Text = dt.Rows[0]["EmpID"].ToString();
+                lblName.Text = dt.Rows[0]["EmpName"].ToString();
+                lbldept.Text = dt.Rows[0]["Dept"].ToString();
+                lblDesignation.Text = dt.Rows[0]["Designation"].ToString();
+                lblJoiningDate.Text = dt.Rows[0]["Joiningdate"].ToString().Substring(0, 10);
+            }
+
+        }
+        catch (Exception msgException)
+        {
+
+            throw msgException;
+        }
+    }
+    protected void btnApply_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            ApplyForExpenseBill();
+            ClearControll();
+
+        }
+        catch (Exception msgException)
+        {
+
+            MessageBox1.ShowError(msgException.Message);
+        }
+    }
+
+    private void ApplyForExpenseBill()
+    {
+        try
+        {
+            LeaveProcess lvp = new LeaveProcess();
+            string transactionNo = lvp.GetTransactionNo(_connectionString);
+            bool checkAdvanceReceived = true;
+            _objLocalTourExpenseClaim = new LocalTourExpenseClaim();
+            _objLocalTourExpenseClaim.AccommodationNoofDays = txtAccommodationDays.Text == string.Empty ? 0 : Convert.ToSingle(txtAccommodationDays.Text);
+            _objLocalTourExpenseClaim.ActualClaimAmount = txtActualClaimAmountBDT.Text == string.Empty ? 0 : Convert.ToDecimal(txtActualClaimAmountBDT.Text);
+            _objLocalTourExpenseClaim.AdvanceReceived = txtAdvancedReceivedBDT.Text == string.Empty ? 0 : Convert.ToDecimal(txtAdvancedReceivedBDT.Text);
+            if (txtAdvancedReceivedDate.Text != string.Empty)
+            {
+                _objLocalTourExpenseClaim.AdvanceReceivedDate = Convert.ToDateTime(txtAdvancedReceivedDate.Text);
+                
+            }
+            
+            _objLocalTourExpenseClaim.DateClaim = Convert.ToDateTime(txtDateofDeparture.Text);
+            _objLocalTourExpenseClaim.EntryUser = current.UserId;
+            _objLocalTourExpenseClaim.ApplicantCode = lblId.Text;
+            _objLocalTourExpenseClaim.TransactionNo = transactionNo;
+            _objLocalTourExpenseClaim.ProcessCode = "P006";
+            _objLocalTourExpenseClaim.ProcessFlowCode = "6";
+            _objLocalTourExpenseClaim.ProcessLevelCode = 9;
+            _objLocalTourExpenseClaim.ProcessTypeCode = "LT";
+            _objLocalTourExpenseClaim.FromPlace = txtFrom.Text == string.Empty ? null : txtFrom.Text;
+            _objLocalTourExpenseClaim.ToPlace = txtTo.Text == string.Empty ? null : txtTo.Text;
+            for (int expenditureArea = 1; expenditureArea <= 5; expenditureArea++)
+            {
+                _objLocalTourExpenseClaim.TransactionNoLineNo = expenditureArea;
+                switch (expenditureArea)
+                {
+                    case 1:
+                        {
+                            _objLocalTourExpenseClaim.ExpenditureArea = lblExpenditure1.Text;
+                            _objLocalTourExpenseClaim.AmountCost = txtAmountExpenditure1.Text == string.Empty ? 0 : Convert.ToDecimal(txtAmountExpenditure1.Text);
+                            break;
+
+                        }
+                    case 2:
+                        {
+                            _objLocalTourExpenseClaim.ExpenditureArea = lblExpenditure2.Text;
+                            _objLocalTourExpenseClaim.AmountCost = txtAmountExpenditure2.Text == string.Empty ? 0 : Convert.ToDecimal(txtAmountExpenditure2.Text);
+                            break;
+
+                        }
+                    case 3:
+                        {
+                            var allowanceDays = txtAllowanceDays.Text == string.Empty ? " " : txtAllowanceDays.Text;
+                            _objLocalTourExpenseClaim.ExpenditureArea = lblExpenditure3_1.Text + " " + allowanceDays + lblExpenditure3_2.Text;
+                            _objLocalTourExpenseClaim.AmountCost = txtAmountExpenditure3.Text == string.Empty ? 0 : Convert.ToDecimal(txtAmountExpenditure3.Text);
+                            break;
+                        }
+                    case 4:
+                        {
+                            var accommodation = txtAccommodationDays.Text == string.Empty ? " " : txtAccommodationDays.Text;
+                            _objLocalTourExpenseClaim.ExpenditureArea = lblExpenditure4_1.Text + " " + accommodation + lblExpenditure4_2.Text;
+                            _objLocalTourExpenseClaim.AmountCost = txtAmountExpenditure4.Text == string.Empty ? 0 : Convert.ToDecimal(txtAmountExpenditure4.Text);
+                            break;
+                        }
+                    default:
+                        {
+                            _objLocalTourExpenseClaim.ExpenditureArea = lblExpenditure5.Text;
+                            _objLocalTourExpenseClaim.AmountCost = txtAmountExpenditure5.Text == string.Empty ? 0 : Convert.ToDecimal(txtAmountExpenditure5.Text);
+                            break;
+                        }
+                }
+
+                _objLocalTourExpenseClaimController = new LocalTourExpenseClaimController();
+                _objLocalTourExpenseClaimController.ApplyForExpense(_connectionString, _objLocalTourExpenseClaim);
+
+                if (checkAdvanceReceived == true)
+                {
+                    CommonMethods objCommonMethods = new CommonMethods();
+                    _objLocalTourExpenseClaim.DepartureTime = objCommonMethods.TimeFormatGenerate(timeofDeparture.Date.Hour.ToString() + ":" + timeofDeparture.Date.Minute.ToString() + ":" + timeofDeparture.AmPm.ToString());
+                    _objLocalTourExpenseClaim.ArrivalDate = Convert.ToDateTime( txtDateofArrival.Text);
+                    _objLocalTourExpenseClaim.ArrivalTime = objCommonMethods.TimeFormatGenerate(timeofArrival.Date.Hour.ToString() + ":" + timeofArrival.Date.Minute.ToString() + ":" + timeofArrival.AmPm.ToString());
+                    _objLocalTourExpenseClaim.NetClaim = txtNetClaimBDT.Text == string.Empty ? 0 : Convert.ToDecimal( txtNetClaimBDT.Text);
+                    _objLocalTourExpenseClaim.DailyAllowanceNoofDays = txtAllowanceDays.Text == string.Empty ? 0 : Convert.ToSingle( txtAllowanceDays.Text);                    
+                    _objLocalTourExpenseClaimController.SaveDetailsInformaton(_connectionString,_objLocalTourExpenseClaim);
+                    checkAdvanceReceived = false;
+                }
+
+
+            }
+
+        }
+        catch (Exception msgException)
+        {
+            
+            throw msgException;
+        }
+
+    }
+    protected void btnClear_Click(object sender, EventArgs e)
+    {
+        ClearControll();
+    }
+
+    private void ClearControll()
+    {
+        txtAllowanceDays.Text = string.Empty;
+        txtActualClaimAmountBDT.Text = string.Empty;
+        txtAdvancedReceivedBDT.Text = string.Empty;
+        txtAdvancedReceivedDate.Text = string.Empty;
+        txtAccommodationDays.Text = string.Empty;
+        txtAmountExpenditure1.Text = string.Empty;
+        txtAmountExpenditure2.Text = string.Empty;
+        txtAmountExpenditure3.Text = string.Empty;
+        txtAmountExpenditure4.Text = string.Empty;
+        txtAmountExpenditure5.Text = string.Empty;
+        txtDateofArrival.Text = string.Empty;
+        txtDateofDeparture.Text = string.Empty;
+        txtFrom.Text = string.Empty;
+        txtNetClaimBDT.Text = string.Empty;
+        txtTo.Text = string.Empty;
+
+    }
+}

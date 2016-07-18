@@ -1,0 +1,76 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using LibraryDAL;
+using LibraryDAL.ErpDataSetTableAdapters;
+
+public partial class frm_supplier_entry : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btnupdate, "Are you sure to add?");
+        
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            clear_all();
+        }
+
+    }
+
+    private void clear_all()
+    {
+        get_max_ref();
+
+        txtname.Text = "";
+        txtadd1.Text = "";
+        txtadd2.Text = "";
+        txtadd3.Text = "";
+        txtadd4.Text = "";
+        txtadd5.Text = "";
+        txttel.Text = "";
+        txtfax.Text = "";
+        txtemail.Text = "";
+        txtcon.Text = "";
+        txtconstatus.Text = "";
+        txtmob.Text = "";
+
+    }
+
+    private void get_max_ref()
+    {
+        PuMa_Par_AdrTableAdapter det = new PuMa_Par_AdrTableAdapter();
+        string max_ref = "APN-";
+        double maxref = Convert.ToDouble(det.GetMaxRef("APN-")) + 1;
+        max_ref = max_ref + string.Format("{0:0000}", maxref);
+        txtcode.Text = max_ref;
+    }
+    
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        PuMa_Par_AdrTableAdapter det = new PuMa_Par_AdrTableAdapter();
+        get_max_ref();
+
+        DateTime dtdate=Convert.ToDateTime(DateTime.Now.ToShortDateString());
+
+        if (txtname.Text.Length < 5) return;
+
+        if (txtcode.Text == "") return;
+
+        if (det.InsertAdrDet(txtcode.Text, txtname.Text, txtcode.Text, txtadd1.Text, txtadd2.Text, txtadd3.Text, txtadd4.Text, txtadd5.Text, txtconstatus.Text, txtmob.Text, txtcon.Text, txttel.Text, txtfax.Text, txtemail.Text, "", "", dtdate, "Y", dtdate,0,0,"","","",0) == 1)
+        {
+            lblupdate.Visible = true;
+            clear_all();
+        }
+    }
+   
+}
+

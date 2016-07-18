@@ -1,0 +1,427 @@
+using System;
+using System.IO;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDTO;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBL3DataSetTableAdapters;
+using LibraryDAL.FpiDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+
+
+public partial class frm_fpi_entry : System.Web.UI.Page
+{
+   
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.MsgConfirmBox(btn_submit, "Are you sure to Submit ? ");
+        clsStatic.CheckUserAuthentication();
+        if (!Page.IsPostBack)
+        {
+            mpr_item_load();
+            load_Pi();
+            load_uom();
+        }
+    }
+
+    private void load_uom()
+    {
+        LibraryDAL.SCBLINTableAdapters.InMa_UomTableAdapter uom = new LibraryDAL.SCBLINTableAdapters.InMa_UomTableAdapter();
+        SCBLIN.InMa_UomDataTable dtuom = new SCBLIN.InMa_UomDataTable();
+
+
+        dtuom = uom.GetAllData();
+        ListItem lst;
+        txt_unit.Items.Clear();
+        txt_unit.Items.Add("");
+
+        foreach (SCBLIN.InMa_UomRow dr in dtuom.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Uom_Code;
+            lst.Text = dr.Uom_Code + ":" + dr.Uom_Name;
+            txt_unit.Items.Add(lst);
+        }
+    }
+    private void mpr_item_load()
+    {
+
+        string itm_det = Session[clsStatic.sessionItemSelForPO].ToString();
+        string[] tmp = itm_det.Split(':');
+        if (tmp.Length < 2) return;
+        string ref_no = tmp[0];
+        string itm_code = tmp[1];
+        ctl_fpi_mpr_item_view1.load_all(ref_no, itm_code);
+    
+    }
+
+    public void load_Pi()
+    {
+        lbl_ref_no.Text = getmaxref();
+
+        LibraryDAL.ErpDataSetTableAdapters.InMa_Stk_CtlTableAdapter stk = new LibraryDAL.ErpDataSetTableAdapters.InMa_Stk_CtlTableAdapter();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstk = new ErpDataSet.InMa_Stk_CtlDataTable();
+
+
+        SCBL2DataSet.PuTr_IN_Det_Scbl2DataTable itm = new SCBL2DataSet.PuTr_IN_Det_Scbl2DataTable();
+        PuTr_IN_Det_Scbl2TableAdapter det = new PuTr_IN_Det_Scbl2TableAdapter();
+
+        SCBLDataSet.PuTr_IN_Hdr_ScblRow drhdr;
+        PuTr_IN_Hdr_ScblTableAdapter hdr = new PuTr_IN_Hdr_ScblTableAdapter();
+
+        string itm_det = Session[clsStatic.sessionItemSelForPO].ToString();
+        string[] tmp = itm_det.Split(':');
+        if (tmp.Length < 2) return;
+        string ref_no = tmp[0];
+        string itm_code = tmp[1];
+
+        itm = det.GetDataByRefItem(ref_no, itm_code);
+        if (itm.Rows.Count == 0) return;
+        drhdr = hdr.GetDataByRef(ref_no)[0];
+
+        dtstk = stk.GetDataByItemStore(itm_code, itm[0].IN_Det_Str_Code);
+        if (dtstk.Rows.Count == 0)
+        {
+            txt_stock_in_hand.Text = "Nill";
+        }
+        else
+        {
+            txt_stock_in_hand.Text = dtstk[0].Stk_Ctl_Free_Stk.ToString("N2") + " " + itm[0].IN_Det_Itm_Uom;
+        }
+        txt_user_name.Text = current.UserName;
+
+       // txt_location.Text = itm[0].In_Det_Loc;
+
+        txt_item_details.Text = itm[0].IN_Det_Icode + ":" + itm[0].IN_Det_Itm_Desc;
+    }
+
+
+    private string getmaxref()
+    {
+        tbl_fpi_approval_dataTableAdapter app = new tbl_fpi_approval_dataTableAdapter();
+        double max_ref = Convert.ToDouble(app.GetMaxRef());
+        string ref_no = "FPAPP-" + string.Format("{0:000000}", max_ref + 1);
+        return ref_no;
+    }
+
+    private decimal total_value(decimal quantity, decimal rate)
+    {
+        decimal result;
+        result = quantity * rate;
+        return result;
+    }
+
+    protected void txt_quantity_TextChanged(object sender, EventArgs e)
+    {
+        if ((txt_quantity.Text == "") || (txt_unit_rate.Text == "")) return;
+
+        lbl_total_value.Text = total_value(Convert.ToDecimal(txt_quantity.Text), Convert.ToDecimal(txt_unit_rate.Text)).ToString();
+    }
+    protected void txt_unit_rate_TextChanged(object sender, EventArgs e)
+    {
+        if ((txt_quantity.Text == "") || (txt_unit_rate.Text == "")) return;
+        lbl_total_value.Text = total_value(Convert.ToDecimal(txt_quantity.Text), Convert.ToDecimal(txt_unit_rate.Text)).ToString();
+    }
+
+    private bool chk_validity()
+    {
+        bool flg = false;
+        SCBL2DataSet.PuTr_IN_Det_Scbl2DataTable itm = new SCBL2DataSet.PuTr_IN_Det_Scbl2DataTable();
+        PuTr_IN_Det_Scbl2TableAdapter det = new PuTr_IN_Det_Scbl2TableAdapter();
+
+
+        string itm_det = Session[clsStatic.sessionItemSelForPO].ToString();
+        string[] tmp = itm_det.Split(':');
+        if (tmp.Length < 2) return false;
+        string ref_no = tmp[0];
+        string itm_code = tmp[1];
+
+        itm = det.GetDataByRefItem(ref_no, itm_code);
+        if (itm.Rows.Count == 0) return false;
+
+        if (itm[0].In_Det_Status == "TEN") { flg = true; }
+
+        return flg;
+    }
+
+
+    private bool chk_party()
+    {
+        bool flg = false;
+
+        string[] tmp = txt_supllier_name.Text.Split(':');
+        if (tmp.Length == 2) flg = true;
+        return flg;
+    }
+
+
+    private bool chk_entry()
+    {
+        bool flg = true;
+        if (txt_user_name.Text == "") flg = false;
+        if (txt_expense_nature.Text == "") flg = false;
+        if (txt_location.Text == "") flg = false;
+        if (txt_pi_no.Text == "") flg = false;
+        if (txt_supllier_name.Text == "") flg = false;
+        if (txt_item_details.Text == "") flg = false;
+        if (txt_origin.Text == "") flg = false;
+        if (txt_quantity.Text == "") flg = false;
+        if (txt_unit.Text == "") flg = false;
+        if (txt_unit_rate.Text == "") flg = false;
+        if (txt_currency.Text == "") flg = false;
+
+        if (lbl_total_value.Text == "") flg = false;
+        if (txt_currency_total_value.Text == "") flg = false;
+        if (txt_port_of_loading.Text == "") flg = false;
+        if (txt_port_of_discharge.Text == "") flg = false;
+
+        if (txt_cf_agent.Text == "") flg = false;
+        if (txt_transport_contact.Text == "") flg = false;
+        if (txt_mode_of_transport.Text == "") flg = false;
+        if (txt_stock_in_hand.Text == "") flg = false;
+        if (txt_LC_details.Text == "") flg = false;
+        if (txt_total_stock.Text == "") flg = false;
+
+
+        return flg;
+    }
+
+
+    private string get_flow_tepmate(string req_type, string cash_type, decimal totval)
+    {
+        App_Flow_DefinitionTableAdapter app = new App_Flow_DefinitionTableAdapter();
+        SCBLDataSet.App_Flow_DefinitionDataTable dt = new SCBLDataSet.App_Flow_DefinitionDataTable();
+
+        req_type = req_type.Substring(0, 2) + "MPR";
+
+        string tem_id = "";
+        dt = app.GetTemplate("PIAPP", req_type, cash_type, totval);
+
+        if (dt.Rows.Count > 0)
+            tem_id = dt[0].flow_id.ToString();
+
+
+        return tem_id;
+    }
+
+
+    private string get_pend_for(string selval)
+    {
+        string pend_for = "";
+        tbl_app_ruleTableAdapter tbl = new tbl_app_ruleTableAdapter();
+        try
+        {
+            pend_for = tbl.GetDataByTypeSeq(selval, 1)[0].app_id.ToString();
+        }
+        catch
+        {
+            pend_for = "";
+        }
+        return pend_for;
+    }
+
+
+    private string save_file(string fpi_ref)
+    {
+        tbl_file_detailTableAdapter fl = new tbl_file_detailTableAdapter();
+
+       string itm_det = Session[clsStatic.sessionItemSelForPO].ToString ();
+       string[] tmp = itm_det.Split(':');
+
+          string retstr = "";
+        if (tmp.Length < 2)
+        {
+            return retstr;
+            
+        }
+        string mpr_ref_no = tmp[0];
+        string itm_code = tmp[1];
+
+        string ref_no, fpath, floc, orgfilename;
+        string uid = current.UserId.ToString();
+
+        double max_ref = Convert.ToDouble(fl.GetmaxSL());
+        int nFileLen;
+
+        HttpPostedFile myFile = updoc.PostedFile;
+        if (myFile != null)
+        {
+            nFileLen = myFile.ContentLength;
+
+            if ((myFile.ContentType == "application/pdf") && (nFileLen > 0) && (nFileLen < 5000001))
+            {
+                try
+                {
+                    ref_no = "DOC-" + string.Format("{0:00000000}", max_ref + 1);
+                    orgfilename = updoc.FileName;
+                    fpath = Server.MapPath("~/Upload") + "\\";
+                    floc = fpath + ref_no + ".pdf";
+                    myFile.SaveAs(floc);
+
+                    fl.InsertFileDet(ref_no, fpi_ref, mpr_ref_no, itm_code, "", "PI", "Profoma Invoice", uid, DateTime.Now, "PDF", (decimal)nFileLen, orgfilename, ref_no + ".pdf", floc, floc, floc);
+
+                    retstr = ref_no;
+                }
+                catch
+                {
+                    retstr = "";
+                }
+            }
+        }
+
+        return retstr;
+    }
+
+    protected void btn_submit_Click(object sender, EventArgs e)
+    {
+                
+        if (chk_validity() == false)
+
+        {
+            Label1.Text = "Validity Error";
+            Label1.Visible = true;
+
+            return;
+        } 
+     
+        if (chk_entry() == false)
+        {
+            Label1.Text = "Please enter all information";
+            Label1.Visible = true;
+
+            return;
+
+        }
+
+        if (chk_party() == false)
+        {
+            Label1.Text = "Check Party";
+            Label1.Visible = true;
+
+            return;
+
+        }
+
+        bool updflg = false;
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+        tbl_fpi_approval_dataTableAdapter app = new tbl_fpi_approval_dataTableAdapter();
+
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+        PuTr_IN_Det_Scbl2TableAdapter det = new PuTr_IN_Det_Scbl2TableAdapter();
+
+        PuMa_Par_AdrTableAdapter adr = new PuMa_Par_AdrTableAdapter();
+        ErpDataSet.PuMa_Par_AdrDataTable dt_adr = new ErpDataSet.PuMa_Par_AdrDataTable();
+
+
+        string itm_det = Session[clsStatic.sessionItemSelForPO].ToString();
+        string[] tmp = itm_det.Split(':');
+
+        string mpr_ref_no = tmp[0];
+        string itm_code = tmp[1];
+
+        string uid = current.UserId;
+        string uname = current.UserName;
+        string desig = usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+
+        string pcode = txt_supllier_name.Text.Split(':')[0];
+        string pdet = txt_supllier_name.Text.Split(':')[1];
+        string ufile = "";
+
+        dt_adr = adr.GetDataByAdrCode(pcode);
+
+        if (dt_adr.Rows.Count == 0) return;
+        string item_det = txt_item_details.Text.Split(':')[1];
+
+        string tem_id = get_flow_tepmate(mpr_ref_no, "FPO", 1);
+        string next_app_id = get_pend_for(tem_id);
+        if ((tem_id == "") || (next_app_id == "")) return;
+        string ref_no = getmaxref();
+
+        if (updoc.HasFile == true)
+        {
+            ufile = save_file(ref_no);
+            if (ufile == "") { Response.Write("File Upload Error"); return; }
+
+        }
+
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(app.Connection);
+
+        try
+        {
+            app.AttachTransaction(myTrn);
+            comm.AttachTransaction(myTrn);
+            det.AttachTransaction(myTrn);
+
+            app.InsertAppData(ref_no, mpr_ref_no, itm_code, DateTime.Now, tem_id, next_app_id, "INI", "", current.UserId, DateTime.Now, txt_user_name.Text.Trim(), txt_location.Text.Trim(), txt_pi_no.Text.Trim(), pcode, pdet, item_det, txt_origin.Text.Trim(), Convert.ToDecimal(txt_quantity.Text.Trim()), Convert.ToDecimal(txt_unit_rate.Text.Trim()), Convert.ToDecimal(lbl_total_value.Text.Trim()), txt_payment_terms.Text.Trim(), dt_date.SelectedDate, txt_expense_nature.Text.Trim(), dt_date_PI.SelectedDate, txt_unit.SelectedValue.Trim(), txt_currency.Text.Trim(), txt_currency_total_value.Text.Trim(), dt_shipment_date.SelectedDate, txt_port_of_loading.Text.Trim(), dt_lc_validity_date.SelectedDate, txt_port_of_discharge.Text.Trim(), dt_arrival.SelectedDate, txt_cf_agent.Text.Trim(), txt_transport_contact.Text.Trim(), txt_mode_of_transport.Text.Trim(), txt_stock_in_hand.Text.Trim(),txt_total_stock.Text.Trim() ,txt_LC_details.Text.Trim(), txt_previous_date.Text.Trim(), dt_production_period.SelectedDate, dt_date_previous_rate.SelectedDate);
+            det.UpdateForFpIni("QUO", ref_no, mpr_ref_no, itm_code);
+            comm.InsertComments(ref_no, 1, DateTime.Now, uid, uname, desig, 1, "PIENT", "INI", "", "", next_app_id);
+
+            myTrn.Commit();
+            updflg = true;
+        }
+        catch
+        {
+            myTrn.Rollback();
+            updflg = false;
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(app.Connection, myTrn);
+        }
+
+        if (updflg)
+        {
+            try
+            {
+                string sid, sname, msub, mbody;
+                clsEmailReceiver[] rec_det = new clsEmailReceiver[20];
+                int remailcnt = 0;
+                dsLinkoffice.tblUserInfoRow udr;
+                LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+                User_Role_DefinitionTableAdapter roleta = new User_Role_DefinitionTableAdapter();
+                SCBLDataSet.User_Role_DefinitionDataTable roledt = new SCBLDataSet.User_Role_DefinitionDataTable();
+
+                udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+                sid = udr.UserEmail.ToString();
+                sname = udr.UserName.ToString();
+
+                msub = "A PI approval request submitted and pending for you [" + ref_no + "]";
+                mbody = "\n\n " + "A PI approval request submitted and pending for you [" + ref_no + "]";
+                mbody += "\n " + "To view details please login in at http://203.76.114.131/cm/cmlcom ";
+                mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+                roledt = roleta.GetDataByRole(next_app_id);
+
+                foreach (SCBLDataSet.User_Role_DefinitionRow rdr in roledt.Rows)
+                {
+                    rec_det[remailcnt] = new clsEmailReceiver();
+                    rec_det[remailcnt].Rname = rdr.user_name;
+                    rec_det[remailcnt].Rid = usrdal.GetUserByCode(rdr.user_id)[0].UserEmail;
+                    remailcnt++;
+                }
+                clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+
+            }
+            catch
+            {
+            }
+        }
+
+        Response.Redirect("./frm_fpi_initiate.aspx");
+    }
+}
+
+
+
+

@@ -1,0 +1,163 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDTO;
+using LibraryDAL;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.ProdDataSetTableAdapters;
+
+
+public partial class frm_production_status_bag : System.Web.UI.Page
+{
+   
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+        //Session[StaticData.sessionUserId] = "MON";
+        //Session[StaticData.sessionUserName] = "MONJU";
+
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+      
+        if (!Page.IsPostBack)
+        {
+            cldfrom.SelectedDate = DateTime.Now.AddDays(-15);
+            cldto.SelectedDate = DateTime.Now;
+
+            load_data();
+        
+        }
+        else
+        {
+
+        }
+          
+    }
+
+    private void load_data() 
+    {
+       
+        GdHeader.Visible = true;
+        
+        string final_status;
+        DateTime frdate = cldfrom.SelectedDate;
+        DateTime todate = cldto.SelectedDate;
+
+        
+
+        tbl_prod_ctl_detTableAdapter det = new tbl_prod_ctl_detTableAdapter();
+        ProdDataSet.tbl_prod_ctl_detDataTable dtdet = new ProdDataSet.tbl_prod_ctl_detDataTable();
+
+        DataTable dt = new DataTable();
+
+        dt.Columns.Clear();
+        dt.Columns.Add("DETAIL", typeof(string));
+        dt.Columns.Add("REF NO", typeof(string));
+        dt.Columns.Add("PORD DATE", typeof(string));
+        dt.Columns.Add("ID", typeof(string));
+        dt.Columns.Add("PRODUCTION", typeof(string));
+        dt.Columns.Add("STATUS", typeof(string));
+        dt.Columns.Add("JV REF", typeof(string));
+
+        dtdet = det.GetDataByDate(frdate, todate, "P");
+
+        foreach (ProdDataSet.tbl_prod_ctl_detRow dr in dtdet.Rows)
+        {
+            final_status = "";
+            switch (dr.issue_status)
+            {
+                case "R":
+                    final_status = "REJECTED";
+                    break;
+
+                case "I":
+                    final_status = "Production Approval Pending";
+                    break;
+
+                case "F":
+                    final_status = "Production Posting Pending";
+                    break;
+
+                case "C":                   
+                    final_status = "Production Completed";
+                    break;
+
+                default:
+                    final_status = "";
+                    break;
+
+                    
+            }
+
+
+
+
+
+            dt.Rows.Add("", dr.ref_no, dr.prod_date.ToShortDateString(), dr.prod_id, dr.prod_name, final_status, dr.cs_jv_save);
+               
+        }
+                             
+        GdHeader.DataSource = dt;
+        GdHeader.DataBind();
+
+    }
+
+    
+
+   
+
+   
+
+
+    protected void btnview_Click(object sender, EventArgs e)
+    {
+        load_data();        
+
+    }
+  
+       
+         
+    
+
+    protected void GdHeader_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+       
+        HtmlInputButton btn;
+        string ref_no;
+        string itm_code;
+        tbl_prod_nameTableAdapter pro = new tbl_prod_nameTableAdapter();
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            btn = new HtmlInputButton();
+
+            ref_no = e.Row.Cells[1].Text;
+
+
+            btn.Attributes.Add("onclick ", "window.open('./frm_prod_view_bag.aspx?ref_no=" + ref_no + "&prod_id=" + e.Row.Cells[3].Text.Trim() + " ')");
+          
+
+            btn.ID = "btnnewwindow" + e.Row.ClientID;            
+            btn.Value = "View";
+            btn.Attributes.Add("class", "btn2");
+            e.Row.Cells[0].Controls.Add(btn);
+           // if (e.Row.Cells[9].Text.Trim() == "1") { e.Row.Font.Bold = true; e.Row.ForeColor = System.Drawing.Color.Navy; }
+        }
+        //e.Row.Cells[8].Visible = false;
+        //e.Row.Cells[9].Visible = false;
+    }
+
+
+
+    
+}
+
+

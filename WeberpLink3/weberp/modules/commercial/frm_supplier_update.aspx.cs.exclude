@@ -1,0 +1,100 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using LibraryDAL;
+using LibraryDAL.ErpDataSetTableAdapters;
+
+public partial class frm_supplier_update : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btnupdate, "Are you sure to update?");
+        
+        tblmaster.BgColor = "#f0f8ff";
+        if (!Page.IsPostBack)
+        {
+            
+        }
+
+    }
+
+    private void clear_all()
+    {
+        txtcode.Text = "";
+        txtname.Text = "";
+        txtadd1.Text = "";
+        txtadd2.Text = "";
+        txtadd3.Text = "";
+        txtadd4.Text = "";
+        txtadd5.Text = "";
+        txttel.Text = "";
+        txtfax.Text = "";
+        txtemail.Text = "";
+        txtcon.Text = "";
+        txtconstatus.Text = "";
+        txtmob.Text = "";
+
+    }
+    
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        PuMa_Par_AdrTableAdapter det = new PuMa_Par_AdrTableAdapter();
+        if (txtcode.Text == "") return;
+
+        if (det.UpdateAdrByAdrCode(txtadd1.Text, txtadd2.Text, txtadd3.Text, txtadd4.Text, txtadd5.Text, txtconstatus.Text, txtmob.Text, txtcon.Text, txttel.Text, txtfax.Text, txtemail.Text, txtcode.Text) == 1)
+        {
+            lblupdate.Visible = true;
+            clear_all();
+        }
+    }
+    protected void btnshow_Click(object sender, EventArgs e)
+    {
+        lblupdate.Visible = false;
+
+        string[] tmp = txtpartydet.Text.Split(':');
+
+        txtpartydet.Text = "";
+
+        if (tmp.Length < 2)
+        {            
+            clear_all();
+            return;
+        }
+
+        string adrcode = tmp[0];
+        PuMa_Par_AdrTableAdapter det = new PuMa_Par_AdrTableAdapter();
+        ErpDataSet.PuMa_Par_AdrDataTable dt = new ErpDataSet.PuMa_Par_AdrDataTable();
+        
+        dt = det.GetDataByAdrCode(adrcode);
+        if (dt.Rows.Count == 0)
+        {
+            clear_all();
+            return;
+        }
+
+        txtcode.Text = dt[0].par_adr_code;
+        txtname.Text = dt[0].par_adr_name;
+        txtadd1.Text = dt[0].Par_Adr_Line_1;
+        txtadd2.Text = dt[0].Par_Adr_Line_2;
+        txtadd3.Text = dt[0].Par_Adr_Line_3;
+        txtadd4.Text = dt[0].Par_Adr_Line_4;
+        txtadd5.Text = dt[0].Par_Adr_Line_5;
+        txttel.Text = dt[0].Par_Adr_Tel_No;
+        txtfax.Text = dt[0].Par_Adr_Fax_No;
+        txtemail.Text = dt[0].Par_Adr_Email_Id;
+        txtcon.Text = dt[0].Par_Adr_Cnt_No;
+        txtconstatus.Text = dt[0].Par_Adr_Cst_No;
+        txtmob.Text =  dt[0].Par_Adr_Lst_No;
+    }
+
+    
+}
+

@@ -1,0 +1,212 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_item_stk_det.aspx.cs" Inherits="frm_item_stk_det" Title=""   EnableEventValidation="false" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                ITEM STOCK DETAIL</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 25px; text-align: left">
+                <table style="width:100%;">
+                    <tr>
+                        <td colspan="3" style="text-align: center">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 93px">
+                            &nbsp;</td>
+                        <td style="width: 12px">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 93px">
+                            STORE</td>
+                        <td style="width: 12px">
+                            :</td>
+                        <td>
+                            <asp:DropDownList ID="ddlstore" runat="server" CssClass="txtbox" 
+                                Width="200px">
+                                <asp:ListItem></asp:ListItem>
+                                <asp:ListItem>2008/2009</asp:ListItem>
+                                <asp:ListItem>2009/2010</asp:ListItem>
+                                <asp:ListItem>2010/2011</asp:ListItem>
+                                <asp:ListItem>2011/2012</asp:ListItem>
+                                <asp:ListItem>2012/2013</asp:ListItem>
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 93px">
+                            &nbsp;</td>
+                        <td style="width: 12px">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 93px">
+                            ITEM</td>
+                        <td style="width: 12px">
+                            :</td>
+                        <td>
+                         <asp:TextBox ID="txtitem" runat="server" autocomplete="off"  CssClass="txtbox" Width="450px">  </asp:TextBox>
+                         
+                         <ajaxToolkit:AutoCompleteExtender
+                                runat="server"                                
+                                ID="autoComplete1" 
+                                BehaviorID="AutoCompleteEx2"                                
+                                TargetControlID="txtitem"
+                                ServicePath="../commercial/services/autocomplete.asmx" 
+                                ServiceMethod="GetItemList"
+                                MinimumPrefixLength="1" 
+                                CompletionInterval="100"
+                                EnableCaching="false"
+                                CompletionSetCount="20"                                 
+                                CompletionListCssClass ="autocomplete_completionListElement"                            
+                                CompletionListItemCssClass="autocomplete_listItem" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem"
+                                DelimiterCharacters=","
+                                ShowOnlyCurrentWordInCompletionListItem="true" > 
+                            </ajaxToolkit:AutoCompleteExtender>
+                            &nbsp;<asp:Button ID="btnview" runat="server" CssClass="btn2" Text="View" 
+                                Width="99px" onclick="btnview_Click" />
+                        </td></tr><tr>
+                        <td style="width: 93px; height: 16px;">
+                            </td><td style="width: 12px; height: 16px;">
+                            </td><td style="height: 16px">
+                            </td></tr><tr>
+                        <td style="width: 93px">
+                            ITEM SEARCH</td><td style="width: 12px">
+                            :</td><td>
+                            <asp:TextBox ID="txtsearch" runat="server" Width="449px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 93px">
+                            &nbsp;</td><td style="width: 12px">
+                            &nbsp;</td><td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 93px">
+                            &nbsp;</td><td style="width: 12px">
+                            &nbsp;</td><td>
+                            <asp:Button ID="btnsearch" runat="server" CssClass="btn2" Text="Search" 
+                                Width="103px" onclick="btnsearch_Click" />
+                        </td>
+                    </tr>
+                </table>
+                </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 34px; text-align: left">
+                
+                
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 22px; text-align: left">
+                
+                
+                <asp:GridView ID="gdItem" runat="server" AutoGenerateColumns="False" 
+                    BackColor="White" BorderColor="#41519A" BorderStyle="Solid" BorderWidth="1px" 
+                    CellPadding="4" ForeColor="#333333" GridLines="None" PageSize="100" 
+                    SkinID="GridView" 
+                     OnRowCreated="gdItem_RowCreated"                   
+                    OnRowCommand="gdItem_RowCommand"
+                    style="border-top-width: 1px; border-left-width: 1px; border-left-color: #e6e6fa; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='white', startcolorstr='#D6DCF9', gradienttype='0'); border-bottom-width: 1px; border-bottom-color: #e6e6fa; border-top-color: #e6e6fa; border-right-width: 1px; border-right-color: #e6e6fa;" 
+                    Width="687px" onselectedindexchanged="gdItem_SelectedIndexChanged">
+                    <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                    <SelectedRowStyle Font-Bold="True" />
+                    <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <EditRowStyle BackColor="#2461BF" />
+                    <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" 
+                        Font-Underline="False" />
+                    <RowStyle Font-Size="8pt" />
+                    <Columns>                       
+                        <asp:BoundField DataField="icode" HeaderText="Icode" />
+                        <asp:BoundField DataField="idet" HeaderText="Idet" />
+                        <asp:BoundField DataField="uom" HeaderText="Uom" />
+                        <asp:BoundField DataField="store" HeaderText="Store" />
+                        <asp:BoundField DataField="curstk" HeaderText="Cur Stk" />
+                                                                       
+                
+                        <asp:TemplateField HeaderText="Min Stock">
+                            <ItemTemplate>
+                                <ajaxToolkit:FilteredTextBoxExtender ID="FilteredTextBoxExtender1" 
+                                    runat="server" FilterType="Custom, Numbers" TargetControlID="TextBox1" 
+                                    ValidChars=".">
+                                </ajaxToolkit:FilteredTextBoxExtender>
+                                <asp:TextBox ID="TextBox1" runat="server" CssClass="txtbox" Width="80px" />                                
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        
+                        <asp:TemplateField HeaderText="Ord Qty">
+                            <ItemTemplate>
+                                <ajaxToolkit:FilteredTextBoxExtender ID="FilteredTextBoxExtender2" 
+                                    runat="server" FilterType="Custom, Numbers" TargetControlID="TextBox2" 
+                                    ValidChars=".">
+                                </ajaxToolkit:FilteredTextBoxExtender>
+                                <asp:TextBox ID="TextBox2" runat="server" CssClass="txtbox" Width="80px" />                                
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        
+                        <asp:TemplateField HeaderText="Std Price">
+                            <ItemTemplate>
+                                <ajaxToolkit:FilteredTextBoxExtender ID="FilteredTextBoxExtender3" 
+                                    runat="server" FilterType="Custom, Numbers" TargetControlID="TextBox3" 
+                                    ValidChars=".">
+                                </ajaxToolkit:FilteredTextBoxExtender>
+                                <asp:TextBox ID="TextBox3" runat="server" CssClass="txtbox" Width="80px" />                                
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        
+                        
+                        <asp:TemplateField HeaderText="Update">
+                            <ItemTemplate>                              
+                                <asp:Button ID="Button1" CssClass="btn2" runat="server" Text="Update" 
+                            CommandName="btnupdate" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                      
+                    </Columns>
+                </asp:GridView>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+
+
+</asp:Content>
+

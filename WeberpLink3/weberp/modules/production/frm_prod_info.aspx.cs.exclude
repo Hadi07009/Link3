@@ -1,0 +1,144 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDAL.ProdDataSetTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+
+public partial class frm_prod_info : System.Web.UI.Page
+{
+   
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+       
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+
+        clsStatic.MsgConfirmBox(btnupdate, "Are you sure to update ?");
+        
+        if (!Page.IsPostBack)
+        {
+            load_all_app();
+            lblmsg.Visible = false;
+            btnupdate.Visible = false;
+        }
+        else
+        {
+
+        }          
+    }
+
+    private void load_all_app()
+    {
+
+        tbl_prod_nameTableAdapter nm = new tbl_prod_nameTableAdapter();
+        ProdDataSet.tbl_prod_nameDataTable dt = new ProdDataSet.tbl_prod_nameDataTable();
+
+        ListItem lst;
+
+        ddllist.Items.Clear();
+        ddllist.Items.Add("");
+        dt = nm.GetAllProd();
+        foreach (ProdDataSet.tbl_prod_nameRow dr in dt.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.prod_id;
+            lst.Text = dr.prod_id + ":" + dr.prod_name;
+            ddllist.Items.Add(lst);
+
+        }
+       
+
+    }
+
+    private void clear_all()
+    {
+        txtname.Text = "";
+        ddltrodtype.SelectedValue = "";
+        txtfodirect.Text = "";
+        txtfoindirect.Text = "";        
+        txtfodirectval.Text= "0";
+        txtfoindirectval.Text = "0";
+        txtrmadjcode.Text = "";
+        txtpmadjcode.Text = "";
+        txtpackadjcode.Text = "";
+    }
+
+
+    private string getcoa(string code)
+    {
+
+        string tmp, ccode = "";
+        budgTableAdapter bud = new budgTableAdapter();
+
+        if (code.Length > 14)
+        {
+            tmp = code.Substring(0, 15);
+
+            if (bud.GetDataByCoaCode(tmp).Count > 0)
+            {
+                return tmp;
+            }
+ 
+        }
+
+
+        return ccode;
+    }
+
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        string prodid = ddllist.SelectedValue.ToString();
+        if (prodid == "") { clear_all(); return; }
+        tbl_prod_nameTableAdapter nm = new tbl_prod_nameTableAdapter();
+        decimal direct = 0, indirect = 0;
+        if (ddltrodtype.SelectedValue == "") return;
+
+        if (txtfodirectval.Text != "") { direct = Convert.ToDecimal(txtfodirectval.Text); }
+        if (txtfoindirectval.Text != "") { indirect = Convert.ToDecimal(txtfoindirectval.Text); }
+
+        nm.UpdateProd(txtname.Text.ToUpper(), ddltrodtype.SelectedValue.ToString(), "", "", "", direct, indirect, getcoa(txtfodirect.Text), getcoa(txtfoindirect.Text), "", "", "", "", "", getcoa(txtrmadjcode.Text), getcoa(txtpmadjcode.Text), getcoa(txtpackadjcode.Text), prodid);
+        load_prod(prodid);
+        lblmsg.Visible = true;
+    }
+
+    private void load_prod(string prodid)
+    {
+        tbl_prod_nameTableAdapter nm = new tbl_prod_nameTableAdapter();
+        ProdDataSet.tbl_prod_nameDataTable dt = new ProdDataSet.tbl_prod_nameDataTable();
+
+        dt = nm.GetDataByProdId(prodid);
+        if (dt.Count == 0) { clear_all(); return; }
+
+        txtname.Text = dt[0].prod_name;
+        ddltrodtype.SelectedValue = dt[0].prod_type;
+        txtfodirect.Text = dt[0].fo_direct_code;
+        txtfoindirect.Text = dt[0].fo_indirect_code;        
+        txtfodirectval.Text = dt[0].fo_direct_val.ToString();
+        txtfoindirectval.Text = dt[0].fo_indirect_val.ToString();
+        txtrmadjcode.Text = dt[0].dmc_adj_code;
+        txtpmadjcode.Text = dt[0].process_adj_code;
+        txtpackadjcode.Text = dt[0].pack_adj_code;
+    }
+
+    protected void ddllist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        lblmsg.Visible = false;
+        btnupdate.Visible = false;
+        string prodid = ddllist.SelectedValue.ToString();
+        if (prodid == "") { clear_all(); return; }
+        btnupdate.Visible = true;
+
+        load_prod(prodid);
+
+    }
+}

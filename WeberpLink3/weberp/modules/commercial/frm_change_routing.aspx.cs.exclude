@@ -1,0 +1,217 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+
+public partial class frm_change_routing : System.Web.UI.Page
+{
+
+    private void setsessiondata(object sender, EventArgs e)
+    {
+        PuTr_IN_Det_ScblTableAdapter srdet = new PuTr_IN_Det_ScblTableAdapter();
+        SCBLDataSet.PuTr_IN_Det_ScblDataTable dtbyreq = new SCBLDataSet.PuTr_IN_Det_ScblDataTable();
+        SCBLDataSet.PuTr_IN_Det_ScblDataTable dtbyitem = new SCBLDataSet.PuTr_IN_Det_ScblDataTable();
+
+        string plnts = "Plants: ";
+        int i, len, indx, cnt;
+        string[] plant_list = get_plant("CPT");
+        if (plant_list == null)
+        {
+            lblplants.Text = "";
+            return;
+        }
+
+        len = plant_list.Length;
+
+        for (i = 0; i < len; i++)
+        {
+            if (plant_list[i].ToString() != "")
+                plnts = plnts + plant_list[i].ToString() + ", ";
+        }
+
+        lblplants.Text = plnts;
+
+        dtbyreq = srdet.GetPendingByMultiRole("QUO", "TEN", "APP");
+        dtbyitem = srdet.GetPendingByMultiRole_Item("QUO", "TEN", "APP");
+
+
+        cnt = dtbyreq.Rows.Count;
+
+        for (indx = cnt; indx > 0; indx--)
+        {
+
+            for (i = 0; i < len; i++)
+            {
+                if (dtbyreq[indx - 1].IN_Det_Code.Substring(0, 2) == plant_list[i])
+                    goto nextcheck1;
+
+            }
+            dtbyreq.RemovePuTr_IN_Det_ScblRow(dtbyreq[indx - 1]);
+
+
+        nextcheck1: ;
+        }
+
+
+        cnt = dtbyitem.Rows.Count;
+
+        for (indx = cnt; indx > 0; indx--)
+        {
+
+            for (i = 0; i < len; i++)
+            {
+                if (dtbyitem[indx - 1].IN_Det_Code.Substring(0, 2) == plant_list[i])
+                    goto nextcheck2;
+
+            }
+            dtbyitem.RemovePuTr_IN_Det_ScblRow(dtbyitem[indx - 1]);
+
+        nextcheck2: ;
+        }
+
+        Session[clsStatic.sessionRoutingPendingByReq] = dtbyreq;
+        Session[clsStatic.sessionRoutingPendingByItem] = dtbyitem;
+       
+    }
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        
+        clsStatic.CheckUserAuthentication();        
+        tblmaster.BgColor = "FFFFFFF";
+      
+        
+        if (!Page.IsPostBack)
+        {
+            setsessiondata(null,null);        
+        }
+        else
+        {
+            
+        }
+        get_pending();    
+    }
+
+    private string[] get_plant(string apptype)
+    {
+        User_Role_DefinitionTableAdapter urole = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable udt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        string[] plant_list;
+        udt = urole.GetDataByUserCodeRole(current.UserId.ToString(), apptype);
+
+        if (udt.Rows.Count > 0)
+            plant_list = udt[0].plant_list.Split(',');
+        else
+            return null;
+
+        return plant_list;
+    }
+   
+    private void get_pending()
+    {
+
+        SCBLDataSet.PuTr_IN_Det_ScblDataTable dtdet = new SCBLDataSet.PuTr_IN_Det_ScblDataTable();
+               
+            if (ddlsort.SelectedValue.ToString() == "2")
+            {
+
+                dtdet = (SCBLDataSet.PuTr_IN_Det_ScblDataTable)Session[clsStatic.sessionRoutingPendingByReq];
+            }
+            else
+            {
+                dtdet = (SCBLDataSet.PuTr_IN_Det_ScblDataTable)Session[clsStatic.sessionRoutingPendingByItem];
+            }
+
+            if (dtdet == null) return;
+
+        lblcount.Text = "Total Items: " + dtdet.Rows.Count.ToString();
+
+        if (dtdet.Rows.Count < 1)
+        {
+            celctl.Visible = false;
+            return;
+        }
+        celctl.Visible = true;
+
+        generate_detail_data(dtdet);
+
+    }
+
+
+    private void generate_detail_data(SCBLDataSet.PuTr_IN_Det_ScblDataTable dtdet)
+    {
+       
+        string ref_no;
+        int line_no;
+        celctl.Controls.Clear();
+        foreach (SCBLDataSet.PuTr_IN_Det_ScblRow dr in dtdet.Rows)
+        {
+            ClientSide_modules_commercial_usercontrols_ctl_change_routing ctl = (ClientSide_modules_commercial_usercontrols_ctl_change_routing)LoadControl("./usercontrols/ctl_change_routing.ascx");
+                       
+            HtmlTableCell celref = (HtmlTableCell)ctl.FindControl("celref");
+            Label celitem = (Label)ctl.FindControl("celitem");
+            HtmlTableCell celqty = (HtmlTableCell)ctl.FindControl("celqty");
+            HtmlTableCell celpurtype = (HtmlTableCell)ctl.FindControl("celpurtype");
+            HtmlTableCell celstatus = (HtmlTableCell)ctl.FindControl("celstatus");
+           
+            ctl.reset_pending += this.setsessiondata;
+            ctl.reset_pending += this.Page_Load;
+
+            ctl.ID = "ctl_" + celctl.Controls.Count.ToString();
+                
+            
+            ref_no = dr.IN_Det_Ref.ToString();
+            line_no = Convert.ToInt32(dr.IN_Det_Lno);
+
+            celref.InnerText = "[" + dr.IN_Det_Ref.ToString() + ", " + dr.IN_Det_Lno.ToString() + "]";// FOR " + dr.In_Det_Type.ToString();
+            celitem.Text = dr.IN_Det_Icode.ToString() + " : " + dr.IN_Det_Itm_Desc.ToString();
+            celqty.InnerText = dr.IN_Det_Lin_Qty.ToString() + " " + dr.IN_Det_Itm_Uom.ToString();
+            celpurtype.InnerText = dr.In_Det_Pur_Type.ToString();
+            celstatus.InnerText = "[" + dr.In_Det_Status.ToString() + "] " + getStatusDet(dr.In_Det_Status.ToString());
+
+            celctl.Controls.Add(ctl);
+        }
+
+    }
+
+
+    private string getStatusDet(string status)
+    {
+        string st_det="";
+
+        switch (status)
+        {
+            case "APP":
+                st_det = "READY FOR PO CREATE";
+                break;
+
+            case "QUO":
+                st_det = "READY FOR CS APPROVAL";
+                break;
+
+            case "TEN":
+                st_det = "READY FOR TENDER ENQUIRY";
+                break;
+        }
+
+        return st_det;
+
+    }
+
+    protected void ddlsort_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        System.Threading.Thread.Sleep(1000);
+       
+       // get_pending();
+        //Response.Redirect(Request.Url.AbsoluteUri);
+    }
+}

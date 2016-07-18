@@ -1,0 +1,876 @@
+﻿<<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_Attendance_Report.aspx.cs" Inherits="modules_HRMS_Details_frm_Attendance_Report" %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register TagPrefix="ew" Namespace="eWorld.UI.Compatibility" Assembly="eWorld.UI.Compatibility" %>
+
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+     <link href="../grayStyleBasic.css" rel="stylesheet" type="text/css" />
+   
+  <script type="text/javascript">
+     
+      function onCalendar1Shown(sender, args) {
+          //set the default mode to month            
+          sender._switchMode("months", true);
+      }
+    </script>
+
+    <script type = "text/javascript">
+        function Check_Click(objRef) {
+            //Get the Row based on checkbox
+            var row = objRef.parentNode.parentNode;
+            if (objRef.checked) {
+                //If checked change color to Aqua
+                row.style.backgroundColor = "silver"; //"aqua";
+            }
+            else {
+                //If not checked change back to original color
+                if (row.rowIndex % 2 == 0) {
+                    //Alternating Row Color
+                    row.style.backgroundColor = "#C2D69B";
+                }
+                else {
+                    row.style.backgroundColor = "white";
+                }
+            }
+            //Get the reference of GridView
+            var GridView = row.parentNode;
+            //Get all input elements in Gridview
+            var inputList = GridView.getElementsByTagName("input");
+            for (var i = 0; i < inputList.length; i++) {
+                //The First element is the Header Checkbox
+                var headerCheckBox = inputList[0];
+                //Based on all or none checkboxes
+                //are checked check/uncheck Header Checkbox
+                var checked = true;
+                if (inputList[i].type == "checkbox" && inputList[i] != headerCheckBox) {
+                    if (!inputList[i].checked) {
+                        ;
+                        break;
+                    }
+                }
+            }
+
+            headerCheckBox.checked = checked;
+        }
+</script>
+<script type = "text/javascript">
+    function checkAll(objRef) {
+        var GridView = objRef.parentNode.parentNode.parentNode;
+        var inputList = GridView.getElementsByTagName("input");
+        for (var i = 0; i < inputList.length; i++) {
+            //Get the Cell To find out ColumnIndex
+            var row = inputList[i].parentNode.parentNode;
+            if (inputList[i].type == "checkbox" && objRef != inputList[i]) {
+                if (objRef.checked) {
+                    //If the header checkbox is checked
+                    //check all checkboxes
+                    //and highlight all rows
+                    row.style.backgroundColor = "silver";
+                    if (inputList[i].disabled == false) {
+                        inputList[i].checked = true;
+                    }
+                }
+                else {
+                    //If the header checkbox is checked
+                    //uncheck all checkboxes
+                    //and change rowcolor back to original 
+                    if (row.rowIndex % 2 == 0) {
+                        //Alternating Row Color
+                        row.style.backgroundColor = "#C2D69B";
+                    }
+                    else {
+                        row.style.backgroundColor = "white";
+                    }
+                    inputList[i].checked = false;
+                }
+            }
+        }
+    }
+    </script> 
+
+
+
+    <style type="text/css">
+        .style2
+        {
+            width: 297px;
+        }
+        .style4
+        {
+        }
+        .style5
+        {
+            width: 270px;
+        }
+        .style6
+        {
+        }
+        .style7
+        {
+            width: 19px;
+        }
+        .style8
+        {
+        }
+        .style9
+        {
+            width: 259px;
+            height: 24px;
+        }
+        .style10
+        {
+            width: 270px;
+            height: 24px;
+        }
+        .style11
+        {
+            height: 24px;
+        }
+        .style12
+        {
+            width: 259px;
+            height: 23px;
+        }
+        .style13
+        {
+            width: 270px;
+            height: 23px;
+        }
+        .style14
+        {
+            height: 23px;
+        }
+        .style15
+        {
+            width: 189px;
+        }
+        .style16
+        {
+            width: 122px;
+        }
+        .style17
+        {
+            width: 161px;
+        }
+        .style23
+        {
+            width: 91px;
+        }
+        .style24
+        {
+            width: 129px;
+        }
+        .style25
+        {
+            width: 114px;
+        }
+        .style26
+        {
+            width: 120px;
+        }
+        .style27
+        {
+            width: 96px;
+        }
+        .style28
+        {
+            width: 195px;
+        }
+         .auto-style4
+         {
+             height: 23px;
+         }
+         .auto-style5
+         {
+             width: 4px;
+             height: 23px;
+         }
+         .auto-style6
+         {
+             height: 23px;
+         }
+         .auto-style7
+        {
+            height: 20px;
+        }
+         </style>
+</head>
+<body style="z-index: 103; font-size: 12pt; text-align: center; margin: 0px">
+    <form id="form1" runat="server">
+    <asp:ScriptManager ID="ScriptManager1" runat="server">
+                    </asp:ScriptManager>
+    
+       <table  align="center"  cellpadding="0" cellspacing="0" class="tab" style="text-align: center; width: 790px; border-top-width: 1px; border-left-width: 1px; border-right-width: 1px; vertical-align: middle;" id="TABLE1" language="javascript"  atomicselection="true">
+            <tr>
+                <td background="../image/linkoffice.jpg" nowrap="nowrap" style="width: 772px;
+                    height: 102px; text-align: center">
+                    
+                </td>
+            </tr>
+            <tr>
+                <td background="../image/top2.jpg" nowrap="nowrap" 
+                    style="text-align: left; height: 45px;">
+            
+            
+                </td>
+            </tr>
+            </table>
+            <asp:UpdatePanel ID="updpnl2" runat="server">
+                    <ContentTemplate>
+            <table background="../image/body_bg.jpg" align="center"  cellpadding="0" cellspacing="0" class="tab" style="text-align: center; width: 790px; border-left-width: 1px; border-bottom-width: 1px; border-right-width: 1px; vertical-align: middle;" id="TABLE2" language="javascript"  atomicselection="true">            
+         
+            <tr>
+                <td nowrap="nowrap" style="width: 773px; text-align: center; height: 15px;">
+                    &nbsp;</td>
+            </tr>
+            <tr>
+                <td class="tblbig" nowrap="nowrap" style="width: 773px; height: 15px;
+                    text-align: center">
+                    ABSENT LIST</td>
+            </tr>
+            <tr>
+                <td class="tbl" nowrap="nowrap" style="width: 773px; height: 15px;
+                    text-align: left">
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                    <table id="tbladmin" runat="server" style="width: 488px">
+                        <tr>
+                            <td style="text-align: left" class="auto-style7">
+                                <asp:LinkButton ID="LinkButton1" runat="server" PostBackUrl="~/frm_index.aspx" Width="40px">Home</asp:LinkButton></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left">
+                                <asp:LinkButton ID="LinkButton2" runat="server" PostBackUrl="~/frm_change_pass.aspx">Change Password</asp:LinkButton></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left">
+                                <asp:LinkButton ID="LinkButton3" runat="server" PostBackUrl="~/frm_login.aspx">Sign Out</asp:LinkButton></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td nowrap="nowrap" style="width: 773px; height: 29px; text-align: center" 
+                    class="tbl">
+                    <asp:Label ID="lblmsg" runat="server" ForeColor="#CC0000" Visible="False"></asp:Label>
+                </td>
+            </tr>
+                <tr>
+                    <td nowrap="nowrap" style="width: 773px; height: 32px; text-align: left" 
+                        class="tbl">
+                        <table style="width:100%;">
+                            <tr>
+                                <td class="style8">
+                                    Select Company</td>
+                                <td class="style7">
+                                    :</td>
+                                <td class="style4">
+                                    <asp:DropDownList ID="ddlcompany" runat="server" CssClass="tbl" Width="400px" 
+                                        AutoPostBack="True" onselectedindexchanged="ddlcompany_SelectedIndexChanged">
+                                    </asp:DropDownList>
+                                </td>
+                                <td>
+                                    &nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">
+                                    Date From</td>
+                                <td class="style7">
+                                    :</td>
+                                <td class="style4">
+                                    <ew:CalendarPopup ID="txtFromDate" runat="server" AutoPostBack="True" cssClass="txtbox" Culture="English (United Kingdom)" Enabled="true" Width="76px">
+                                        <MonthHeaderStyle BackColor="#2A2965" />
+                                        <ButtonStyle CssClass="btn2" />
+                                    </ew:CalendarPopup>
+                                </td>
+                                <td>
+                                    &nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">Date To</td>
+                                <td class="style7">:</td>
+                                <td class="style4">
+                                    <ew:CalendarPopup ID="txtToDate" runat="server" AutoPostBack="True" cssClass="txtbox" Culture="English (United Kingdom)" Enabled="true" Width="76px">
+                                        <MonthHeaderStyle BackColor="#2A2965" />
+                                        <ButtonStyle CssClass="btn2" />
+                                    </ew:CalendarPopup>
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">Department</td>
+                                <td class="style7">:</td>
+                                <td class="style4">
+                                    <asp:DropDownList ID="ddlDepartmentId" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlDepartmentId_SelectedIndexChanged" Width="300px">
+                                    </asp:DropDownList>
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">
+                                    <asp:Button ID="btnShowEmployee" runat="server" CssClass="btn2" OnClick="btnShowEmployee_Click" Text="Pick Department Employe" Visible="False" Width="200px" />
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">
+                                    <asp:RadioButtonList ID="RadioButtonList1" runat="server" RepeatDirection="Horizontal">
+                                        <asp:ListItem Value="1">Selected Department</asp:ListItem>
+                                        <asp:ListItem Value="2">ALL Department</asp:ListItem>
+                                        <asp:ListItem Value="3">SelectedDepartment ALL Date</asp:ListItem>
+                                    </asp:RadioButtonList>
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">
+                                    <asp:Button ID="btnPreview" runat="server" CssClass="btn2" OnClick="btnPreview_Click" Text="Report Preview" Width="200px" />
+                                    <asp:Button ID="btnShowAttendance" runat="server" CssClass="btn2" Text="Preview Absent List" Width="200px" OnClick="btnShowAttendance_Click" />
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">
+                                    <asp:GridView ID="grdShiftAllocationPreview" runat="server" AutoGenerateColumns="False" CssClass="myGrid td" EnableModelValidation="True" OnPageIndexChanging="grdShiftAllocationPreview_PageIndexChanging" OnPreRender="grdShiftAllocationPreview_PreRender" OnRowDataBound="grdShiftAllocationPreview_RowDataBound" Width="100%">
+                                        <Columns>
+                                            <asp:BoundField DataField="EmployeeID" HeaderText="Employee ID" />
+                                            <asp:BoundField DataField="EmployeeName" HeaderText="Employee Name" />
+                                            <asp:BoundField DataField="adate" HeaderText="Date" />
+                                            <asp:TemplateField>
+                                                <HeaderTemplate>
+                                                    <asp:CheckBox ID="chkbALL" runat="server" oncheckedchanged="chkbALL_CheckedChanged" onclick="checkAll(this);" />
+                                                </HeaderTemplate>
+                                                <ItemTemplate>
+                                                    <asp:CheckBox ID="CheckIndv" runat="server" />
+                                                </ItemTemplate>
+                                            </asp:TemplateField>
+                                        </Columns>
+                                        <RowStyle BorderColor="Black" BorderStyle="Solid" BorderWidth="1px" />
+                                    </asp:GridView>
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">
+                                    <asp:Button ID="btnSubmitAttendance" runat="server" CssClass="btn2" OnClick="btnSubmitAttendance_Click" Text="Approve Attendance" Visible="False" Width="200px" />
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">
+                                    <asp:DropDownList ID="ddlShift" runat="server" AutoPostBack="True" Visible="False" Width="180px">
+                                        <asp:ListItem Value="1">Morning</asp:ListItem>
+                                        <asp:ListItem Value="2">Evening</asp:ListItem>
+                                        <asp:ListItem Value="3">Night</asp:ListItem>
+                                        <asp:ListItem Value="4">Weekend</asp:ListItem>
+                                        <asp:ListItem Value="5">Gen</asp:ListItem>
+                                    </asp:DropDownList>
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">
+                                    <asp:RadioButtonList ID="RadioButtonList2" runat="server" RepeatDirection="Horizontal">
+                                        <asp:ListItem>Late</asp:ListItem>
+                                        <asp:ListItem>Attendance</asp:ListItem>
+                                    </asp:RadioButtonList>
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">
+                                    <asp:TextBox ID="txtEmpId" runat="server" CssClass="btn2" Width="100px" Visible="False"></asp:TextBox>
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">
+                                    <asp:Button ID="btnPreviewIndividual" runat="server" CssClass="btn2" Text="Report Preview" Width="200px" OnClick="btnPreviewIndividual_Click" Visible="False" />
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">
+                                    <asp:Button ID="btnShowIndividual" runat="server" CssClass="btn2" OnClick="btnShowIndividual_Click" Text="Pick Individual Employe" Width="200px" Visible="False" />
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">
+                                    &nbsp;</td>
+                                <td class="style7">
+                                    &nbsp;</td>
+                                <td class="style4" colspan="2">
+                                    <table style="width: 100%;">
+                                        <tr>
+                                            <td class="style7" width="50px"></td>
+                                            <td class="style4"></td>
+                                            <td class="auto-style1" colspan="2" width="200px">
+                                            </td>
+                                            <td align="left" class="auto-style1" colspan="2">&nbsp; &nbsp;
+                                                </td>
+                                            <td class="auto-style1"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="auto-style4" width="50px">&nbsp;</td>
+                                            <td class="auto-style5">&nbsp;</td>
+                                            <td class="auto-style6" width="200px">                                                
+                                                &nbsp;</td>
+                                            <td align="right" class="auto-style6">&nbsp;&nbsp;</td>
+                                            <td class="auto-style6"></td>
+                                            <td align="left" class="auto-style6">&nbsp;</td>
+                                            <td class="auto-style6"></td>
+                                            <td class="style7"></td>
+                                            <td class="style4"></td>
+                                            <td>&nbsp;<asp:Label ID="lblresult" runat="server" />
+                                                <asp:Button ID="btnShowPopup" runat="server" style="display: none" />
+                                                <ajaxToolkit:ModalPopupExtender ID="ModalPopupExtender1" runat="server" BackgroundCssClass="modalBackground" CancelControlID="btnCancel" PopupControlID="pnlpopup" TargetControlID="btnShowPopup">
+                                                </ajaxToolkit:ModalPopupExtender>
+                                                <asp:Panel ID="pnlpopup" runat="server" BackColor="#ccccff" Height="550px" ScrollBars="Both" style="display: block" Width="725px">
+                                                    <table style="width: 100%;">
+                                                        <tr>
+                                                            <td align="center" class="cpHeader" colspan="6">
+                                                                <asp:Label ID="Label3" runat="server" Text="Employee Details"></asp:Label>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="auto-style7" width="50px">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                            <td align="right" class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                            <td align="right" class="auto-style7" rowspan="5">
+                                                                <asp:GridView ID="grdLoadShiftType" runat="server" AutoGenerateColumns="False" EnableModelValidation="True" GridLines="Horizontal">
+                                                                    <Columns>
+                                                                        <asp:BoundField DataField="Shift Code" HeaderText="Shift Code" />
+                                                                        <asp:TemplateField>
+                                                                            <ItemTemplate>
+                                                                                <asp:Label ID="Label4" runat="server" Text="="></asp:Label>
+                                                                            </ItemTemplate>
+                                                                        </asp:TemplateField>
+                                                                        <asp:BoundField DataField="Shift" HeaderText="Shift" />
+                                                                        <asp:BoundField DataField="From" HeaderText="From" />
+                                                                        <asp:BoundField DataField="To" HeaderText="To" />
+                                                                    </Columns>
+                                                                </asp:GridView>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="auto-style7" width="50px">Department</td>
+                                                            <td class="auto-style7">:</td>
+                                                            <td class="auto-style7">
+                                                                <asp:Label ID="lblShowDept" runat="server"></asp:Label>
+                                                            </td>
+                                                            <td align="right" class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="auto-style7" width="50px">Date</td>
+                                                            <td class="auto-style7">:</td>
+                                                            <td class="auto-style7">
+                                                                <asp:Label ID="LabelShowDate" runat="server"></asp:Label>
+                                                            </td>
+                                                            <td align="right" class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="auto-style7" width="50px">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">
+                                                                <asp:Button ID="btnApply" runat="server" CommandName="Insert" OnClick="btnApply_Click" Text="Apply" Width="80px" CssClass="btn2" />
+                                                                <asp:Button ID="btnCancel" runat="server" Text="Cancel" Width="80px" CssClass="btn2" />
+                                                            </td>
+                                                            <td align="right" class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="auto-style7" width="50px">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                            <td align="right" class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="6">&nbsp;<asp:GridView ID="GridViewShowEmployeePerDept" runat="server" EnableModelValidation="True" OnRowDataBound="GridViewShowEmployeePerDept_RowDataBound" Width="670px" OnSelectedIndexChanged="GridViewShowEmployeePerDept_SelectedIndexChanged">
+                                                                <Columns>
+                                                                    <asp:TemplateField>
+                                                                        <HeaderTemplate>
+                                                                            <asp:CheckBox ID="chkbForSelectALL" runat="server" oncheckedchanged="chkbForSelectALL_CheckedChanged" onclick="checkAll(this);" />
+                                                                        </HeaderTemplate>
+                                                                        <ItemTemplate>
+                                                                            <asp:CheckBox ID="CheckRet" runat="server" />
+                                                                        </ItemTemplate>
+                                                                    </asp:TemplateField>
+                                                                    <asp:TemplateField HeaderText="Shift">
+                                                                        <ItemTemplate>
+                                                                            <asp:CheckBoxList ID="cblForShiftSelect" runat="server" RepeatDirection="Horizontal">
+                                                                                <%--<asp:ListItem Value="1" Enabled="false">A</asp:ListItem>
+                                                                                <asp:ListItem Value="2" Enabled="false">B</asp:ListItem>
+                                                                                <asp:ListItem Value="3" Enabled="false">C</asp:ListItem>--%>
+                                                                                <asp:ListItem Value="4">H</asp:ListItem>
+                                                                                <%--<asp:ListItem Value="5" Enabled="false">G</asp:ListItem>
+                                                                                <asp:ListItem Value="6" Enabled="false">S</asp:ListItem>--%>
+                                                                            </asp:CheckBoxList>
+                                                                        </ItemTemplate>
+                                                                    </asp:TemplateField>
+                                                                </Columns>
+                                                                </asp:GridView>
+                                                            </td>
+                                                            <td>&nbsp;</td>
+                                                            <td>&nbsp;</td>
+                                                            <td></td>
+                                                            <td align="right">&nbsp;</td>
+                                                            <td align="right">&nbsp;</td>
+                                                        </tr>
+                                                    </table>
+                                                </asp:Panel>
+                                            </td>
+                                            <td class="style6">&nbsp;</td>
+                                            <td class="style6">&nbsp;</td>
+                                            <td>&nbsp;&nbsp;&nbsp;</td>
+                                            <td class="style7">&nbsp;<table style="width: 100%;">
+                                                <tr>
+                                                    <td>&nbsp;</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>&nbsp;</td>
+                                                </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="auto-style4" width="50px">&nbsp;</td>
+                                            <td class="auto-style5">&nbsp;</td>
+                                            <td class="auto-style6" width="200px">&nbsp;</td>
+                                            <td align="right" class="auto-style6">&nbsp;</td>
+                                            <td class="auto-style6">&nbsp;</td>
+                                            <td align="left" class="auto-style6">&nbsp;</td>
+                                            <td class="auto-style6">&nbsp;</td>
+                                            <td class="style7">&nbsp;</td>
+                                            <td class="style4">&nbsp;</td>
+                                            <td>&nbsp;</td>
+                                            <td class="style6">&nbsp;</td>
+                                            <td class="style6">&nbsp;</td>
+                                            <td>&nbsp;</td>
+                                            <td class="style7">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="auto-style4" width="50px">&nbsp;</td>
+                                            <td class="auto-style5">&nbsp;</td>
+                                            <td class="auto-style6" width="200px">&nbsp;</td>
+                                            <td align="right" class="auto-style6">&nbsp;</td>
+                                            <td class="auto-style6">&nbsp;</td>
+                                            <td align="left" class="auto-style6">&nbsp;</td>
+                                            <td class="auto-style6">&nbsp;</td>
+                                            <td class="style7">&nbsp;</td>
+                                            <td class="style4">&nbsp;</td>
+                                            <td>
+                                                <asp:Button ID="btnShowPopup1" runat="server" style="display: none" />
+                                                <ajaxToolkit:ModalPopupExtender ID="ModalPopupExtender2" runat="server" BackgroundCssClass="modalBackground" CancelControlID="btnCancel" PopupControlID="pnlpopupemp" TargetControlID="btnShowPopup1">
+                                                </ajaxToolkit:ModalPopupExtender>
+                                                <asp:Panel ID="pnlpopupemp" runat="server" BackColor="#ccccff" Height="550px" ScrollBars="Both" style="display: block" Width="725px">
+                                                    <table style="width: 100%;">
+                                                        <tr>
+                                                            <td align="center" class="auto-style7" colspan="6">
+                                                                <asp:Label ID="Label5" runat="server" Text="Employee Details"></asp:Label>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="auto-style7" width="50px">EmpLoyee ID</td>
+                                                            <td class="auto-style7">:</td>
+                                                            <td class="auto-style7">
+                                                                <asp:Label ID="lblShowEmpId" runat="server"></asp:Label>
+                                                            </td>
+                                                            <td align="right" class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                            <td align="right" class="auto-style7" rowspan="5">
+                                                                <asp:GridView ID="grdLoadShiftType0" runat="server" AutoGenerateColumns="False" EnableModelValidation="True" GridLines="Horizontal">
+                                                                    <Columns>
+                                                                        <asp:BoundField DataField="Shift Code" HeaderText="Shift Code" />
+                                                                        <asp:TemplateField>
+                                                                            <ItemTemplate>
+                                                                                <asp:Label ID="Label6" runat="server" Text="="></asp:Label>
+                                                                            </ItemTemplate>
+                                                                        </asp:TemplateField>
+                                                                        <asp:BoundField DataField="Shift" HeaderText="Shift" />
+                                                                        <asp:BoundField DataField="From" HeaderText="From" />
+                                                                        <asp:BoundField DataField="To" HeaderText="To" />
+                                                                    </Columns>
+                                                                </asp:GridView>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="auto-style7" width="50px">Name</td>
+                                                            <td class="auto-style7">:</td>
+                                                            <td class="auto-style7">
+                                                                <asp:Label ID="lblShowEmp" runat="server"></asp:Label>
+                                                            </td>
+                                                            <td align="right" class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="auto-style7" width="50px">Shift Allocate</td>
+                                                            <td class="auto-style7">:</td>
+                                                            <td class="auto-style7">
+                                                                <asp:Label ID="lblShowadt" runat="server"></asp:Label>
+                                                            </td>
+                                                            <td align="right" class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="auto-style7" width="50px">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">
+                                                                &nbsp;</td>
+                                                            <td align="right" class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="auto-style7" width="50px">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                            <td align="right" class="auto-style7">&nbsp;</td>
+                                                            <td class="auto-style7">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="6">
+                                                                <asp:Button ID="btnApplyIndv" runat="server" CommandName="Insert" CssClass="btn2" OnClick="btnApplyIndv_Click" Text="Apply" Width="80px" />
+                                                                <asp:Button ID="btnCancel0" runat="server" CssClass="btn2" Text="Cancel" Width="80px" />
+                                                            </td>
+                                                            <td>&nbsp;</td>
+                                                            <td>&nbsp;</td>
+                                                            <td>&nbsp;</td>
+                                                            <td align="right">&nbsp;</td>
+                                                            <td align="right">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="6">&nbsp;<asp:GridView ID="GridViewShowEmployeeIndividual" runat="server" EnableModelValidation="True" OnRowDataBound="GridViewShowEmployeeIndividual_RowDataBound" Width="670px" AutoGenerateColumns="false" >
+                                                                <Columns>
+                                                                    <asp:TemplateField>
+                                                                        <HeaderTemplate>
+                                                                            <asp:CheckBox ID="chkbForSelectALL0" runat="server" />
+                                                                        </HeaderTemplate>
+                                                                        <ItemTemplate>
+                                                                            <asp:CheckBox ID="CheckRetIndv" runat="server" />
+                                                                        </ItemTemplate>
+                                                                    </asp:TemplateField>
+                                                                    <asp:TemplateField HeaderText="Shift">
+                                                                        <ItemTemplate>
+                                                                            <asp:CheckBoxList ID="cblForShiftSelectShiftIndv" runat="server" RepeatDirection="Horizontal">
+                                                                                <asp:ListItem Value="1">A</asp:ListItem>
+                                                                                <asp:ListItem Value="2">B</asp:ListItem>
+                                                                                <asp:ListItem Value="3">C</asp:ListItem>
+                                                                                <asp:ListItem Value="4">H</asp:ListItem>
+                                                                                <asp:ListItem Value="5">G</asp:ListItem>
+                                                                                <asp:ListItem Value="6">S</asp:ListItem>
+                                                                            </asp:CheckBoxList>
+                                                                        </ItemTemplate>
+                                                                    </asp:TemplateField>
+
+                                                                    <asp:BoundField ItemStyle-Width="100px" DataField="sDate" HeaderText="Shift Date" DataFormatString = "{0:d}">
+                                                                    <ItemStyle Width="100px"></ItemStyle>
+                                                                    </asp:BoundField>
+                                                                    <asp:BoundField ItemStyle-Width="120px" DataField="DayofWeek" HeaderText="Day of Week">
+                                                                    <ItemStyle Width="120px"></ItemStyle>
+                                                                    </asp:BoundField>
+                                                                     <asp:BoundField ItemStyle-Width="50px" DataField="ShiftID" HeaderText="ID">
+                                                                    <ItemStyle Width="50px"></ItemStyle>
+                                                                    </asp:BoundField>
+                                                                    <asp:BoundField ItemStyle-Width="50px" DataField="Shift" HeaderText="Shift">
+                                                                    <ItemStyle Width="100px"></ItemStyle>
+                                                                    </asp:BoundField>
+                                                                </Columns>
+                                                                </asp:GridView>
+                                                            </td>
+                                                            <td>&nbsp;</td>
+                                                            <td>&nbsp;</td>
+                                                            <td></td>
+                                                            <td align="right">&nbsp;</td>
+                                                            <td align="right">&nbsp;</td>
+                                                        </tr>
+                                                    </table>
+                                                </asp:Panel>
+                                            </td>
+                                            <td class="style6">&nbsp;</td>
+                                            <td class="style6">&nbsp;</td>
+                                            <td>&nbsp;</td>
+                                            <td class="style7">&nbsp;</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="style8">
+                                    &nbsp;</td>
+                                <td class="style7">
+                                    &nbsp;</td>
+                                <td class="style4">
+                                    &nbsp;</td>
+                                <td>
+                                    &nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">
+                                    <asp:Label ID="lblmsgPf" runat="server" ForeColor="#CC0000"></asp:Label>
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8" colspan="3">
+                                    &nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">&nbsp;</td>
+                                <td class="style7">&nbsp;</td>
+                                <td class="style4">&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">
+                                    &nbsp;</td>
+                                <td class="style7">
+                                    &nbsp;</td>
+                                <td class="style4">
+                                    <asp:Label ID="lblmsgSal" runat="server" ForeColor="#CC0000"></asp:Label>
+                                </td>
+                                <td>
+                                    &nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="style8">
+                                    &nbsp;</td>
+                                <td class="style7">
+                                    &nbsp;</td>
+                                <td class="style4">
+                                    <asp:GridView ID="gdvView" runat="server">
+                                    </asp:GridView>
+                                </td>
+                                <td>
+                                    &nbsp;</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td nowrap="nowrap" style="width: 773px; text-align: left" class="tdcell">
+                        &nbsp;</td>
+                </tr>
+            <tr>
+                <td nowrap="nowrap" style="width: 773px; height: 58px; text-align: center">
+               <asp:UpdateProgress ID="sp1" runat="server">
+                        <ProgressTemplate>
+                           <%--<div class="TransparentGrayBackground"> </div>--%>
+                            <asp:Panel  ID="alwaysVisibleAP" runat="server" style="text-align: center" >
+                            
+                                <div style="text-align: center">
+                                    <asp:Image  ID="ajaxLoadNotificationImage" 
+                                                runat="server" 
+                                                ImageUrl="~/image/ajax-loader1.gif" 
+                                                AlternateText="[image]" />
+                                    
+                                </div>
+                            
+                            </asp:Panel>
+                            <ajaxToolKit:AlwaysVisibleControlExtender 
+                                ID="AlwaysVisibleControlExtender" 
+                                runat="server"
+                                TargetControlID="alwaysVisibleAP"
+                                HorizontalSide="Center"
+                                HorizontalOffset="0"
+                                VerticalSide="Middle"
+                                VerticalOffset="0">
+                            </ajaxToolKit:AlwaysVisibleControlExtender>
+                           
+                        </ProgressTemplate>
+                    </asp:UpdateProgress>
+                </td>
+            </tr>
+            <tr>
+                <td nowrap="nowrap" style="width: 773px; text-align: center">
+                    &nbsp;</td>
+            </tr>
+            <tr>
+                <td nowrap="nowrap" style="width: 773px; height: 63px; text-align: center">
+                </td>
+            </tr>
+            <tr>
+                <td nowrap="nowrap" background="../image/bottom.jpg" 
+                    style="text-align: center; width: 772px; height: 20px; margin: 0px;">
+                   
+                </td>
+            </tr>
+            <tr>
+                <td nowrap="nowrap" style="width: 773px; height: 45px; text-align: center">
+                </td>
+            </tr>
+            </table>
+        &nbsp;&nbsp;
+  </ContentTemplate>
+                        <Triggers>
+                        
+                        <%--<asp:AsyncPostBackTrigger ControlID="btnpost" EventName="Click" />
+                        <asp:AsyncPostBackTrigger ControlID="btnsave" EventName="Click" />
+                        <asp:AsyncPostBackTrigger ControlID="ddlcompany" EventName="SelectedIndexChanged" />
+                        <asp:AsyncPostBackTrigger ControlID="btnInclude" EventName="Click" />
+                        <asp:PostBackTrigger ControlID="btnSalreport"/>
+                        <asp:PostBackTrigger ControlID="btnSalreportPosted"/>
+                        <asp:PostBackTrigger ControlID="btnManpowerList"/>
+                        <asp:PostBackTrigger ControlID="btnPaySlip"/>
+                        <asp:PostBackTrigger ControlID="btndeptsal"/>
+                        <asp:PostBackTrigger ControlID="btnCashAdvice"/>
+                        <asp:PostBackTrigger ControlID="btnBankAdvice"/>
+                        <asp:PostBackTrigger ControlID="btnPaySlip"/>                       
+                        <asp:PostBackTrigger ControlID="btnEL"/>
+                        <asp:PostBackTrigger ControlID="btnElpost"/>
+                        <asp:PostBackTrigger ControlID="btnElpreview"/>                                                                                                         
+                        <asp:PostBackTrigger ControlID="btnRefresh"/>   --%>
+                            
+
+                        <asp:PostBackTrigger ControlID="btnPreview"/>   
+                        <asp:PostBackTrigger ControlID="btnShowAttendance"/> 
+                        <asp:PostBackTrigger ControlID="btnSubmitAttendance"/> 
+                        <asp:PostBackTrigger ControlID="btnPreviewIndividual"/>   
+                                                                       
+                        </Triggers>
+                    </asp:UpdatePanel>
+    
+
+            
+    
+ </asp:Panel>
+</asp:Content>

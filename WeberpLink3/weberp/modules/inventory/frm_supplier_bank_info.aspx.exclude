@@ -1,0 +1,305 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_supplier_bank_info.aspx.cs" Inherits="frm_supplier_bank_info"  Title=""   ValidateRequest="false" EnableEventValidation="false"  %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+  
+  <asp:UpdatePanel ID="updpnl" runat="server">
+<ContentTemplate>
+    <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="3" class="heading" style="text-align: center">
+                SUPPLIER BANK ACCOUNT INFORMATION SCREEN</td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width: 197px; height: 22px; text-align: right;">
+                SUPPLIER:</td>
+            <td style="width: 84px; height: 22px">
+            <asp:TextBox ID="txtpartydet" runat="server" 
+                CssClass="txtbox" autocomplete="off" 
+                    Width="499px" AutoPostBack="True" ontextchanged="txtpartydet_TextChanged"></asp:TextBox>
+                     <ajaxToolkit:AutoCompleteExtender
+                                runat="server"                                
+                                ID="autoComplete1" 
+                                BehaviorID="AutoCompleteEx"                                
+                                TargetControlID="txtpartydet"
+                                ServicePath="../commercial/services/autocomplete.asmx" 
+                                ServiceMethod="GetPartyAdrList"
+                                MinimumPrefixLength="1" 
+                                CompletionInterval="100"
+                                EnableCaching="false"
+                                CompletionSetCount="20"                                 
+                                CompletionListCssClass ="autocomplete_completionListElement"                            
+                                CompletionListItemCssClass="autocomplete_listItem" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem"
+                                DelimiterCharacters=","
+                                ShowOnlyCurrentWordInCompletionListItem="true" > 
+                            </ajaxToolkit:AutoCompleteExtender>
+                </td>
+            <td style="width: 174px; height: 22px; text-align: left;">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                
+                <table id="tbldet" runat="server" style="width: 100%;">
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            SUPPLIER CODE</td>
+                        <td style="text-align: left; width: 9px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtcode" runat="server" CssClass="txtbox" 
+                                Width="188px" ReadOnly="True"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            SUPPLIER NAME</td>
+                        <td style="text-align: left; width: 9px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtname" runat="server" CssClass="txtbox" ReadOnly="True" 
+                                Width="455px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 9px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            ADDRESS</td>
+                        <td style="text-align: left; width: 9px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtadd1" runat="server" CssClass="txtbox" Width="455px" 
+                                ReadOnly="True"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 9px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtadd2" runat="server" CssClass="txtbox" Width="455px" 
+                                ReadOnly="True"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 9px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtadd3" runat="server" CssClass="txtbox" Width="455px" 
+                                ReadOnly="True"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 9px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtadd4" runat="server" CssClass="txtbox" Width="455px" 
+                                ReadOnly="True"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 9px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtadd5" runat="server" CssClass="txtbox" Width="455px" 
+                                ReadOnly="True"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 9px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td colspan="3" style="text-align: center; ">
+                            SUPPLIER BANK INFORMATION</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: center; " colspan="3">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            A/C NAME</td>
+                        <td style="text-align: left; width: 9px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtacname" runat="server" CssClass="txtbox" Width="455px"></asp:TextBox>
+                            &nbsp;<span style="color: #FF0000">*</span></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            A/C NO</td>
+                        <td style="text-align: left; width: 9px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtacno" runat="server" CssClass="txtbox" Width="227px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            A/C TYPE</td>
+                        <td style="text-align: left; width: 9px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtactype" runat="server" CssClass="txtbox" Width="227px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            BANK NAME</td>
+                        <td style="text-align: left; width: 9px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtbankname" runat="server" CssClass="txtbox" Width="227px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            BRANCH NAME</td>
+                        <td style="text-align: left; width: 9px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtbranch" runat="server" CssClass="txtbox" Width="227px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            <asp:Label ID="lblupdate" runat="server" ForeColor="Red" 
+                                Text="UPDATED SUCCESSFULLY" Visible="False"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            <asp:Button ID="btnupdate" runat="server" CssClass="btn2" 
+                                onclick="btnupdate_Click" Text="UPDATE" Width="143px" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                </table>
+                
+
+                </td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+    </table>
+    </ContentTemplate>
+    <Triggers>
+   <asp:AsyncPostBackTrigger ControlID="txtpartydet" EventName="TextChanged" />
+   <asp:PostBackTrigger ControlID="btnupdate" />
+    </Triggers>
+</asp:UpdatePanel>
+</asp:Content>
+

@@ -1,0 +1,256 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_prod_info.aspx.cs" Inherits="frm_prod_info"  EnableEventValidation="false" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <asp:UpdatePanel ID="update" runat="server">
+<ContentTemplate>
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                PRODUCTION INFORMATION SCREEN&nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 25px; text-align: center">
+                <table style="width: 84%;">
+                    <tr>
+                        <td style="text-align: left; width: 74px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 187px">
+                            PRODUCTION LIST</td>
+                        <td style="width: 16px">
+                            :</td>
+                        <td style="width: 307px; text-align: left">
+                            <asp:DropDownList ID="ddllist" runat="server" AutoPostBack="True" Width="491px" 
+                                onselectedindexchanged="ddllist_SelectedIndexChanged">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; width: 74px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 187px">
+                            PRODUCTION NAME</td>
+                        <td style="width: 16px">
+                            :</td>
+                        <td style="width: 307px; text-align: left">
+                            <asp:TextBox ID="txtname" runat="server" CssClass="txtbox" Width="491px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; width: 74px">&nbsp;</td>
+                        <td style="text-align: right; width: 187px">Production Type</td>
+                        <td style="width: 16px">:</td>
+                        <td style="width: 307px; text-align: left">
+                            <asp:DropDownList ID="ddltrodtype" runat="server" Width="130px">
+                                <asp:ListItem></asp:ListItem>
+                                <asp:ListItem Value="B">BULK</asp:ListItem>
+                                <asp:ListItem Value="P">BAG</asp:ListItem>
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; width: 74px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 187px">
+                            Power &amp; Utility Std Value</td>
+                        <td style="width: 16px">
+                            :</td>
+                        <td style="width: 307px; text-align: left">
+                            <asp:TextBox ID="txtfodirectval" runat="server" CssClass="txtbox" Width="130px"></asp:TextBox>
+                            <ajaxToolkit:FilteredTextBoxExtender ID="txtfodirectval_FilteredTextBoxExtender" 
+                                runat="server" FilterType="Custom, Numbers" TargetControlID="txtfodirectval" 
+                                ValidChars=".">
+                            </ajaxToolkit:FilteredTextBoxExtender>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; width: 74px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 187px">
+                            Factory overhead Std Value</td>
+                        <td style="width: 16px">
+                            :</td>
+                        <td style="width: 307px; text-align: left">
+                            <asp:TextBox ID="txtfoindirectval" runat="server" CssClass="txtbox"  Width="130px"></asp:TextBox>
+                            <ajaxToolkit:FilteredTextBoxExtender ID="txtfoindirectval_FilteredTextBoxExtender" 
+                                runat="server" FilterType="Custom, Numbers" TargetControlID="txtfoindirectval" 
+                                ValidChars=".">
+                            </ajaxToolkit:FilteredTextBoxExtender>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; width: 74px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 187px">
+                            Power &amp; Utility Code</td>
+                        <td style="width: 16px">
+                            :</td>
+                        <td style="width: 307px; text-align: left">
+                            <asp:TextBox ID="txtfodirect" runat="server" CssClass="txtbox" Width="491px"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="autoComplete1" runat="server" 
+                                BehaviorID="AutoCompleteEx" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetCoa" ServicePath="../commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtfodirect">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; width: 74px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 187px">
+                            Factory overhead Code</td>
+                        <td style="width: 16px">
+                            :</td>
+                        <td style="width: 307px; text-align: left">
+                            <asp:TextBox ID="txtfoindirect" runat="server" CssClass="txtbox" Width="491px"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtfodirect0_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx1" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetCoa" ServicePath="../commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtfoindirect">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; width: 74px; height: 22px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 187px; height: 22px">
+                            DMC Adjustment Code</td>
+                        <td style="width: 16px; height: 22px">
+                            :</td>
+                        <td style="width: 307px; text-align: left; height: 22px">
+                            <asp:TextBox ID="txtrmadjcode" runat="server" CssClass="txtbox" Width="491px"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtfodirect6_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx7" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetCoa" ServicePath="../commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtrmadjcode">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; width: 74px; height: 22px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 187px; height: 22px">
+                            Process Material Adj Code</td>
+                        <td style="width: 16px; height: 22px">
+                            :</td>
+                        <td style="width: 307px; text-align: left; height: 22px">
+                            <asp:TextBox ID="txtpmadjcode" runat="server" CssClass="txtbox" Width="491px"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtfodirect7_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx8" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetCoa" ServicePath="../commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtpmadjcode">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; width: 74px; height: 22px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 187px; height: 22px">
+                            Pack Material Adj Code</td>
+                        <td style="width: 16px; height: 22px">
+                            :</td>
+                        <td style="width: 307px; text-align: left; height: 22px">
+                            <asp:TextBox ID="txtpackadjcode" runat="server" CssClass="txtbox" Width="491px"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txttxtpackadjcode_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx9" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetCoa" ServicePath="../commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtpackadjcode">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; width: 74px; height: 22px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 187px; height: 22px">
+                            &nbsp;</td>
+                        <td style="width: 16px; height: 22px">
+                            &nbsp;</td>
+                        <td style="width: 307px; text-align: left; height: 22px">
+                            <asp:Label ID="lblmsg" runat="server" ForeColor="#CC0000" 
+                                Text="UPDATED SUCCESSFULY" Visible="False"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; width: 74px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 187px">
+                            &nbsp;</td>
+                        <td style="width: 16px">
+                            &nbsp;</td>
+                        <td style="width: 307px; text-align: left">
+                            <asp:Button ID="btnupdate" runat="server" CssClass="btn2" Text="UPDATE" 
+                                Width="112px" onclick="btnupdate_Click" Visible="False" />
+                        </td>
+                    </tr>
+                </table>
+                </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 34px; text-align: left">
+                
+                
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 22px; text-align: left">
+                
+                
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+    </ContentTemplate>
+    <Triggers>
+    <asp:AsyncPostBackTrigger ControlID="btnupdate" EventName="Click" />
+    <asp:AsyncPostBackTrigger ControlID="ddllist" EventName="SelectedIndexChanged" />
+    
+    </Triggers>
+</asp:UpdatePanel>
+
+</asp:Content>
+

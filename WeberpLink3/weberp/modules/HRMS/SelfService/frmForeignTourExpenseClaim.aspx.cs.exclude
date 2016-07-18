@@ -1,0 +1,202 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class modules_HRMS_SelfService_frmForeignTourExpenseClaim : System.Web.UI.Page
+{
+    string _connectionString = System.Configuration.ConfigurationManager.AppSettings["UbasysConnectionString"].ToString();
+    private ForeignTourExpenseClaim _objForeignTourExpenseClaim;
+    private ForeignTourExpenseClaimController _objForeignTourExpenseClaimController;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            clsStatic.CheckUserAuthentication(true);
+            if (!Page.IsPostBack)
+            {
+                LoadEmployeeInformation(Session[StaticData.sessionUserId].ToString());
+
+            }
+
+        }
+        catch (Exception msgException)
+        {
+
+            MessageBox1.ShowError(msgException.Message);
+        }
+
+    }
+    private void LoadEmployeeInformation(string employeeCode)
+    {
+        try
+        {
+            CommonMethods objCommonMethods = new CommonMethods();
+            var dt = DataProcess.GetData(_connectionString, objCommonMethods.SqlEmployeeInformation(employeeCode));
+            if (dt.Rows.Count > 0)
+            {
+                lblId.Text = dt.Rows[0]["EmpID"].ToString();
+                lblName.Text = dt.Rows[0]["EmpName"].ToString();
+                lbldept.Text = dt.Rows[0]["Dept"].ToString();
+                lblDesignation.Text = dt.Rows[0]["Designation"].ToString();
+                lblJoiningDate.Text = dt.Rows[0]["Joiningdate"].ToString().Substring(0, 10);
+            }
+
+        }
+        catch (Exception msgException)
+        {
+
+            throw msgException;
+        }
+    }
+    protected void btnApply_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            ApplyForExpenseBill();
+            ClearControll();
+
+        }
+        catch (Exception msgException)
+        {
+
+            MessageBox1.ShowError(msgException.Message);
+        }
+    }
+
+    private void ApplyForExpenseBill()
+    {
+        try
+        {
+            LeaveProcess lvp = new LeaveProcess();
+            string transactionNo = lvp.GetTransactionNo(_connectionString);
+            bool checkAdvanceReceived = true;
+            _objForeignTourExpenseClaim = new ForeignTourExpenseClaim();
+            _objForeignTourExpenseClaim.AccommodationNoofDays = txtAccommodationDays.Text == string.Empty ? 0 : Convert.ToSingle(txtAccommodationDays.Text);
+            _objForeignTourExpenseClaim.ActualClaimAmount = txtActualClaimAmountBDT.Text == string.Empty ? 0 : Convert.ToDecimal(txtActualClaimAmountBDT.Text);
+            _objForeignTourExpenseClaim.AdvanceReceived = txtAdvancedReceivedBDT.Text == string.Empty ? 0 : Convert.ToDecimal(txtAdvancedReceivedBDT.Text);
+            if (txtAdvancedReceivedDate.Text != string.Empty)
+            {
+                _objForeignTourExpenseClaim.AdvanceReceivedDate = Convert.ToDateTime(txtAdvancedReceivedDate.Text);
+
+            }
+
+            _objForeignTourExpenseClaim.DateClaim = Convert.ToDateTime(txtDateofDeparture.Text);
+            _objForeignTourExpenseClaim.EntryUser = current.UserId;
+            _objForeignTourExpenseClaim.ApplicantCode = lblId.Text;
+            _objForeignTourExpenseClaim.TransactionNo = transactionNo;
+            _objForeignTourExpenseClaim.ProcessCode = "P007";
+            _objForeignTourExpenseClaim.ProcessFlowCode = "7";
+            _objForeignTourExpenseClaim.ProcessLevelCode = 10;
+            _objForeignTourExpenseClaim.ProcessTypeCode = "FT";
+            _objForeignTourExpenseClaim.PurposeofClaim = txtPurpose.Text == string.Empty ? null : txtPurpose.Text;
+
+            CommonMethods objCommonMethods = new CommonMethods();
+            _objForeignTourExpenseClaim.DepartureTime = objCommonMethods.TimeFormatGenerate(timeofDeparture.Date.Hour.ToString() + ":" + timeofDeparture.Date.Minute.ToString() + ":" + timeofDeparture.AmPm.ToString());
+            _objForeignTourExpenseClaim.ArrivalDate = Convert.ToDateTime(txtDateofArrival.Text);
+            _objForeignTourExpenseClaim.ArrivalTime = objCommonMethods.TimeFormatGenerate(timeofArrival.Date.Hour.ToString() + ":" + timeofArrival.Date.Minute.ToString() + ":" + timeofArrival.AmPm.ToString());
+            _objForeignTourExpenseClaim.NetClaim = txtNetClaimBDT.Text == string.Empty ? 0 : Convert.ToDecimal(txtNetClaimBDT.Text);
+            _objForeignTourExpenseClaim.DailyAllowanceNoofDays = txtAllowanceDays.Text == string.Empty ? 0 : Convert.ToSingle(txtAllowanceDays.Text);
+            _objForeignTourExpenseClaim.VendorTour = txtVendor.Text == string.Empty ? null : txtVendor.Text;
+            _objForeignTourExpenseClaim.PlaceofTour = txtPlaceofTour.Text == string.Empty ? null : txtPlaceofTour.Text;
+            _objForeignTourExpenseClaim.Country = txtCountry.Text == string.Empty ? null : txtCountry.Text;
+            _objForeignTourExpenseClaim.DepartureFlight = txtDepartureFlight.Text == string.Empty ? null : txtDepartureFlight.Text;
+            _objForeignTourExpenseClaim.ArrivalFlight = txtArrivalFlight.Text == string.Empty ? null : txtArrivalFlight.Text;
+            if (txtDurationDays.Text != string.Empty)
+            {
+                _objForeignTourExpenseClaim.DurationDaysTour = Convert.ToSingle(txtDurationDays.Text);
+
+            }
+            
+            
+            for (int expenditureArea = 1; expenditureArea <= 5; expenditureArea++)
+            {
+                _objForeignTourExpenseClaim.TransactionNoLineNo = expenditureArea;
+                switch (expenditureArea)
+                {
+                    case 1:
+                        {
+                            _objForeignTourExpenseClaim.ExpenditureArea = lblExpenditure1.Text;
+                            _objForeignTourExpenseClaim.AmountCost = txtAmountExpenditure1.Text == string.Empty ? 0 : Convert.ToDecimal(txtAmountExpenditure1.Text);
+                            break;
+
+                        }
+                    case 2:
+                        {
+                            _objForeignTourExpenseClaim.ExpenditureArea = lblExpenditure2.Text;
+                            _objForeignTourExpenseClaim.AmountCost = txtAmountExpenditure2.Text == string.Empty ? 0 : Convert.ToDecimal(txtAmountExpenditure2.Text);
+                            break;
+
+                        }
+                    case 3:
+                        {
+                            var allowanceDays = txtAllowanceDays.Text == string.Empty ? " " : txtAllowanceDays.Text;
+                            _objForeignTourExpenseClaim.ExpenditureArea = lblExpenditure3_1.Text + " " + allowanceDays + lblExpenditure3_2.Text;
+                            _objForeignTourExpenseClaim.AmountCost = txtAmountExpenditure3.Text == string.Empty ? 0 : Convert.ToDecimal(txtAmountExpenditure3.Text);
+                            break;
+                        }
+                    case 4:
+                        {
+                            var accommodation = txtAccommodationDays.Text == string.Empty ? " " : txtAccommodationDays.Text;
+                            _objForeignTourExpenseClaim.ExpenditureArea = lblExpenditure4_1.Text + " " + accommodation + lblExpenditure4_2.Text;
+                            _objForeignTourExpenseClaim.AmountCost = txtAmountExpenditure4.Text == string.Empty ? 0 : Convert.ToDecimal(txtAmountExpenditure4.Text);
+                            break;
+                        }
+                    default:
+                        {
+                            _objForeignTourExpenseClaim.ExpenditureArea = lblExpenditure5.Text;
+                            _objForeignTourExpenseClaim.AmountCost = txtAmountExpenditure5.Text == string.Empty ? 0 : Convert.ToDecimal(txtAmountExpenditure5.Text);
+                            break;
+                        }
+                }
+
+                _objForeignTourExpenseClaimController = new ForeignTourExpenseClaimController();
+                _objForeignTourExpenseClaimController.ApplyForExpense(_connectionString, _objForeignTourExpenseClaim);
+
+                if (checkAdvanceReceived == true)
+                {
+                    _objForeignTourExpenseClaimController.SaveDetailsInformaton(_connectionString, _objForeignTourExpenseClaim);
+                    checkAdvanceReceived = false;
+                }
+
+
+            }
+
+        }
+        catch (Exception msgException)
+        {
+            
+            throw msgException;
+        }
+    }
+
+    private void ClearControll()
+    {
+        txtAllowanceDays.Text = string.Empty;
+        txtActualClaimAmountBDT.Text = string.Empty;
+        txtAdvancedReceivedBDT.Text = string.Empty;
+        txtAdvancedReceivedDate.Text = string.Empty;
+        txtAccommodationDays.Text = string.Empty;
+        txtAmountExpenditure1.Text = string.Empty;
+        txtAmountExpenditure2.Text = string.Empty;
+        txtAmountExpenditure3.Text = string.Empty;
+        txtAmountExpenditure4.Text = string.Empty;
+        txtAmountExpenditure5.Text = string.Empty;
+        txtDateofArrival.Text = string.Empty;
+        txtDateofDeparture.Text = string.Empty;        
+        txtNetClaimBDT.Text = string.Empty;
+        txtPlaceofTour.Text = string.Empty;
+        txtCountry.Text = string.Empty;
+        txtVendor.Text = string.Empty;
+        txtDepartureFlight.Text = string.Empty;
+        txtArrivalFlight.Text = string.Empty;
+        txtDurationDays.Text = string.Empty;
+        txtPurpose.Text = string.Empty;
+    }
+    protected void btnClear_Click(object sender, EventArgs e)
+    {
+        ClearControll();
+    }
+}

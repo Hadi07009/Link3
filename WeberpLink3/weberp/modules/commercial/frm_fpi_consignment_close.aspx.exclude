@@ -1,0 +1,98 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_fpi_consignment_close.aspx.cs" Inherits="frm_fpi_consignment_close" Title=""   %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+
+<%@ Register assembly="eWorld.UI.Compatibility" namespace="eWorld.UI.Compatibility" tagprefix="ew1" %>
+<%@ Register src="usercontrols/ctl_fpi_consign_sum.ascx" tagname="ctl_fpi_consign_sum" tagprefix="uc1" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+<table id="tbltop" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" style="text-align: center; font-family: verdana; font-style: normal; font-weight: bold; font-size: 9pt; color: #FFFFFF;">
+                LC CONSIGNMENT CLOSE SCREEN</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+           
+                PENDING LIST(<asp:Label ID="lblpcount" runat="server" Text="Label"></asp:Label>
+                ) :
+                <asp:DropDownList ID="ddlpolist" runat="server" Width="600px" 
+                    AutoPostBack="True" CssClass="txtbox" 
+                    onselectedindexchanged="ddlpolist_SelectedIndexChanged">
+                </asp:DropDownList>
+                   
+            </td>
+        </tr>
+        </table>
+         
+         <asp:UpdatePanel ID= "updall" runat="server">
+         <ContentTemplate>
+        <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="text-align: center">
+                &nbsp;</td>
+        </tr>
+
+
+
+         <tr>
+          <td class="tbl" style="height: 24px; text-align: center">
+                
+                   
+               
+              <asp:PlaceHolder ID="ph" runat="server"></asp:PlaceHolder>
+             </td>
+        </tr>
+
+
+
+       
+            <tr>
+                <td class="tbl" style="height: 24px; text-align: center">&nbsp;</td>
+            </tr>
+
+
+
+       
+            <tr>
+                <td class="tbl" style="height: 24px; text-align: center">
+                    <asp:Button ID="btn_lc_con_close" runat="server"  Text="LC CONSIGNMENT CLOSE" Width="181px" OnClick="btn_lc_con_close_Click" />
+                </td>
+            </tr>
+
+
+
+       
+   <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+
+                            &nbsp;</td>
+        </tr>
+
+       
+        
+
+
+    </table>
+
+
+     </ContentTemplate>
+         <Triggers>
+           <asp:AsyncPostBackTrigger ControlID="ddlpolist" EventName="SelectedIndexChanged" />
+             
+             <asp:AsyncPostBackTrigger ControlID="btn_lc_con_close" EventName="Click" />
+           
+           
+          
+           
+         </Triggers>
+         </asp:UpdatePanel>
+</asp:Content>
+

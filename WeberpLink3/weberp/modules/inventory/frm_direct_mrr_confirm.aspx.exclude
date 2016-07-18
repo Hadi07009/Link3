@@ -1,0 +1,488 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_direct_mrr_confirm.aspx.cs" Inherits="frm_direct_mrr_confirm" Title=""   EnableEventValidation="false" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register Assembly="eWorld.UI, Version=2.0.6.2393, Culture=neutral, PublicKeyToken=24d65337282035f2"
+    Namespace="eWorld.UI" TagPrefix="ew" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <asp:UpdatePanel ID="updgrid" runat="server">
+ <ContentTemplate>
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px" colspan="2">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="4" style="text-align: center">
+                DIRECT MATERIAL RECEIVE CONFIRM</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 24px; text-align: right">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 24px; text-align: center">
+                &nbsp;&nbsp;<table style="width:100%;">
+                    <tr>
+                        <td style="width: 99px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 88px">
+                            Party</td>
+                        <td style="width: 8px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtpartyDet" runat="server" CssClass="txtbox" ReadOnly="True" 
+                                Width="523px"></asp:TextBox>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 99px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 88px">
+                            Sub Party/LC</td>
+                        <td style="width: 8px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtSubparty" runat="server" CssClass="txtbox" ReadOnly="True" 
+                                Width="523px"></asp:TextBox>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 99px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 88px">
+                            Carring Cost</td>
+                        <td style="width: 8px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtcarcost" runat="server" CssClass="txtbox" ReadOnly="True" 
+                                Width="91px"></asp:TextBox>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 99px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 88px">
+                            Carring Acc</td>
+                        <td style="width: 8px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtcarcode" runat="server" CssClass="txtbox" ReadOnly="True" 
+                                Width="523px"></asp:TextBox>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 99px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 88px">
+                            Carring Anal</td>
+                        <td style="width: 8px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtcaranal" runat="server" CssClass="txtbox" ReadOnly="True" 
+                                Width="523px"></asp:TextBox>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 99px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 88px">
+                            &nbsp;</td>
+                        <td style="width: 8px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                </table>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+                &nbsp;</td>
+            <td class="tbl" colspan="2" style="height: 24px; text-align: left">
+                &nbsp;</td>
+            <td class="tbl" style="height: 24px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+                UNIT:
+                <asp:Label ID="lblunit" runat="server" Font-Bold="False"></asp:Label>
+            </td>
+            <td class="tbl" colspan="2" style="height: 24px; text-align: left">
+                Date:
+                <asp:Label ID="lbldate" runat="server" Font-Bold="False" Text="Label"></asp:Label>
+            </td>
+            <td class="tbl" style="height: 24px; text-align: left">
+                PO Ref:
+                <asp:Label ID="lblporef" runat="server" Font-Bold="False" Text="Label"></asp:Label>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="2" style="height: 24px; text-align: left">
+                TOTAL AMOUNT:
+                <asp:Label ID="lbltotamnt" runat="server" Font-Bold="True" Text="Label"></asp:Label>
+            </td>
+            <td class="tbl" style="height: 24px; text-align: left">
+                EMP CODE:
+                <asp:Label ID="lblempcode" runat="server" Font-Bold="False" Text="Label"></asp:Label>
+            </td>
+            <td class="tbl" style="height: 24px; text-align: left">
+                PO Type:
+                <asp:Label ID="lblpotype" runat="server" Font-Bold="False" Text="Label"></asp:Label>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 34px; text-align: left">
+                
+                
+                <asp:GridView ID="gdItem" runat="server" 
+                    BackColor="White" BorderColor="#41519A" BorderStyle="Solid" BorderWidth="1px" 
+                    CellPadding="4" ForeColor="#333333" GridLines="None" 
+                    PageSize="100" SkinID="GridView" 
+                    style="border-color: #e6e6fa; border-width: 1px; text-align: left;" 
+                    Width="98%">
+                    <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                    <SelectedRowStyle Font-Bold="True" />
+                    <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <EditRowStyle BackColor="#2461BF" />
+                    <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" 
+                        Font-Underline="False" />
+                    <RowStyle Font-Size="8pt" />
+                  
+                </asp:GridView>
+                
+                
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 22px; text-align: center">
+            
+             <asp:Panel ID="Panel4" runat="server" BorderStyle="Solid" BorderWidth="2px" CssClass="tbl"
+                    DefaultButton="btncancel" Height="200px" ScrollBars="Auto"  Style="border-right: black 2px solid;
+                    padding-right: 20px; border-top: black 2px solid; padding-left: 20px; display:none;
+                    padding-bottom: 20px;  border-left: black 2px solid; padding-top: 20px; border-bottom: black 2px solid;
+                    background-color: white" Width="329px">
+                    <div style="border-color: #e6e6fa; border-width: 1px;
+                                                width: 94%; height: 177px; text-align: center; ">
+                        &nbsp;&nbsp;<table id="tblmsg" runat="server" style="width: 286px">
+                        <tr>
+                            <td colspan="1" style="width: 364px; height: 18px; text-align: center">
+                                <span style="color: #ff0000"><strong>&nbsp;MATERIAL RECEIVED SUCCESSFULLY</strong></span></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 364px; height: 13px">
+                            </td>
+                        </tr>
+                            
+                            <tr>
+                                <td colspan="1" style="height: 19px; text-align: center; width: 364px;">
+                                    REF:<asp:Label ID="lbllogref" runat="server" Font-Bold="True" Width="162px"></asp:Label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="1" style="height: 19px; text-align: left; width: 364px;">
+                                    &nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td colspan="1" style="width: 364px; height: 29px; text-align: center">
+                                    <asp:Button ID="Button1" runat="server" CssClass="btn2" Width="0px" Height="0px" />
+                                     <asp:Button ID="btncancelhdn" runat="server" Width="0px" Height="0px" 
+                                        CssClass="hdn" />
+                                    <asp:Button ID="btnok" runat="server" CssClass="btn2" OnClick="btnok_Click" Text="OK"
+                                        Width="102px" />
+                                       
+                                        </td>
+                            </tr>
+                    </table>
+                    </div>
+                </asp:Panel>
+                <ajaxToolkit:ConfirmButtonExtender ID="ConfirmButtonExtender5" runat="server" DisplayModalPopupID="ModalPopupExtender5"
+                    TargetControlID="Button1">
+                </ajaxToolkit:ConfirmButtonExtender>
+                <ajaxToolkit:ModalPopupExtender ID="ModalPopupExtender5" runat="server" BackgroundCssClass="modalBackground"
+                    CancelControlID="btncancelhdn" PopupControlID="Panel4" TargetControlID="Button1">
+                </ajaxToolkit:ModalPopupExtender> 
+                <asp:Button ID="Button2" runat="server" Text="Button" Visible="False" />
+            
+               
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 22px; text-align: left">
+                 <asp:Panel ID="lc_HeaderPanel" runat="server" style="cursor: pointer;">
+                                    <div class="heading">
+                                        <asp:ImageButton ID="lc_ToggleImage" runat="server" ImageUrl="~/images/collapse.jpg" AlternateText="collapse" />
+                                        EXTRA INFORMATION
+                                    </div>
+                                </asp:Panel>
+                </td>
+        </tr>
+        <tr>
+            <td class="cpe" colspan="4" style="height: 22px; text-align: left">
+                 <asp:Panel id="lc_ContentPanel" runat="server" Height="0px" style="overflow:hidden;">   
+                            <table ID="tblextinfo" runat="server" style="width:100%;">
+                                <tr>
+                                    <td style="width: 101px">
+                                        MPR NO</td>
+                                    <td style="width: 14px">
+                                        :</td>
+                                    <td>
+                                        <asp:TextBox ID="txtmprno" runat="server" CssClass="txtbox" Width="103px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 115px">
+                                        L/C NO</td>
+                                    <td style="width: 13px">
+                                        :</td>
+                                    <td>
+                                        <asp:TextBox ID="txtlcdet" runat="server" CssClass="txtbox" Width="393px" 
+                                            Font-Size="Smaller"></asp:TextBox>
+                                    
+                                    <ajaxToolkit:AutoCompleteExtender
+                                runat="server"                                
+                                ID="autoComplete1" 
+                                BehaviorID="AutoCompleteEx2"                                
+                                TargetControlID="txtlcdet"
+                                ServicePath="../commercial/services/autocomplete.asmx" 
+                                ServiceMethod="GetLC"
+                                MinimumPrefixLength="3" 
+                                CompletionInterval="1000"
+                                EnableCaching="false"
+                                CompletionSetCount="20"                                 
+                                CompletionListCssClass ="autocomplete_completionListElement"                            
+                                CompletionListItemCssClass="autocomplete_listItem" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem"
+                                DelimiterCharacters=","
+                                UseContextKey="true"
+                                ShowOnlyCurrentWordInCompletionListItem="true" > 
+                            </ajaxToolkit:AutoCompleteExtender>
+                                    </td>
+                                    <td>
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 101px">
+                                        MPR DATE</td>
+                                    <td style="width: 14px">
+                                        :</td>
+                                    <td>
+                                        <ew:CalendarPopup ID="cldmprdate" runat="server" 
+                                            Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="87px">
+                                            <ButtonStyle CssClass="btn2" />
+                                        </ew:CalendarPopup>
+                                    </td>
+                                    <td style="width: 115px">
+                                        L/C DATE</td>
+                                    <td style="width: 13px">
+                                        :</td>
+                                    <td>
+                                        <ew:CalendarPopup ID="cldlcdate" runat="server" 
+                                            Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="87px">
+                                            <ButtonStyle CssClass="btn2" />
+                                        </ew:CalendarPopup>
+                                    </td>
+                                    <td>
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 101px">
+                                        PO NO</td>
+                                    <td style="width: 14px">
+                                        :</td>
+                                    <td>
+                                        <asp:TextBox ID="txtpono" runat="server" CssClass="txtbox" Width="103px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 115px">
+                                        BANK NAME</td>
+                                    <td style="width: 13px">
+                                        :</td>
+                                    <td>
+                                        <asp:TextBox ID="txtbankname" runat="server" CssClass="txtbox" Width="103px"></asp:TextBox>
+                                    </td>
+                                    <td>
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 101px">
+                                        PO DATE</td>
+                                    <td style="width: 14px">
+                                        :</td>
+                                    <td>
+                                        <ew:CalendarPopup ID="cldpodate" runat="server" 
+                                            Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="87px">
+                                            <ButtonStyle CssClass="btn2" />
+                                        </ew:CalendarPopup>
+                                    </td>
+                                    <td style="width: 115px">
+                                        BRANCH NAME</td>
+                                    <td style="width: 13px">
+                                        :</td>
+                                    <td>
+                                        <asp:TextBox ID="txtbrancename" runat="server" CssClass="txtbox" Width="103px"></asp:TextBox>
+                                    </td>
+                                    <td>
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 101px">
+                                        MODE OF DEL</td>
+                                    <td style="width: 14px">
+                                        :</td>
+                                    <td>
+                                        <asp:TextBox ID="txtmodeofdel" runat="server" CssClass="txtbox" Width="103px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 115px">
+                                        MO VESS NAME</td>
+                                    <td style="width: 13px">
+                                        :</td>
+                                    <td>
+                                        <asp:TextBox ID="txtmovessname" runat="server" CssClass="txtbox" Width="103px"></asp:TextBox>
+                                    </td>
+                                    <td>
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 101px">
+                                        CHALLAN NO</td>
+                                    <td style="width: 14px">
+                                        :</td>
+                                    <td>
+                                        <asp:TextBox ID="txtcertno" runat="server" CssClass="txtbox" Width="103px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 115px">
+                                        DELIVERY DATE</td>
+                                    <td style="width: 13px">
+                                        :</td>
+                                    <td>
+                                        <ew:CalendarPopup ID="cldarrdate" runat="server" 
+                                            Culture="English (United Kingdom)" DisableTextBoxEntry="False" 
+                                            Width="87px">
+                                            <ButtonStyle CssClass="btn2" />
+                                        </ew:CalendarPopup>
+                                    </td>
+                                    <td>
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 101px">
+                                        CHALLAN DATE</td>
+                                    <td style="width: 14px">
+                                        :</td>
+                                    <td>
+                                        <ew:CalendarPopup ID="cldcertdate" runat="server" 
+                                            Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="87px">
+                                            <ButtonStyle CssClass="btn2" />
+                                        </ew:CalendarPopup>
+                                    </td>
+                                    <td style="width: 115px">
+                                        &nbsp;</td>
+                                    <td style="width: 13px">
+                                        &nbsp;</td>
+                                    <td>
+                                        &nbsp;</td>
+                                    <td>
+                                        &nbsp;</td>
+                                </tr>
+                            </table>
+                              </asp:Panel>
+
+                                          <ajaxToolkit:CollapsiblePanelExtender ID="cpelc" runat="Server"
+                                            TargetControlID="lc_ContentPanel"
+                                            ExpandControlID="lc_HeaderPanel"
+                                            CollapseControlID="lc_HeaderPanel"
+                                            Collapsed="True"
+                                            SuppressPostBack="True"
+                                            ExpandedImage="~/images/collapse.jpg"
+                                            CollapsedImage="~/images/expand.jpg"
+                                            ImageControlID="lc_ToggleImage" /> 
+                </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 22px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 22px; text-align: center">
+                Remarks (If any):
+                <asp:TextBox ID="txtcomm" runat="server" CssClass="txtbox" Width="454px"></asp:TextBox>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 22px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 8px; text-align: center">
+                <asp:Button ID="btnCancel" runat="server" CssClass="btn2" Text="Cancel" 
+                    Width="121px" onclick="btnCancel_Click" />
+                &nbsp;<asp:Button ID="btnconfirm" runat="server" CssClass="btn2" Text="Confirm" 
+                    Width="121px" onclick="btnconfirm_Click" />
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 8px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+</ContentTemplate>                
+</asp:UpdatePanel>
+ <script type="text/javascript">
+
+
+         function ColorRow(CheckBoxObj) {
+             if (CheckBoxObj.checked == true) {
+                 CheckBoxObj.parentElement.parentElement.style.backgroundColor = '#88AAFF';
+             }
+             else {
+                 CheckBoxObj.parentElement.parentElement.style.backgroundColor = '#F8E5A1';
+             }
+
+         }
+         
+         function ShowHideField(DecisionControl, ToggleControl1) {
+
+             if (DecisionControl.checked == true) {
+                 ToggleControl1.style.visibility = 'visible';                 
+             }
+             else 
+             {
+                 ToggleControl1.style.visibility = 'hidden';                 
+             }
+
+         }
+
+         
+        
+    </script>
+</asp:Content>
+

@@ -1,0 +1,64 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "weberp", "weberp", "{FE39CE81-2E50-48E7-A9F8-DF585FE9E10B}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		ProjectReferences = "{c386bff1-c557-4a4f-8077-d04bded3448b}|LibraryDAL.dll;{ed45a073-bca8-4d60-9fea-803ffc3b4dc8}|LibraryPAY.dll;{9e8b9c1a-45de-468b-8d84-214b53d23aed}|ProudMonkey.Common.Controls.dll;{36b13c50-de66-4449-b6e6-dc9e36d158db}|LibraryPF.dll;"
+		Debug.AspNetCompiler.VirtualPath = "/weberp"
+		Debug.AspNetCompiler.PhysicalPath = "weberp\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\weberp\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/weberp"
+		Release.AspNetCompiler.PhysicalPath = "weberp\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\weberp\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "31303"
+		VWDDynamicPort = "false"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryDAL", "LibraryDAL\LibraryDAL.csproj", "{C386BFF1-C557-4A4F-8077-D04BDED3448B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryPAY", "LibraryPAY\LibraryPAY.csproj", "{ED45A073-BCA8-4D60-9FEA-803FFC3B4DC8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomizeMessage", "ControlLibrary\CustomizeMessage.csproj", "{9E8B9C1A-45DE-468B-8D84-214B53D23AED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryPF", "LibraryPF\LibraryPF.csproj", "{36B13C50-DE66-4449-B6E6-DC9E36D158DB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FE39CE81-2E50-48E7-A9F8-DF585FE9E10B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE39CE81-2E50-48E7-A9F8-DF585FE9E10B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE39CE81-2E50-48E7-A9F8-DF585FE9E10B}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE39CE81-2E50-48E7-A9F8-DF585FE9E10B}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{C386BFF1-C557-4A4F-8077-D04BDED3448B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C386BFF1-C557-4A4F-8077-D04BDED3448B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C386BFF1-C557-4A4F-8077-D04BDED3448B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C386BFF1-C557-4A4F-8077-D04BDED3448B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED45A073-BCA8-4D60-9FEA-803FFC3B4DC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED45A073-BCA8-4D60-9FEA-803FFC3B4DC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED45A073-BCA8-4D60-9FEA-803FFC3B4DC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED45A073-BCA8-4D60-9FEA-803FFC3B4DC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E8B9C1A-45DE-468B-8D84-214B53D23AED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E8B9C1A-45DE-468B-8D84-214B53D23AED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E8B9C1A-45DE-468B-8D84-214B53D23AED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E8B9C1A-45DE-468B-8D84-214B53D23AED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36B13C50-DE66-4449-B6E6-DC9E36D158DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36B13C50-DE66-4449-B6E6-DC9E36D158DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36B13C50-DE66-4449-B6E6-DC9E36D158DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36B13C50-DE66-4449-B6E6-DC9E36D158DB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

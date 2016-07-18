@@ -1,0 +1,182 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+
+public partial class frm_jv_code_det: System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+        clsStatic.MsgConfirmBox(btnsave, "Are you sure to save ?");
+
+        if (!Page.IsPostBack)
+        {            
+           
+            load_all_trn_type();
+            load_data();
+           
+        }
+        else
+        {
+
+        }
+        
+    }
+
+    private void load_data()
+    {
+        tbl_jv_code_detTableAdapter jv = new tbl_jv_code_detTableAdapter();
+        SCBL2DataSet.tbl_jv_code_detDataTable dt = new SCBL2DataSet.tbl_jv_code_detDataTable();
+        dt = jv.GetAllData();
+
+        DataTable dtt = new DataTable();
+        
+        dtt.Columns.Add("TYPE", typeof(string));
+        dtt.Columns.Add("PLANT", typeof(string));
+        dtt.Columns.Add("DBT CODE (RM)", typeof(string));
+        dtt.Columns.Add("DBT CODE", typeof(string));
+        dtt.Columns.Add("CRD CODE", typeof(string));
+
+        foreach (SCBL2DataSet.tbl_jv_code_detRow dr in dt.Rows)
+        {
+            dtt.Rows.Add(dr.pur_type, dr.mrr_type, dr.dbt_acc_rm_code, dr.dbt_acc_code, dr.crd_acc_code);
+        }
+
+
+        gddetail.DataSource = dtt;
+        gddetail.DataBind();
+
+    }
+    
+    
+    private void load_all_trn_type()    
+    {
+        ListItem lst;
+       
+        SCBLDataSet.App_Type_DetDataTable appdt = new SCBLDataSet.App_Type_DetDataTable();
+        tbl_trn_detTableAdapter trn = new tbl_trn_detTableAdapter();
+        SCBLDataSet.tbl_trn_detDataTable dt = new SCBLDataSet.tbl_trn_detDataTable();
+
+
+
+        dt = trn.GetAllCodeByType("IN");
+
+        ddltype.Items.Clear();
+        ddltype.Items.Add("");
+
+        foreach (SCBLDataSet.tbl_trn_detRow dr in dt.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.trn_code.ToString();
+            lst.Text = dr.trn_code.ToString() +": " + dr.trn_det.ToString(); ;
+            ddltype.Items.Add(lst);
+        }
+
+
+       
+
+       
+
+    }
+
+
+    
+    protected void ddltype_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        get_data();
+
+    }
+    protected void ddlpurtype_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        get_data();
+    }
+
+    private void get_data()
+    {
+        tbl_jv_code_detTableAdapter jv = new tbl_jv_code_detTableAdapter();
+        SCBL2DataSet.tbl_jv_code_detDataTable dt = new SCBL2DataSet.tbl_jv_code_detDataTable();
+
+        string pur = ddlpurtype.SelectedValue.ToString();
+        string plant = ddltype.SelectedValue.ToString();
+        if ((pur == "") || (plant == "")) 
+        {
+            txtdcoderm.Text = "";
+            txtdcode.Text = "";
+            txtccode.Text = "";
+            return; 
+        }
+        dt = jv.GetDataByPurMrr(pur, plant);
+        if (dt.Rows.Count == 0)
+        {
+            txtdcoderm.Text = "";
+            txtdcode.Text = "";
+            txtccode.Text = "";
+        }
+        else
+        {
+            txtdcoderm.Text = dt[0].dbt_acc_rm_code;
+            txtdcode.Text = dt[0].dbt_acc_code;
+            txtccode.Text = dt[0].crd_acc_code;
+        }
+
+    }
+    
+    protected void btnsave_Click(object sender, EventArgs e)
+    {
+        tbl_jv_code_detTableAdapter jv = new tbl_jv_code_detTableAdapter();
+
+        string pur = ddlpurtype.SelectedValue.ToString();
+        string plant = ddltype.SelectedValue.ToString();
+
+        if ((pur == "") || (plant == "")) return;
+
+        if (jv.GetDataByPurMrr(pur, plant).Rows.Count == 0)
+            jv.InsertDet(pur, plant, txtdcoderm.Text, txtdcode.Text, txtccode.Text);
+        else
+            jv.UpdateDet(txtdcoderm.Text, txtdcode.Text, txtccode.Text, pur, plant);
+
+        txtdcoderm.Text = "";
+        txtdcode.Text = "";
+        txtccode.Text = "";
+        load_data();
+    }
+    protected void gddetail_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        int indx = gddetail.SelectedIndex;
+
+        if (indx<0) return;
+        try
+        {
+            ddlpurtype.Text = gddetail.Rows[indx].Cells[1].Text;
+            ddltype.Text = gddetail.Rows[indx].Cells[2].Text;
+            if (gddetail.Rows[indx].Cells[3].Text == "&nbsp;") txtdcoderm.Text = ""; else txtdcoderm.Text = gddetail.Rows[indx].Cells[3].Text;
+            if (gddetail.Rows[indx].Cells[4].Text == "&nbsp;") txtdcode.Text = ""; else txtdcode.Text=gddetail.Rows[indx].Cells[4].Text;
+            if (gddetail.Rows[indx].Cells[5].Text == "&nbsp;") txtdcode.Text = ""; else txtccode.Text=gddetail.Rows[indx].Cells[5].Text;
+                
+
+        }
+        catch
+        {
+            ddlpurtype.Text ="";
+            ddltype.Text = "";
+            txtdcoderm.Text = "";
+            txtccode.Text = "";
+            txtdcode.Text = "";
+        }
+
+
+    }
+}

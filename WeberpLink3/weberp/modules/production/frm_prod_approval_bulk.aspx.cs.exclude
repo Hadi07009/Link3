@@ -1,0 +1,354 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.ProdDataSetTableAdapters;
+using LibraryDAL.SCBLQryTableAdapters;
+using System.Net.Mail;
+using LibraryDAL.dsLinkofficeTableAdapters;
+
+public partial class frm_prod_approval_bulk : System.Web.UI.Page
+{
+   
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.MsgConfirmBox(btnapprove, "Are you sure to Approve ? ");
+        clsStatic.MsgConfirmBox(btnreject, "Are you sure to Reject ? ");        
+
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+        generate_comments();
+        if (!Page.IsPostBack)
+        {
+            load_pending_list();           
+                   
+        }
+       
+          
+    }
+
+   
+
+   
+
+    private void load_pending_list()
+    {
+        tbl_prod_ctl_detTableAdapter ctl = new tbl_prod_ctl_detTableAdapter();
+        ProdDataSet.tbl_prod_ctl_detDataTable dtctl = new ProdDataSet.tbl_prod_ctl_detDataTable();
+        ListItem lst;
+
+
+        dtctl = ctl.GetDataForPending("I", "B");
+
+        if (dtctl.Rows.Count == 0)
+        {
+            Response.Redirect("../commercial/frm_com_inbox.aspx");
+        }
+
+
+        ddllist.Items.Clear();
+        ddllist.Items.Add("");
+        foreach (ProdDataSet.tbl_prod_ctl_detRow dr in dtctl.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.ref_no.ToString() + ":" + dr.prod_id;
+            lst.Text = dr.ref_no.ToString() + ":" + dr.prod_id + ":" + dr.prod_name + ":[" + dr.prod_date.ToShortDateString() + "]";
+            ddllist.Items.Add(lst);
+        }
+
+        lblcount.Text = "(" + dtctl.Rows.Count.ToString() + ")";
+
+        tbl_po.Visible = false;
+    }
+
+
+
+
+
+
+    private void generate_detail_data(string ref_no, string selprod)
+    {
+        tbl_prod_ctl_detTableAdapter ctl = new tbl_prod_ctl_detTableAdapter();
+        ProdDataSet.tbl_prod_ctl_detDataTable dtctl = new ProdDataSet.tbl_prod_ctl_detDataTable();
+        tbl_prod_ctl_detTableAdapter prodet = new tbl_prod_ctl_detTableAdapter();
+
+        tbl_prod_entryTableAdapter prod = new tbl_prod_entryTableAdapter();
+        ProdDataSet.tbl_prod_entryDataTable dtprod = new ProdDataSet.tbl_prod_entryDataTable();
+        InTr_Trn_DetTableAdapter trndet = new InTr_Trn_DetTableAdapter();
+        ErpDataSet.InTr_Trn_DetDataTable dttrndet = new ErpDataSet.InTr_Trn_DetDataTable();
+
+        InTr_Trn_HdrTableAdapter trnhdr = new InTr_Trn_HdrTableAdapter();
+        ErpDataSet.InTr_Trn_HdrDataTable dttrnhdr = new ErpDataSet.InTr_Trn_HdrDataTable();
+
+        tbl_prod_itm_mapTableAdapter map = new tbl_prod_itm_mapTableAdapter();
+        ProdDataSet.tbl_prod_itm_mapDataTable dtmap = new ProdDataSet.tbl_prod_itm_mapDataTable();
+
+        InMa_Itm_StkTableAdapter stk = new InMa_Itm_StkTableAdapter();
+        ErpDataSet.InMa_Itm_StkDataTable dtstk = new ErpDataSet.InMa_Itm_StkDataTable();
+
+        DataTable dt = new DataTable();
+
+        decimal stdrat, actratio, avlqty, diffratio, totqty = 0;
+
+        dtctl = ctl.GetDataByRef(ref_no);
+        if (dtctl.Count == 0) { return; }
+        
+        lblref.Text = dtctl[0].ref_no;
+        lblprodname.Text = ddllist.SelectedItem.Text;
+        lbldate.Text = dtctl[0].prod_date.ToShortDateString();
+        
+        //row material issue
+
+        dt.Rows.Clear();
+        dt.Columns.Clear();
+
+        dt.Columns.Add("SL", typeof(int));
+        dt.Columns.Add("ITEM CODE", typeof(string));
+        dt.Columns.Add("ITEM DETAIL", typeof(string));
+        dt.Columns.Add("UOM", typeof(string));
+        dt.Columns.Add("STORE", typeof(string));
+        dt.Columns.Add("AVL QTY", typeof(string));
+        dt.Columns.Add("ISSUE QTY (PLC Record)", typeof(string));
+        dt.Columns.Add("STD RATIO(%)", typeof(string));
+        dt.Columns.Add("ACTUAL RATIO(%)", typeof(string));
+        dt.Columns.Add("DIFFERENCE(%) (std-act)", typeof(string));
+
+        dttrnhdr = trnhdr.GetDataForIssuePost(ref_no, selprod, "H");
+
+        if (dttrnhdr.Rows.Count == 0) return;
+
+
+        dttrndet = trndet.GetDataByRef(dttrnhdr[0].Trn_Hdr_Ref);
+
+        foreach (ErpDataSet.InTr_Trn_DetRow dr in dttrndet.Rows)
+        {
+            totqty += (decimal)dr.Trn_Det_Lin_Qty;
+        
+        }
+
+
+        int cnt = 1;
+
+        foreach (ErpDataSet.InTr_Trn_DetRow dr in dttrndet.Rows)
+        {
+            actratio = (100 * (decimal)dr.Trn_Det_Lin_Qty) / totqty;
+            dtmap = new ProdDataSet.tbl_prod_itm_mapDataTable();
+            dtmap = map.GetDataByItmProd(dr.Trn_Det_Icode, selprod);
+            stdrat = dtmap[0].prod_std_ratio;
+            diffratio = stdrat - actratio;
+
+            avlqty = (decimal) stk.GetDataByItm(dr.Trn_Det_Icode)[0].Itm_Stk_Cur;
+            dt.Rows.Add(cnt++, dr.Trn_Det_Icode, dr.Trn_Det_Itm_Desc, dr.Trn_Det_Itm_Uom, dr.Trn_Det_Str_Code, avlqty.ToString("N2"), dr.Trn_Det_Lin_Qty.ToString("N2"), stdrat.ToString("N2"), actratio.ToString("N2"), diffratio.ToString("N2"));
+        }
+
+
+        gdItem.DataSource = dt;
+        gdItem.DataBind();
+
+
+        //add finish product
+        dtprod = prod.GetDataByProd(ref_no, selprod);
+        gdfinnItem.DataSource = dtprod;
+        gdfinnItem.DataBind();
+
+
+      
+
+    }
+
+    private void load_data()
+    {
+        lblComm.Visible = false;
+        string[] tmp = ddllist.SelectedItem.Value.ToString().Split(':');
+
+
+        if (tmp.Length < 2)
+        {
+            tbl_po.Visible = false;
+        }
+        else
+        {
+            string selitem = tmp[0];
+            string selprod = tmp[1];
+         
+            tbl_po.Visible = true;
+            generate_detail_data(selitem, selprod);
+        }
+    }
+    
+    private bool Check_Approval_Validity(string ref_no, string prod_id)
+    {
+        tbl_prod_ctl_detTableAdapter ctl = new tbl_prod_ctl_detTableAdapter();
+        ProdDataSet.tbl_prod_ctl_detDataTable dtctl = new ProdDataSet.tbl_prod_ctl_detDataTable();
+
+
+        dtctl = ctl.GetDataByRefProd(ref_no, prod_id);
+        if (dtctl.Count == 0) { return false; }
+
+        if (dtctl[0].issue_status == "I") { return true; }
+
+        return false;
+    }
+       
+  
+
+    protected void btnapprove_Click(object sender, EventArgs e)
+    {
+        lblComm.Visible = false;
+        string[] tmp = ddllist.SelectedItem.Value.ToString().Split(':');
+        if (tmp.Length < 2) return;
+        string selitem = tmp[0];
+        string selprod = tmp[1];
+        if (Check_Approval_Validity(selitem, selprod) == false) { lblComm.Visible = true; lblComm.Text = "VALIDITY ERROR"; return; }        
+        if ((selitem == "") || (selprod == "")) { lblComm.Visible = true; lblComm.Text = "ENTRY ERROR"; return; }
+
+        tbl_prod_ctl_detTableAdapter ctl = new tbl_prod_ctl_detTableAdapter();
+        tbl_prod_ctl_detTableAdapter ctldet = new tbl_prod_ctl_detTableAdapter();
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+        bool flg = false;
+
+        if (ctldet.UpdateIssueStatus("F", "", "", selitem, selprod) == 1) flg = true;
+        comm.InsertComments(selitem, 1, DateTime.Now, current.UserId, current.UserName, current.UserDesignation, 1, selprod, "APP", txtcomm.Text, "", "");
+        if (flg)
+        {
+            Response.Redirect(Request.Url.AbsoluteUri);
+        }
+    }
+
+    private void mail_send(string b_ref_no)
+    {
+        //mailsend
+        tblUserInfoTableAdapter usr = new tblUserInfoTableAdapter();
+        dsLinkoffice.tblUserInfoDataTable dtusr = new dsLinkoffice.tblUserInfoDataTable();
+
+        User_Role_DefinitionTableAdapter role = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable roledt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        string usercode = current.UserId.ToString();
+        roledt = role.GetDataByRole("prod3");
+
+        string ms;
+
+
+        ms = System.Configuration.ConfigurationSettings.AppSettings["smtpserver"].ToString();
+
+        SmtpClient smtp = new SmtpClient(ms);
+        MailMessage msg = new MailMessage();
+        string mbody;
+        msg.From = new MailAddress("masud.mis@sevencircle-bd.com", "SSCML Commercial Module");
+
+
+        //msg.To.Add(new MailAddress("monju@link3.net", "M Monjurul Islam"));
+        //msg.To.Add(new MailAddress("masud.mis@sevencircle-bd.com", "MIS SCBL"));        
+
+        foreach (SCBLDataSet.User_Role_DefinitionRow dr in roledt.Rows)
+        {
+            dtusr = new dsLinkoffice.tblUserInfoDataTable();
+            dtusr = usr.GetDataByUserId(dr.user_id, current.CompanyCode);
+
+            if (dtusr.Rows.Count > 0)
+            {
+                if (dtusr[0].UserEmail != "")
+                {
+                    msg.To.Add(new MailAddress(dtusr[0].UserEmail, dtusr[0].UserName));
+                }
+            }
+
+        }
+
+        msg.Subject = "Production Entry Notification " + lblprodname.Text;
+
+
+        mbody = "\n\n " + "A BULK Production Approved and pending for your post. Production brief information as bellow :";
+        mbody += "\n\n   Production Date         : " + lbldate.Text;
+        mbody += "\n Production Batch Ref No  : " + b_ref_no;
+        mbody += "\n Production Name             : " + lblprodname.Text;
+
+
+        mbody += "\n\n\n\n\n";
+
+        mbody += "\n " + "To view details please login in at http://203.76.114.131/cml/cmlcom/frmLogin.aspx ";
+        mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+
+
+        msg.Body = mbody;
+        smtp.Send(msg);
+
+
+    }
+    protected void ddllist_SelectedIndexChanged(object sender, EventArgs e)
+    {        
+        load_data();
+    }
+
+    protected void btnreject_Click(object sender, EventArgs e)
+    {
+        lblComm.Visible = false;
+        string[] tmp = ddllist.SelectedItem.Value.ToString().Split(':');
+        if (tmp.Length < 2) return;
+        string selitem = tmp[0];
+        string selprod = tmp[1];
+        if (Check_Approval_Validity(selitem, selprod) == false) { lblComm.Visible = true; lblComm.Text = "VALIDITY ERROR"; return; }
+        if ((selitem == "") || (selprod == "")) { lblComm.Visible = true; lblComm.Text = "ENTRY ERROR"; return; }
+        if (txtcomm.Text.Length < 5) { lblComm.Visible = true; lblComm.Text = "PLEASE TYPE REASON FOR REJECT"; return; }
+        tbl_prod_ctl_detTableAdapter ctl = new tbl_prod_ctl_detTableAdapter();
+        tbl_prod_ctl_detTableAdapter ctldet = new tbl_prod_ctl_detTableAdapter();
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+        bool flg = false;
+
+        if (ctldet.UpdateIssueStatus("R", "", "", selitem, selprod) == 1) flg = true;
+        comm.InsertComments(selitem, 1, DateTime.Now, current.UserId, current.UserName, current.UserDesignation, 1, selprod, "REJ", txtcomm.Text, "", "");
+        if (flg)
+        {
+            Response.Redirect(Request.Url.AbsoluteUri);
+        }
+    }
+
+    private void generate_comments()
+    {
+        if (ddllist.SelectedItem == null) return;
+        string ref_no = ddllist.SelectedItem.Value.ToString().Split(':')[0];
+
+
+       
+
+        tbl_CommentsTableAdapter com = new tbl_CommentsTableAdapter();
+        SCBLDataSet.tbl_CommentsDataTable dt = new SCBLDataSet.tbl_CommentsDataTable();
+        phcomments.Controls.Clear();
+                
+        dt = com.GetCommentsByRef(ref_no);
+       
+        foreach (SCBLDataSet.tbl_CommentsRow dr in dt.Rows)
+        {
+            ClientSide_modules_commercial_usercontrols_ctl_comments ctl = (ClientSide_modules_commercial_usercontrols_ctl_comments)LoadControl("~/modules/commercial/usercontrols/ctl_comments.ascx");
+            Label lblname = (Label)ctl.FindControl("lblname");
+            Label lbldate = (Label)ctl.FindControl("lbldate");
+            HtmlTableCell celcomm = (HtmlTableCell)ctl.FindControl("celcomm");
+            Image imgimage = (Image)ctl.FindControl("imgimage");
+
+            imgimage.ImageUrl = "~/handler/hndImage.ashx?id=" + dr.app_id;
+
+            ctl.ID = "ctl_" + phcomments.Controls.Count.ToString();
+
+            lblname.Text = dr.app_name.ToString() + " (" + dr.app_designation.ToString() + ")";
+            lbldate.Text = dr.app_date.ToString();
+            celcomm.InnerText = dr.gen_comments.ToString();
+
+            phcomments.Controls.Add(ctl);
+        }
+
+    }
+}

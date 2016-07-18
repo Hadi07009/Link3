@@ -1,0 +1,152 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_uom_create.aspx.cs" Inherits="frm_uom_create"  Title=""   ValidateRequest="false" EnableEventValidation="false"  %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+  
+
+    <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="3" class="heading" style="text-align: center">
+                NEW UNIT OF MEASUREMENT CREATE SCREEN</td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <asp:UpdatePanel ID="updpnl" runat="server">
+<ContentTemplate>
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            UOM CODE</td>
+                        <td style="text-align: left; width: 9px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtcode" runat="server" CssClass="txtbox" 
+                                Width="98px" ></asp:TextBox>
+                            </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            UOM NAME</td>
+                        <td style="text-align: left; width: 9px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtname" runat="server" CssClass="txtbox" 
+                                Width="455px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            <asp:Label ID="lblupdate" runat="server" ForeColor="Red" 
+                                Text="ADDED SUCCESSFULLY" Visible="False"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            <asp:Button ID="btnupdate" runat="server" CssClass="btn2" 
+                                onclick="btnupdate_Click" Text="ADD/UPDATE" Width="143px" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 184px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td colspan="3" style="text-align: left; ">
+                            <asp:GridView ID="gduom" runat="server" BackColor="White" BorderColor="#41519A" 
+                                BorderStyle="Solid" BorderWidth="1px" CellPadding="4" ForeColor="#333333" 
+                                GridLines="None"  AutoGenerateColumns="false" OnRowDataBound="gduom_RowDataBound"
+                                onselectedindexchanged="gduom_SelectedIndexChanged" 
+                                SkinID="GridView" Width="50%">
+                                <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                                <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                                <SelectedRowStyle BackColor="LightBlue" Font-Bold="True" ForeColor="#333333" />
+                                <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                                <AlternatingRowStyle BackColor="Lavender" />
+                                <EditRowStyle BackColor="#2461BF" />
+                                <Columns>                 
+                                  <asp:BoundField DataField="uom_code" HeaderText="CODE" HeaderStyle-HorizontalAlign="Left"/>
+                                  <asp:BoundField DataField="uom_name" HeaderText="NAME" HeaderStyle-HorizontalAlign="Left"/>
+                                  
+                                              
+                       
+                   </Columns> 
+                            </asp:GridView>
+                        </td>
+                    </tr>
+                </table>
+                </ContentTemplate>
+   
+</asp:UpdatePanel>
+
+                </td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+    </table>
+    
+</asp:Content>
+

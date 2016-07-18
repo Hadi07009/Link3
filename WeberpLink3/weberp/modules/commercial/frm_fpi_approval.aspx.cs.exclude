@@ -1,0 +1,686 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBL3DataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using FreeTextBoxControls;
+using LibraryDAL.AccDataSetTableAdapters;
+using LibraryDAL.AccDataSet2TableAdapters;
+using LibraryDAL.FpiDataSetTableAdapters;
+
+public partial class frm_fpi_approval : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+        clsStatic.MsgConfirmBox(btnApprove, "Are you sure to Approve this PI");
+        clsStatic.MsgConfirmBox(btnForward, "Are you sure to Forward this PI");
+        clsStatic.MsgConfirmBox(btnreject, "Are you sure to Reject this PI");        
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+
+        if (!Page.IsPostBack)
+        {
+            tblpodet.Visible = false;
+            lblComm.Visible = false;
+            load_bank();
+            load_pending();
+            
+           
+        }
+        else
+        {
+            generate_comments(ddlpolist.SelectedValue.ToString());
+
+        }
+
+    }
+
+    private string get_my_app()
+    {
+        User_Role_DefinitionTableAdapter urole = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable udt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        string my_app = "";
+        udt = urole.GetRoleByUser(current.UserId.ToString(), "PIAPP");
+
+        if (udt.Rows.Count > 0) my_app = udt[0].role_as.ToString();
+
+        return my_app;
+    }
+
+    private void load_pending()
+    {
+        tbl_fpi_approval_dataTableAdapter app = new tbl_fpi_approval_dataTableAdapter();
+        LibraryDAL.FpiDataSet.tbl_fpi_approval_dataDataTable dtapp = new LibraryDAL.FpiDataSet.tbl_fpi_approval_dataDataTable();
+        ListItem lst;
+
+        string my_app = get_my_app();
+
+        if (my_app == "") { Response.Redirect("./frm_com_inbox.aspx"); }
+
+        dtapp = app.GetDataForPending("INI", my_app);
+
+        if (dtapp.Rows.Count == 0)
+        {
+            Response.Redirect("./frm_com_inbox.aspx");
+        }
+
+        lblpcount.Text = dtapp.Rows.Count.ToString();
+
+        ddlpolist.Items.Clear();
+        ddlpolist.Items.Add("");
+
+        foreach (LibraryDAL.FpiDataSet.tbl_fpi_approval_dataRow dr in dtapp.Rows)
+        {
+            lst = new ListItem();
+
+            lst.Value = dr.ref_no.ToString();
+            lst.Text = dr.ref_no.ToString() + ":" + dr.supp_id + ":" + dr.supplier + ":" + dr.mpr_itm_code + ":" + dr.Item_details.ToString();
+            ddlpolist.Items.Add(lst);
+        }
+        ddlchange();
+        
+    }
+
+    private void load_bank()
+    {
+        AccBankInfoTableAdapter bank = new AccBankInfoTableAdapter();
+        AccDataSet2.AccBankInfoDataTable dtbank = new AccDataSet2.AccBankInfoDataTable();
+        ListItem lst;
+
+        dtbank = bank.GetAllBank();
+        ddlbank.Items.Clear();
+        ddlbranch.Items.Clear();
+        ddlbank.Items.Add("");
+        foreach (AccDataSet2.AccBankInfoRow dr in dtbank.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Bnk_info_Bnk_code;
+            lst.Text = dr.Bnk_info_Bnk_code + ":" + dr.Bnk_info_Bnk_Name;
+            ddlbank.Items.Add(lst);
+        }
+
+    }
+
+    
+
+ 
+      
+    private void Generate_Items(string ref_no)
+    {
+
+        tbl_fpi_approval_dataTableAdapter app = new tbl_fpi_approval_dataTableAdapter();
+        LibraryDAL.FpiDataSet.tbl_fpi_approval_dataDataTable dtapp = new LibraryDAL.FpiDataSet.tbl_fpi_approval_dataDataTable();
+        tbl_fpi_lc_infoTableAdapter lcdata=new tbl_fpi_lc_infoTableAdapter();
+
+        string app_flow;
+        string my_app = get_my_app();
+        dtapp = app.GetDataByRef(ref_no);
+        if (dtapp.Rows.Count == 0) return;
+        app_flow = dtapp[0].template;
+        bool edit_per = set_permission(app_flow, my_app);
+        ctl_fpi_mpr_item_view1.load_all(dtapp[0].mpr_ref_no, dtapp[0].mpr_itm_code);
+        ctl_fpi_download1.load_all(dtapp[0].ref_no);
+        ctl_fpi_pi_entry_view1.load_details(dtapp[0].ref_no);
+        generate_comments(ref_no);
+        tbllcentry.Visible = edit_per;
+        lbllcdoc.Visible = edit_per;
+        updoc.Visible = edit_per;
+
+        if ((lcdata.GetDataByRef(dtapp[0].ref_no).Rows.Count == 0) || (edit_per==true))
+        {
+            ctl_fpi_lc_entry_view1.Visible = false;
+        }
+        else
+        {
+            ctl_fpi_lc_entry_view1.Visible = true;
+            ctl_fpi_lc_entry_view1.load_data(dtapp[0].ref_no);
+        }
+
+    }
+
+    private bool set_permission(string flow_id, string app_code)
+    {
+        tbl_app_ruleTableAdapter app = new tbl_app_ruleTableAdapter();
+        SCBLDataSet.tbl_app_ruleDataTable dt = new SCBLDataSet.tbl_app_ruleDataTable();
+        App_Type_DetTableAdapter apptype = new App_Type_DetTableAdapter();
+       
+        dt = app.GetDataByTypeApp(flow_id, app_code);
+        string tmpstr;
+        bool edtper;
+        ListItem lst;
+        ddlforto.Items.Clear();
+        ddlforto.Items.Add("");
+
+        if (dt.Rows.Count != 0)
+        {
+            if (dt[0].app_per == 1) { btnApprove.Visible = true; }
+            else { btnApprove.Visible = false; }
+
+            if (dt[0].rej_per == 1) { btnreject.Visible = true; }
+            else { btnreject.Visible = false; }
+
+            if (dt[0].edit_per == 1) { edtper = true; }
+            else { edtper = false; }
+
+            tmpstr = dt[0].for_1.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_2.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_3.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_4.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_5.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+        }
+        else
+        {
+            btnApprove.Visible = false;
+            btnreject.Visible = false;
+            btnForward.Visible = false;
+            edtper = false;
+        }
+        return edtper;
+       
+    }
+    
+    private void generate_comments(string ref_no)
+    {
+        tbl_CommentsTableAdapter com = new tbl_CommentsTableAdapter();
+        SCBLDataSet.tbl_CommentsDataTable dt = new SCBLDataSet.tbl_CommentsDataTable();
+
+        dt = com.GetCommentsByRef(ref_no);
+        phcomments.Controls.Clear();
+        foreach (SCBLDataSet.tbl_CommentsRow dr in dt.Rows)
+        {
+            ClientSide_modules_commercial_usercontrols_ctl_comments ctl = (ClientSide_modules_commercial_usercontrols_ctl_comments)LoadControl("./usercontrols/ctl_comments.ascx");
+            Label lblname = (Label)ctl.FindControl("lblname");
+            Label lbldate = (Label)ctl.FindControl("lbldate");
+            HtmlTableCell celcomm = (HtmlTableCell)ctl.FindControl("celcomm");
+            Image imgimage = (Image)ctl.FindControl("imgimage");
+
+            imgimage.ImageUrl = "~/handler/hndImage.ashx?id=" + dr.app_id;
+
+            ctl.ID = "ctl_" + phcomments.Controls.Count.ToString();
+
+            lblname.Text = dr.app_name.ToString() + " (" + dr.app_designation.ToString() + ")";
+            lbldate.Text = dr.app_date.ToString();
+            celcomm.InnerText = dr.gen_comments.ToString();
+                   
+            phcomments.Controls.Add(ctl);
+        }
+    }
+
+
+    private void ddlchange()
+    {
+        string selval = ddlpolist.SelectedValue.ToString();
+        
+
+        if (selval == "") { tblpodet.Visible = false; return; }
+        tblpodet.Visible = true;
+        Generate_Items(selval);
+    }
+
+
+    protected void ddlpolist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        ddlchange();
+       
+    }
+
+    private bool check_pending_validity(string piref)
+    {
+        bool flg = true;
+        tbl_fpi_approval_dataTableAdapter appdata = new tbl_fpi_approval_dataTableAdapter();        
+        string my_app = get_my_app();
+
+        if (appdata.Checkpendingvalidity(piref, "INI", my_app).Rows.Count == 0) flg = false;
+        return flg;
+    }
+
+
+    private bool entrycheck()
+    {
+        bool flg = true;
+
+        if (ddlbank.SelectedValue == "") flg = false;
+        if (ddlbranch.SelectedValue == "") flg = false;
+        if (txt_LC_opening_margin.Text  == "") flg = false;
+        if (txt_currency_opening_margin.Text == "") flg = false;
+        if (txt_LC_cash_margin.Text  == "") flg = false;
+        if (txt_currency_cash_margin.Text == "") flg = false;
+        if (txt_LC_fdr_margin.Text  == "") flg = false;
+        if (txt_currency_fdr_margin.Text  == "") flg = false;
+        if (txt_insurance_company.Text  == "") flg = false;
+        if (txt_insurance_branch.Text  == "") flg = false;
+        if (txt_insurance_total_amt.Text  == "") flg = false;
+        if (txt_premimum_amt.Text == "") flg = false;
+        if (txt_vat_amt.Text  == "") flg = false;
+        if (txt_stamp_duty_amt.Text  == "") flg = false;
+        if (txt_currency_total_amt.Text  == "") flg = false;
+        if (txt_currency_stamp_amt.Text  == "") flg = false;
+        return flg;
+    }
+
+
+    private string save_file(string fpi_ref, string  mpr_ref_no, string itm_code)
+    {
+        string retstr = "";
+
+       
+
+        tbl_file_detailTableAdapter fl = new tbl_file_detailTableAdapter();
+
+   
+        tbl_fpi_approval_dataTableAdapter app = new tbl_fpi_approval_dataTableAdapter();
+        LibraryDAL.FpiDataSet.tbl_fpi_approval_dataDataTable dtapp = new LibraryDAL.FpiDataSet.tbl_fpi_approval_dataDataTable();
+
+
+       dtapp = app.GetDataByRef(ddlpolist.SelectedValue.ToString());
+       if (dtapp.Rows.Count == 0)
+       {
+           return retstr;
+       }
+
+       else
+       {
+           mpr_ref_no = dtapp[0].mpr_ref_no;
+          // itm_code = dtapp[0].mpr_itm_code;
+
+       }
+
+        string ref_no, fpath, floc, orgfilename;
+        string uid = current.UserId.ToString();
+
+        double max_ref = Convert.ToDouble(fl.GetmaxSL());
+        int nFileLen;
+
+        HttpPostedFile myFile = updoc.PostedFile;
+        if (myFile != null)
+        {
+            nFileLen = myFile.ContentLength;
+
+            if ((myFile.ContentType == "application/pdf") && (nFileLen > 0) && (nFileLen < 5000001))
+            {
+                try
+                {
+                    ref_no = "DOC-" + string.Format("{0:00000000}", max_ref + 1);
+                    orgfilename = updoc.FileName;
+                    fpath = Server.MapPath("~/Upload") + "\\";
+                    floc = fpath + ref_no + ".pdf";
+                    myFile.SaveAs(floc);
+
+                    fl.InsertFileDet(ref_no, fpi_ref, mpr_ref_no, itm_code, "", "PI", "LC Related", uid, DateTime.Now, "PDF", (decimal)nFileLen, orgfilename, ref_no + ".pdf", floc, floc, floc);
+
+                    retstr = ref_no;
+                }
+                catch
+                {
+                    retstr = "";
+                }
+            }
+        }
+
+        return retstr;
+    }
+
+    protected void btnForward_Click(object sender, EventArgs e)
+    {
+        tbl_fpi_approval_dataTableAdapter appdata = new tbl_fpi_approval_dataTableAdapter();
+
+        LibraryDAL.FpiDataSet.tbl_fpi_approval_dataDataTable dtapp = new LibraryDAL.FpiDataSet.tbl_fpi_approval_dataDataTable();
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+
+        tbl_fpi_lc_infoTableAdapter lcinfo = new tbl_fpi_lc_infoTableAdapter();
+        FpiDataSet.tbl_fpi_lc_infoDataTable dtlcinfo = new FpiDataSet.tbl_fpi_lc_infoDataTable();
+
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+
+     
+       
+        string uid = current.UserId.ToString();
+        string uname = current.UserName.ToString();
+        string desig = "";
+        string role_as = "";
+
+        string ufile = "";
+        desig = usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+        role_as = get_my_app();
+
+        bool updflg = false;
+
+        string ref_no = ddlpolist.SelectedValue.ToString();
+
+        dtapp = appdata.GetDataByRef(ref_no);
+        string mpref= dtapp[0].mpr_ref_no;
+        string item_code = dtapp[0].mpr_itm_code;
+        string status = dtapp[0].status;
+
+        if (tbllcentry.Visible)
+            if (entrycheck() == false)
+            {
+                lblComm.Text = "Pls Entry all LC Information "; lblComm.Visible = true; return;
+            }
+
+        if (txtcomments.Text == "") { lblComm.Text = "Pls type your comments "; lblComm.Visible = true; return; }
+        if (ddlforto.Text == "") { lblComm.Text = "Pls select forward to "; lblComm.Visible = true; return; }
+        if (check_pending_validity(ref_no) == false) Response.Redirect(Request.Url.AbsoluteUri);
+
+        string pending_for = ddlforto.SelectedValue.ToString();
+
+
+        if (updoc.HasFile == true)
+        {
+            ufile = save_file(ref_no, mpref, item_code);
+            if (ufile == "") { Response.Write("File Upload Error"); return; }
+        }
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(appdata.Connection);
+
+        try
+        {
+            appdata.AttachTransaction(myTrn);
+            comm.AttachTransaction(myTrn);
+
+            if (tbllcentry.Visible)
+                lcinfo.Insert_lc_info(ref_no, mpref, item_code, status, current.UserId, DateTime.Now, ddlbank.SelectedItem.Value, ddlbank.SelectedItem.Text.Split(':')[1], ddlbranch.SelectedItem.Value, ddlbranch.SelectedItem.Text.Split(':')[1], Convert.ToDecimal(txt_LC_opening_margin.Text.Trim()), Convert.ToDecimal(txt_LC_cash_margin.Text.Trim()), Convert.ToDecimal(txt_LC_fdr_margin.Text.Trim()), txt_currency_opening_margin.Text.Trim(), txt_currency_cash_margin.Text.Trim(), txt_currency_fdr_margin.Text.Trim(), txt_insurance_company.Text.Trim(), txt_insurance_branch.Text.Trim(), Convert.ToDecimal(txt_insurance_total_amt.Text.Trim()), Convert.ToDecimal(txt_premimum_amt.Text.Trim()), Convert.ToDecimal(txt_vat_amt.Text.Trim()), Convert.ToDecimal(txt_stamp_duty_amt.Text.Trim()), txt_currency_total_amt.Text.Trim(), txt_currency_premium_amt.Text.Trim(), txt_currency_vat_amt.Text.Trim(), txt_currency_stamp_amt.Text.Trim(), "", "", "", "", DateTime.Now);
+           
+            
+            appdata.UpdateStatus(pending_for, "INI", ref_no);
+            comm.InsertComments(ref_no, 1, DateTime.Now, uid, uname, desig, 1, role_as, "INI", txtcomments.Text, "", pending_for);
+
+            myTrn.Commit();
+            updflg = true;
+        }
+        catch
+        {
+            updflg = false;
+            myTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(appdata.Connection, myTrn);
+        }
+
+        if (updflg)
+        {
+            string sid, sname, msub, mbody;
+            clsEmailReceiver[] rec_det = new clsEmailReceiver[20];
+            int remailcnt = 0;
+            dsLinkoffice.tblUserInfoRow udr;
+            LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+            User_Role_DefinitionTableAdapter roleta = new User_Role_DefinitionTableAdapter();
+            SCBLDataSet.User_Role_DefinitionDataTable roledt = new SCBLDataSet.User_Role_DefinitionDataTable();
+
+            udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+
+            msub = "A PI Approval request pending for you [" + ref_no + "]";
+            mbody = "\n\n " + "A PI Approval request pending for you [" + ref_no + "]";
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cm/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+            roledt = roleta.GetDataByRole(pending_for);
+
+            foreach (SCBLDataSet.User_Role_DefinitionRow rdr in roledt.Rows)
+            {
+                rec_det[remailcnt] = new clsEmailReceiver();
+                rec_det[remailcnt].Rname = rdr.user_name;
+                rec_det[remailcnt].Rid = usrdal.GetUserByCode(rdr.user_id)[0].UserEmail;
+                remailcnt++;
+            }
+            clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+            Response.Redirect(Request.Url.AbsoluteUri);
+        }
+        else { lblComm.Text = "ERROR"; lblComm.Visible = true; }
+               
+    }
+
+    
+
+    protected void btnApprove_Click(object sender, EventArgs e)
+    {
+      
+        tbl_fpi_approval_dataTableAdapter appdata = new tbl_fpi_approval_dataTableAdapter();
+        string ref_no = ddlpolist.SelectedValue.ToString();
+
+        if (check_pending_validity(ref_no) == false) Response.Redirect(Request.Url.AbsoluteUri);
+
+        bool updflg = false;
+        
+        PuTr_IN_Det_Scbl2TableAdapter indet = new PuTr_IN_Det_Scbl2TableAdapter();
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+
+        string uid = current.UserId.ToString();
+        string uname = current.UserName.ToString();
+        string desig = usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+        string role_as = get_my_app();        
+        string pending_for = "";
+
+        
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(appdata.Connection);
+
+
+        try
+        {
+            appdata.AttachTransaction(myTrn);
+            comm.AttachTransaction(myTrn);
+            indet.AttachTransaction(myTrn);
+
+            indet.UpdateStatusByQref("FPAPP", ref_no);
+            appdata.UpdateStatus(pending_for, "APP", ref_no);
+            comm.InsertComments(ref_no, 1, DateTime.Now, uid, uname, desig, 1, role_as, "APP", txtcomments.Text, "", pending_for);
+
+            myTrn.Commit();
+            updflg = true;
+        }
+        catch
+        {
+            updflg = false;
+            myTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(appdata.Connection, myTrn);
+        }
+
+        if (updflg)
+        {
+            LibraryDAL.SCBLDataSetTableAdapters.User_Role_DefinitionTableAdapter urole = new User_Role_DefinitionTableAdapter();
+            SCBLDataSet.User_Role_DefinitionDataTable dtrole = new SCBLDataSet.User_Role_DefinitionDataTable();
+
+            dtrole = urole.GetDataByRole("CONENT");
+
+            string sid, sname, msub, mbody;
+
+
+            clsEmailReceiver[] rec_det = new clsEmailReceiver[dtrole.Rows.Count + 1];
+
+            dsLinkoffice.tblUserInfoRow udr;
+            LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+
+
+            udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+
+            msub = "A PI Approval request Approved and pending for consignment entry [" + ref_no + "]";
+            mbody = "\n\n " + "A PI Approval request Approved and pending for consignment entry [" + ref_no + "]";
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cm/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+
+            int cnt = 0;
+            foreach (SCBLDataSet.User_Role_DefinitionRow dr in dtrole.Rows)
+            {                
+                rec_det[cnt] = new clsEmailReceiver();
+                rec_det[cnt].Rname = dr.user_name;
+                rec_det[cnt].Rid = usrdal.GetUserByCode(dr.user_id)[0].UserEmail;
+                cnt++;
+            }
+                      
+
+            clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+            Response.Redirect(Request.Url.AbsoluteUri);
+        }
+        else { lblComm.Text = "ERROR"; lblComm.Visible = true; }     
+
+
+    }
+
+    
+
+    protected void btnreject_Click(object sender, EventArgs e)
+    {
+        tbl_fpi_approval_dataTableAdapter appdata = new tbl_fpi_approval_dataTableAdapter();
+        string ref_no = ddlpolist.SelectedValue.ToString();
+
+        if (txtcomments.Text == "") { lblComm.Text = "Pls type your comments "; lblComm.Visible = true; return; }
+        if (check_pending_validity(ref_no) == false) Response.Redirect(Request.Url.AbsoluteUri);
+
+        bool updflg = false;
+
+        PuTr_IN_Det_Scbl2TableAdapter indet = new PuTr_IN_Det_Scbl2TableAdapter();
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+        SCBLDataSet.tbl_CommentsDataTable dtcom = new SCBLDataSet.tbl_CommentsDataTable();
+
+        dtcom = comm.GetCommentsByRef(ref_no);
+        string uid = current.UserId.ToString();
+        string uname = current.UserName.ToString();
+        string desig = usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+        string role_as = get_my_app();
+        string pending_for = "";
+        SqlTransaction myTrn = HelperTA.OpenTransaction(appdata.Connection);
+        try
+        {
+            appdata.AttachTransaction(myTrn);
+            comm.AttachTransaction(myTrn);
+            indet.AttachTransaction(myTrn);
+
+            indet.UpdateStatusByQref("TEN", ref_no);
+            appdata.UpdateStatus(pending_for, "REJ", ref_no);
+            comm.InsertComments(ref_no, 1, DateTime.Now, uid, uname, desig, 1, role_as, "REJ", txtcomments.Text, "", pending_for);
+
+            myTrn.Commit();
+            updflg = true;
+        }
+        catch
+        {
+            updflg = false;
+            myTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(appdata.Connection, myTrn);
+        }
+
+        if (updflg)
+        {
+            string sid, sname, msub, mbody;
+            clsEmailReceiver[] rec_det = new clsEmailReceiver[2];
+
+            dsLinkoffice.tblUserInfoRow udr;
+            LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+
+
+            udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+
+            msub = "A PI Approval request Rejected [" + ref_no + "]";
+            mbody = "\n\n " + "A PI Approval request Rejected [" + ref_no + "]";
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cm/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+
+
+            rec_det[0] = new clsEmailReceiver();
+            rec_det[0].Rname = dtcom[0].app_name;
+            rec_det[0].Rid = usrdal.GetUserByCode(dtcom[0].app_id)[0].UserEmail;
+
+            clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+            Response.Redirect(Request.Url.AbsoluteUri);
+        }
+        else { lblComm.Text = "ERROR"; lblComm.Visible = true; }
+
+    }
+
+    private void bank_change(string salval)
+    {
+        if (salval == "") { ddlbranch.Items.Clear(); return; }
+
+        AccBankInfo1TableAdapter branch = new AccBankInfo1TableAdapter();
+        AccDataSet2.AccBankInfo1DataTable dtbranch = new AccDataSet2.AccBankInfo1DataTable();
+        ListItem lst;
+
+        dtbranch = branch.GetBranceDet(salval);
+        ddlbranch.Items.Clear();
+        ddlbranch.Items.Add("");
+
+        foreach (AccDataSet2.AccBankInfo1Row dr in dtbranch.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Bnk_info_Branch_Code;
+            lst.Text = dr.Bnk_info_Branch_Code + ":" + dr.Bnk_info_Branch_name;
+            ddlbranch.Items.Add(lst);
+        }
+    }
+
+    protected void ddlbank_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        bank_change(ddlbank.SelectedValue.ToString());
+    }
+}
+

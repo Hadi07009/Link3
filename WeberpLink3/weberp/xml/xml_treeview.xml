@@ -1,0 +1,173 @@
+<?xml version='1.0'?>
+
+<TreeView Id="0" Text="Link3" Tag="" Tergate="formname" FormName="" Tooltip="tooltip here" ImageIndex="1" Permission="hold,post" Parameter="" PermType="" >
+  
+    <!--<Node Id="1" Text="My Account" Tergate="formname"  Tag="" FormName="" Tooltip="Account Sttings" ImageIndex="3" Permission="" Parameter="" PermType="">
+    <Node Id="1_1" Text="Profile" Tergate="formname"  Tag="" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+      <Node Id="1_1_1" Text="Profile Settings"  Tag="" FormName="" Tergate="~/modules/admin/ProfileSettings.aspx" Tooltip="Approval Details"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="1_1_2" Text="Log Out"  Tag="" FormName="" Tergate="~/HomePage.aspx" Tooltip="Flow Info"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="1_1_3" Text="Home"  Tag="" FormName="" Tergate="~/Default.aspx" Tooltip="Home"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+    </Node>
+  </Node>-->
+      
+  <Node Id="2" Text="HRMS" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+    <Node Id="3.1" Text="Master" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+
+      <Node Id="3_12" Text="Company Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmCompanySetup.aspx" Tooltip="Company Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_2" Text="Office Location Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmDivisionSetup.aspx" Tooltip="Office Location Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_3" Text="Department Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmDepartmentSetup.aspx" Tooltip="Department Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_4" Text="Section Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmSectionSetup.aspx" Tooltip="Section Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_5" Text="Designation Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmDesignationSetup.aspx" Tooltip="Designation Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_6" Text="Leave Type Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmLeaveTypeSetup.aspx" Tooltip="Leave Type Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_7" Text="Employee Information Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmEmployeeInformation.aspx" Tooltip="Employee Information Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_8" Text="Advance Type Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmAdvanceTypeSetup.aspx" Tooltip="Advance Type Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_9" Text="Holiday Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmHolidaySetup.aspx" Tooltip="Holiday Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />      
+      <Node Id="3_13" Text="Shift Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmShiftSetup.aspx" Tooltip="Shift Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_14" Text="Loan Type Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmLoanTypeSetup.aspx" Tooltip="Loan Type Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_15" Text="Late Reason Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmLateReasonSetup.aspx" Tooltip="Late Reason Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_16" Text="Work Location setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmWorkLocationSetup.aspx" Tooltip="Work Location setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_17" Text="Shift Exception Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Setup/frmBaseTimeSetup.aspx" Tooltip="Shift Exception Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+
+    </Node>
+
+    <Node Id="3_100" Text="Details" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+      <Node Id="3_100_1" Text="Manual Leave Entry"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmManualLeaveEntry.aspx" Tooltip="Manual Leave Entry"   ImageIndex="3" Permission="" Parameter="" PermType="" />      
+      <Node Id="3_100_3" Text="Attendance Import"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmAttendanceTransfer.aspx" Tooltip="Attendance Import"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_4" Text="Shift Allocation"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frm_Shift_Allocation.aspx" Tooltip="Shift Allocation"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_5" Text="Employee Transfer/Promotion"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmEmployeeTransfer_Promotion.aspx" Tooltip="Employee Transfer/Promotion"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_6" Text="Advance Details Entry"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmAdvanceDetailsEntry.aspx" Tooltip="Advance Details Entry"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_7" Text="Employee Settlement"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/FrmEmployeeSettlement.aspx" Tooltip="Employee Settlement"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_8" Text="Employee Confirmation"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmEmployeeConfirmation.aspx" Tooltip="Employee Confirmation"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_9" Text="Attendance Entry/Approval"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frm_Attendance_Approval.aspx" Tooltip="Attendance Approval"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_10" Text="Manpower List"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/ActiveEmployeeInformation.aspx" Tooltip="Manpower List"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_11" Text="Conveyance Claim"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/ConveyanceCalm.aspx" Tooltip="Conveyance Calm"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_12" Text="Disciplinary Action"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmDisciplanaryAction.aspx" Tooltip="Disciplinary Action"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_13" Text="Document Upload"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmDocumentUpload.aspx" Tooltip="Document Upload"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_14" Text="Job Card Admin View"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmAttendanceIndividualViewAdmin.aspx" Tooltip="Job Card Admin View"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_15" Text="Leave Carry forward"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmLeaveCarryForward.aspx" Tooltip="Leave Carry forward"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_16" Text="Attendance Import Individual"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmAttendanceTransferIndividual.aspx" Tooltip="Attendance Import Individual"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_17" Text="Manual Attendance"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmManualAttendance.aspx" Tooltip="Manual Attendance"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+    
+    
+    </Node>
+
+    <Node Id="3_300" Text="Payroll" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+      <Node Id="3_300_1" Text="Pay Formula Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmFormulaSetup.aspx" Tooltip="Pay Formula Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_2" Text="Employee Pay Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmPaySetup.aspx" Tooltip="Employee Pay Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_3" Text="Grade Definition Setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmGradeSetup.aspx" Tooltip="Grade Definition Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />      
+      <Node Id="3_300_5" Text="Payroll Calculation (Cyclic)"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frm_payroll_Cyclic.aspx" Tooltip="Payroll Calculation (Cyclic)"   ImageIndex="3" Permission="" Parameter="" PermType="" />            
+      <Node Id="3_300_8" Text="PF Membership Activation"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmPFActivation.aspx" Tooltip="PF Membership Activation"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_9" Text="Payroll Calculation Hold"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmPayrollHold.aspx" Tooltip="Payroll Calculation Hold"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_10" Text="Bonus Calculation"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frm_Bonus_Cyclic.aspx" Tooltip="Bonus Calculation"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_11" Text="Pay slip mail setup"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmPayslipMailSetup.aspx" Tooltip="Pay slip mail setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_12" Text="Tax Challan Upload"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmTaxChallan.aspx" Tooltip="Tax Challan Upload"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_13" Text="Other Allowances Upload"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmOtherAllowances.aspx" Tooltip="Other Allowances Upload"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_14" Text="Incentive Bonus Upload"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmIncentivesbonus.aspx" Tooltip="Incentive Bonus Upload"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_15" Text="Other Allowances Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmOthersPayment.aspx" Tooltip="Other Allowances Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_16" Text="Other Deductions"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmOtherDeductions.aspx" Tooltip="Other Deductions"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_17" Text="AIT Deductions"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmAITDeductions.aspx" Tooltip="AIT Deductions"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+
+      <Node Id="3_300_20" Text="Payslip"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmPayslipIndividualAcc.aspx" Tooltip="Payslip"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_21" Text="Tax Slab Update"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmTaxSlabUpdate.aspx" Tooltip="Tax Slab Update"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_300_22" Text="Invest amount"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmEmployeeInvest.aspx" Tooltip="Invest amount"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      
+    </Node>
+
+
+    <Node Id="3_200" Text="Report" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+      <Node Id="3_200_1" Text="Salary Register"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmSalaryRegister.aspx" Tooltip="Salary Register"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_2" Text="Pay Slip"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmPayslip.aspx" Tooltip="Pay Slip"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_3" Text="Cash Advice"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmCashAdvice.aspx" Tooltip="Cash Advice"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_4" Text="Bank Advice"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmBankAdvice.aspx" Tooltip="Bank Advice"   ImageIndex="3" Permission="" Parameter="" PermType="" />      
+      <Node Id="3_200_6" Text="Attendance and Late  Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frm_Individual_Attendance_Report.aspx" Tooltip="Attendance and Late  Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_7" Text="Absent List Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frm_AbsentList_Report.aspx" Tooltip="Absent List Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />      
+      <Node Id="3_200_9" Text="Bank Account Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmBankAccountReport.aspx" Tooltip="Bank Account Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_10" Text="Active Employee Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmActiveEmployeeReport.aspx" Tooltip="Active Employee Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_11" Text="Joining Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmJoiningReport.aspx" Tooltip="Joining Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_12" Text="Resignation Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmResignationReport.aspx" Tooltip="Resignation Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_14" Text="Bonus Register"  Tag="---" FormName="" Tergate="~/modules/HRMS/Payroll/frmBonusRegister.aspx" Tooltip="Bonus Register"   ImageIndex="3" Permission="" Parameter="" PermType="" />      
+      <Node Id="3_200_16" Text="Movement Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frm_Movement_Report.aspx" Tooltip="Movement Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_18" Text="Manpower Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmManPowerReport.aspx" Tooltip="Manpower Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_19" Text="Dependent Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmDependentReport.aspx" Tooltip="Dependent Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_20" Text="Leave Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmLeaveReport.aspx" Tooltip="Leave Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_21" Text="Leave Statement"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmLeaveStatement.aspx" Tooltip="Leave Statement"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_22" Text="Tax Deduction Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmTaxReport.aspx" Tooltip="Tax Deduction Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_23" Text="Salary Certificate Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmSalaryCertificateReport.aspx" Tooltip="Salary Certificate Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_24" Text="Tax Report Yearly"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmTaxCalculaionReport.aspx" Tooltip="Tax Report Yearly"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_25" Text="Query Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmQueryReport.aspx" Tooltip="Query Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_27" Text="Annual Statement"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmAnnualStatement.aspx" Tooltip="Annual Statement"   ImageIndex="3" Permission="" Parameter="" PermType="" />		
+      <Node Id="3_200_28" Text="Day wise Leave Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmDaywiseLeaveReport.aspx" Tooltip="Day wise Leave Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_200_29" Text="Day wise Employee Shift Report"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmDaywiseShiftReport.aspx" Tooltip="Day wise Employee Shift Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+    </Node>
+
+    <Node Id="3_400" Text="Self Service" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">            
+      <Node Id="3_400_6" Text="Leave Application"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmLeaveApplication.aspx" Tooltip="Leave Application" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_400_7" Text="Leave Application Admin"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmLeaveApplicationAdmin.aspx" Tooltip="Leave Application Admin" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_400_8" Text="Offday Application"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmOffdayApplication.aspx" Tooltip="Offday Application" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_400_9" Text="Offday Application Special"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmOffdaySpecialApplication.aspx" Tooltip="Offday Application Special" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_400_10" Text="Offday Special Admin"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmOffdayApplicationSpecialAdmin.aspx" Tooltip="Offday Special Admin" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_400_11" Text="OT Application"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmOvertimeApplication.aspx" Tooltip="OT Application" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_400_12" Text="OT Application Admin"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmOvertimeApplicationAdmin.aspx" Tooltip="OT Application Admin" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_400_13" Text="Night Application"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmNightApplication.aspx" Tooltip="Night Application" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_400_14" Text="Night Application Admin"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmNightApplicationAdmin.aspx" Tooltip="Night Application Admin" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      
+      <Node Id="3_400_16" Text="Process Details"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmProcessDetails.aspx" Tooltip="Process Details" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_400_17" Text="Business Leave Application"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmBusinessLeaveApplicationAdmin.aspx" Tooltip="Business Leave Application" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_400_18" Text="Business Leave Apply and Approve"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmBusinessLeaveApplicationApproveByAdmin.aspx" Tooltip="Business Leave Apply and Approve" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_400_19" Text="Conveyance Application"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmConveyanceApplication.aspx" Tooltip="Conveyance Application" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      
+      
+      
+      
+      
+    </Node>
+    <Node Id="3_450" Text="Approval" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+      <Node Id="3_450_1" Text="Attendance Approval"  Tag="---" FormName="" Tergate="~/modules/HRMS/Approval/frmAttendanceApplicationApproval.aspx" Tooltip="Attendance Approval" ImageIndex="3" Permission="" Parameter="" PermType="" />      
+      <Node Id="3_450_3" Text="Leave Approval"  Tag="---" FormName="" Tergate="~/modules/HRMS/Approval/frmLeaveApplicationApproval.aspx" Tooltip="Leave Approval" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_450_4" Text="Offday Approval"  Tag="---" FormName="" Tergate="~/modules/HRMS/Approval/frmOffdayApplicationApproval.aspx" Tooltip="Offday Approval" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_450_5" Text="Overtime Approval"  Tag="---" FormName="" Tergate="~/modules/HRMS/Approval/frmOvertimeApplicationApproval.aspx" Tooltip="Overtime Approval" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_450_25" Text="ALL Approval"  Tag="---" FormName="" Tergate="~/modules/HRMS/Approval/frmApproval.aspx" Tooltip="ALL Approval" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_450_26" Text="Conveyance Approval"  Tag="---" FormName="" Tergate="~/modules/HRMS/Approval/frmConveyanceApplicationApproval.aspx" Tooltip="Conveyance Approval" ImageIndex="3" Permission="" Parameter="" PermType="" />
+    </Node>    
+  </Node>
+
+
+  <Node Id="5" Text="Provident Fund" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+    <Node Id="5_1" Text="Master" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+      <Node Id="5_1_1" Text="PF Configuration Rule Setup"  Tag="---" FormName="" Tergate="~/modules/PF/frm_pf_settle_setup.aspx" Tooltip="PF Configuration Rule Setup"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+    </Node>
+
+    <Node Id="5_2" Text="Transaction" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+      <Node Id="5_2_1" Text="Yearly Profit Distribution"  Tag="---" FormName="" Tergate="~/modules/PF/frm_yearly_profit_distribution.aspx" Tooltip="Yearly Profit Distribution"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="5_2_2" Text="Interim Profit Distribution"  Tag="---" FormName="" Tergate="~/modules/PF/frm_intrim_profit_distribution.aspx" Tooltip="Intrim Profit Distribution"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="5_2_3" Text="PF Settlement"  Tag="---" FormName="" Tergate="~/modules/PF/frm_pf_settlement.aspx" Tooltip="PF Settlement"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+    </Node>
+
+    <Node Id="5_3" Text="Report" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+      <Node Id="5_3_1" Text="PF Report"  Tag="---" FormName="" Tergate="~/modules/PF/frm_pf_report.aspx" Tooltip="PF Report"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+    </Node>
+  </Node>
+
+
+
+  <Node Id="3" Text="User Module" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+    <Node Id="3_1" Text="User Permission" Tergate="formname"  Tag="---" FormName="" Tooltip="tooltip here" ImageIndex="3" Permission="" Parameter="" PermType="">
+      <Node Id="3_1_1" Text="Approval Details"  Tag="---" FormName="" Tergate="~/modules/commercial/frm_app_det.aspx" Tooltip="Approval Details"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_1_2" Text="Flow Info"  Tag="---" FormName="" Tergate="~/modules/commercial/frm_app_flow_det.aspx" Tooltip="Flow Info"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_1_3" Text="Assign User Role"  Tag="---" FormName="" Tergate="~/modules/commercial/frm_user_role_assign.aspx" Tooltip="Assign User Role"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_1_4" Text="Approval Rule"  Tag="---" FormName="" Tergate="~/modules/commercial/frm_app_rule.aspx" Tooltip="CS Approval Rule"   ImageIndex="3" Permission="" Parameter="" PermType="" />      
+      <Node Id="3_1_7" Text="User Information"  Tag="---" FormName="" Tergate="~/modules/admin/frmUserInformation.aspx" Tooltip="User Information" ImageIndex="3" Permission="" Parameter="" PermType=""/>
+	    <Node Id="3_1_8" Text="Node Permission"  Tag="---" FormName="" Tergate="~/modules/admin/frmNodePermission.aspx" Tooltip="Userwise Node Permission" ImageIndex="1" Permission="View,Update" Parameter="" PermType=""/>
+	    <Node Id="3_1_9" Text="XML Node Modify"  Tag="---" FormName="" Tergate="~/modules/admin/frmNodeEdit.aspx" Tooltip="XML Node Modify" ImageIndex="2" Permission="" Parameter="" PermType=""/>
+      <Node Id="3_1_10" Text="Node Permission Advance"  Tag="---" FormName="" Tergate="~/modules/admin/frmNodePermissionAdvance.aspx" Tooltip="Node Permission Advance" ImageIndex="2" Permission="" Parameter="" PermType=""/>
+      <Node Id="3_1_11" Text="SMTP Setup"  Tag="---" FormName="" Tergate="~/modules/admin/frmSmtpSetup.aspx" Tooltip="SMTP Setup" ImageIndex="2" Permission="" Parameter="" PermType=""/>
+      <Node Id="3_1_12" Text="Mail Type Setup"  Tag="---" FormName="" Tergate="~/modules/admin/frmMailTypeSetup.aspx" Tooltip="Mail Type Setup" ImageIndex="2" Permission="" Parameter="" PermType=""/>
+      <Node Id="3_1_13" Text="Scripts"  Tag="---" FormName="" Tergate="~/modules/admin/frmScriptsRun.aspx" Tooltip="Scripts" ImageIndex="1" Permission="" Parameter="" PermType=""/>
+      <Node Id="3_1_14" Text="Node Permission Report"  Tag="---" FormName="" Tergate="~/modules/admin/frmNodePermissionSummary.aspx" Tooltip="Node Permission Report" ImageIndex="1" Permission="" Parameter="" PermType=""/>
+    </Node>
+  </Node>
+
+  
+</TreeView>
+
+

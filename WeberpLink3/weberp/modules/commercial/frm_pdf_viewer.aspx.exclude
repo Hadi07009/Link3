@@ -1,0 +1,130 @@
+<%@ Page Language="C#"  AutoEventWireup="true" CodeFile="frm_pdf_viewer.aspx.cs" Inherits="frm_pdf_viewer" Title=""   %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register Assembly="PdfViewer" Namespace="PdfViewer" TagPrefix="cc1" %>
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>QUOTATION</title>
+    <style type="text/css">
+        .style1
+        {
+            width: 108px;
+        }
+    </style>
+    </head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+<asp:UpdatePanel ID="upddoc" runat="server">
+<ContentTemplate>
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td class="heading" style="text-align: center">
+                <asp:ScriptManager ID="ScriptManager1" runat="server">
+                </asp:ScriptManager>
+                DOCUMENT VIEWER</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                    <table id ="tbldet" runat="server" style="width: 57%;">
+                        <tr>
+                            <td style="text-align: left" class="style1">
+                                &nbsp;</td>
+                            <td style="text-align: left">
+                                &nbsp;</td>
+                            <td>
+                                &nbsp;</td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left" class="style1">
+                                &nbsp;</td>
+                            <td style="text-align: left">
+                                FILE TITLE</td>
+                            <td>
+                                :</td>
+                            <td style="text-align: left">
+                                <asp:Label ID="lbltitle" runat="server" Text="Label"></asp:Label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left" class="style1">
+                                &nbsp;</td>
+                            <td style="text-align: left">
+                                FILE NAME</td>
+                            <td>
+                                :</td>
+                            <td style="text-align: left">
+                                <asp:Label ID="lblfilename" runat="server" Text="Label"></asp:Label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left" class="style1">
+                                &nbsp;</td>
+                            <td style="text-align: left">
+                                UPLOAD BY</td>
+                            <td>
+                                :</td>
+                            <td style="text-align: left">
+                                <asp:Label ID="lbluploadby" runat="server" Text="Label"></asp:Label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left" class="style1">
+                                &nbsp;</td>
+                            <td style="text-align: left">
+                                DATE TIME</td>
+                            <td>
+                                :</td>
+                            <td style="text-align: left">
+                                <asp:Label ID="lbldatetime" runat="server" Text="Label"></asp:Label>
+                            </td>
+                        </tr>
+                    </table>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                  <asp:Label ID="lblmsg" runat="server" Font-Bold="True" ForeColor="Red" 
+                      Text="FILE NOT FOUND" Visible="False"></asp:Label>
+                  </td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                  <asp:UpdateProgress ID="sp1" runat="server">
+                      <ProgressTemplate>
+                           <%-- <div class="TransparentGrayBackground"> </div>--%>
+                            <asp:Panel ID="alwaysVisibleAP" runat="server" style="text-align: center">
+                                <div style="text-align: center">
+                                    <asp:Image ID="ajaxLoadNotificationImage" runat="server" 
+                                        AlternateText="[image]" ImageUrl="~/images/Loading.gif" />
+                                </div>
+                          </asp:Panel>
+                          <ajaxToolkit:AlwaysVisibleControlExtender ID="AlwaysVisibleControlExtender" 
+                              runat="server" HorizontalOffset="0" HorizontalSide="Center" 
+                              TargetControlID="alwaysVisibleAP" VerticalOffset="0" VerticalSide="Middle">
+                          </ajaxToolkit:AlwaysVisibleControlExtender>
+                      </ProgressTemplate>
+                  </asp:UpdateProgress>
+                  </td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                  <cc1:ShowPdf ID="Showdoc" runat="server" FilePath="" Height="600px" 
+                      Width="1024px" />
+                  </td>
+        </tr>
+        </table>
+        </ContentTemplate>
+ </asp:UpdatePanel>
+
+ </div>
+    </form>
+</body>
+</html>
+
+

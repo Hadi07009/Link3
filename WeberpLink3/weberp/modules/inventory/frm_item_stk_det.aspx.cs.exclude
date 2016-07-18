@@ -1,0 +1,256 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+
+public partial class frm_item_stk_det : System.Web.UI.Page
+{
+   
+
+    protected void Page_Load(object sender, EventArgs e)
+    {       
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";        
+
+        if (!Page.IsPostBack)
+        {
+            get_all_store();
+        }
+        else
+        {
+
+        }
+          
+    }
+
+    private void get_all_store()
+    {
+        InMa_Str_LocTableAdapter str = new InMa_Str_LocTableAdapter();
+        ErpDataSet.InMa_Str_LocDataTable dtstr = new ErpDataSet.InMa_Str_LocDataTable();
+        ddlstore.Items.Clear();
+        ddlstore.Items.Add("ALL");
+        ListItem lst;
+
+        dtstr = str.GetData();
+
+        foreach (ErpDataSet.InMa_Str_LocRow dr in dtstr.Rows)
+        {
+            lst = new ListItem();
+
+            lst.Value = dr.Str_Loc_Id.ToString();
+            lst.Text = dr.Str_Loc_Id.ToString() + ":" + dr.Str_Loc_Name.ToString();
+            ddlstore.Items.Add(lst);
+
+        }
+
+
+
+    }
+
+    private void load_search_items(string srcitem, string store)
+    {
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitm = new ErpDataSet.InMa_Itm_DetDataTable();
+
+        InMa_Stk_CtlTableAdapter stk = new InMa_Stk_CtlTableAdapter();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstk = new ErpDataSet.InMa_Stk_CtlDataTable();
+        ErpDataSet.InMa_Stk_CtlRow drstk;
+        TextBox txtmin, txtqty, txtstd;
+        string itmcode, scode;
+        srcitem = "%" + srcitem + "%";
+        
+        dtitm = itm.SearchItem(srcitem);
+
+        DataTable dt = new DataTable();
+
+        dt.Columns.Add(new DataColumn("icode", typeof(string)));
+        dt.Columns.Add(new DataColumn("idet", typeof(string)));
+        dt.Columns.Add(new DataColumn("uom", typeof(string)));
+        dt.Columns.Add(new DataColumn("store", typeof(string)));
+        dt.Columns.Add(new DataColumn("curstk", typeof(string)));
+
+
+        foreach (ErpDataSet.InMa_Itm_DetRow dr in dtitm.Rows)
+        {
+            if (store == "ALL")
+                dtstk = stk.GetDataByItem(dr.Itm_Det_Icode);
+            else
+                dtstk = stk.GetDataByItemStore(dr.Itm_Det_Icode, store);
+
+            foreach (ErpDataSet.InMa_Stk_CtlRow drr in dtstk.Rows)
+            {
+                dtitm = itm.GetItemByCode(dr.Itm_Det_Icode);
+                dt.Rows.Add(dr.Itm_Det_Icode, dtitm[0].Itm_Det_desc, dtitm[0].Itm_Det_PUSA_unit, drr.Stk_Ctl_SCode, drr.Stk_Ctl_Cur_Stk.ToString("N2"));
+            }
+
+            
+        }
+
+        gdItem.DataSource = dt;
+        gdItem.DataBind();
+
+        foreach (GridViewRow gr in gdItem.Rows)
+        {
+
+            txtmin = new TextBox();
+            txtqty = new TextBox();
+            txtstd = new TextBox();
+
+            txtmin = (TextBox)gr.FindControl("TextBox1");
+            txtqty = (TextBox)gr.FindControl("TextBox2");
+            txtstd = (TextBox)gr.FindControl("TextBox3");
+            itmcode = gr.Cells[0].Text.ToString();
+            scode = gr.Cells[3].Text.ToString();
+            drstk = stk.GetDataByItemStore(itmcode, scode)[0];
+
+            txtmin.Text = drstk.Stk_Ctl_Min_Stk.ToString("N2");
+            txtqty.Text = drstk.Stk_Ctl_Reord_Stk.ToString("N2");
+            txtstd.Text = drstk.Stk_Ctl_FIFO_Val.ToString("N2");
+
+        }
+
+    }
+
+    private void load_item(string icode, string store)
+    {
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitm = new ErpDataSet.InMa_Itm_DetDataTable();
+
+        InMa_Stk_CtlTableAdapter stk = new InMa_Stk_CtlTableAdapter();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstk = new ErpDataSet.InMa_Stk_CtlDataTable();
+        ErpDataSet.InMa_Stk_CtlRow drstk;
+
+        TextBox txtmin, txtqty, txtstd;
+        string itmcode, scode;
+
+        if(store=="ALL")
+            dtstk = stk.GetDataByItem(icode);
+        else
+            dtstk=stk.GetDataByItemStore(icode,store);
+        
+        DataTable dt = new DataTable();
+
+        dt.Columns.Add(new DataColumn("icode", typeof(string)));
+        dt.Columns.Add(new DataColumn("idet", typeof(string)));
+        dt.Columns.Add(new DataColumn("uom", typeof(string)));
+        dt.Columns.Add(new DataColumn("store", typeof(string)));
+        dt.Columns.Add(new DataColumn("curstk", typeof(string)));
+              
+
+        foreach (ErpDataSet.InMa_Stk_CtlRow dr in dtstk.Rows)
+        {
+            dtitm = itm.GetItemByCode(icode);
+            dt.Rows.Add(dr.Stk_Ctl_ICode, dtitm[0].Itm_Det_desc, dtitm[0].Itm_Det_PUSA_unit, dr.Stk_Ctl_SCode, dr.Stk_Ctl_Cur_Stk.ToString("N2"));
+        }
+
+        gdItem.DataSource = dt;
+        gdItem.DataBind();
+
+        foreach (GridViewRow gr in gdItem.Rows)
+        {
+            txtmin=new TextBox();
+            txtqty = new TextBox();
+            txtstd = new TextBox();
+
+            txtmin = (TextBox)gr.FindControl("TextBox1");
+            txtqty = (TextBox)gr.FindControl("TextBox2");
+            txtstd = (TextBox)gr.FindControl("TextBox3");
+            itmcode = gr.Cells[0].Text.ToString();
+            scode = gr.Cells[3].Text.ToString();
+            drstk = stk.GetDataByItemStore(itmcode, scode)[0];
+
+            txtmin.Text = drstk.Stk_Ctl_Min_Stk.ToString("N2");
+            txtqty.Text = drstk.Stk_Ctl_Reord_Stk.ToString("N2");
+            txtstd.Text = drstk.Stk_Ctl_FIFO_Val.ToString("N2");
+
+        }
+    }
+
+
+    protected void btnview_Click(object sender, EventArgs e)
+    {
+        string[] tmp = txtitem.Text.Split(':');
+
+
+        if ((ddlstore.Text == "") || (tmp.Length < 2))
+        {
+            gdItem.Visible = false;
+            return;
+        }
+        gdItem.Visible = true;
+
+        string store = ddlstore.SelectedValue.ToString();
+
+        load_item(tmp[0].ToString(), store);
+
+    }
+    protected void btnsearch_Click(object sender, EventArgs e)
+    {
+
+        if ((ddlstore.Text == "") || (txtsearch.Text==""))
+        {
+            gdItem.Visible = false;
+            return;
+        }
+        gdItem.Visible = true;
+
+        string session = ddlstore.SelectedValue.ToString();
+
+        load_search_items(txtsearch.Text, session);
+
+    }
+
+
+    protected void gdItem_RowCreated(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType != DataControlRowType.DataRow) { return; }
+
+        Button btnButton = (Button)e.Row.Cells[0].FindControl("Button1");
+        btnButton.CommandArgument = e.Row.RowIndex.ToString();
+       
+    }
+
+    protected void gdItem_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        if (e.CommandName == "btnupdate")
+        {
+            InMa_Stk_CtlTableAdapter stk = new InMa_Stk_CtlTableAdapter();
+
+            int index = Convert.ToInt32(e.CommandArgument);
+            TextBox txtmin = new TextBox();
+            TextBox txtqty = new TextBox();
+            TextBox txtstd = new TextBox();
+            
+            string icode, scode;
+
+            icode = gdItem.Rows[index].Cells[0].Text;
+            scode = gdItem.Rows[index].Cells[3].Text;            
+            
+            txtmin = (TextBox)gdItem.Rows[index].FindControl("Textbox1");
+            txtqty = (TextBox)gdItem.Rows[index].FindControl("Textbox2");
+            txtstd = (TextBox)gdItem.Rows[index].FindControl("Textbox3");
+
+            if ((txtmin.Text == "") || (txtqty.Text == "") || (txtstd.Text == "")) return;
+
+            if ((Convert.ToDecimal(txtmin.Text) == 0) || (Convert.ToDecimal(txtqty.Text) == 0) || (Convert.ToDecimal(txtstd.Text) == 0)) return;
+
+            stk.UpdateMinStk(Convert.ToDouble(txtmin.Text), Convert.ToDouble(txtqty.Text), Convert.ToDecimal(txtstd.Text), icode, scode);            
+            
+        }
+    }
+
+    protected void gdItem_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+}

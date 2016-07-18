@@ -1,0 +1,516 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+using LibraryDAL.dsLinkofficeTableAdapters;
+
+public partial class frm_direct_mrr : System.Web.UI.Page
+{  
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";       
+
+        if (!Page.IsPostBack)
+        {
+            Session[clsStatic.sessionTempDatatable] = null;
+            cldmrrdate.SelectedDate = DateTime.Now;
+            get_all_plant();
+            get_all_party();
+            get_all_store();
+            AutoCompleteExtender2.ContextKey = "";
+            txtcaranal_AutoCompleteExtender.ContextKey = "";
+        }
+        else
+        {
+
+        }
+    }
+
+    private void get_all_store()
+    {
+        InMa_Str_LocTableAdapter store = new InMa_Str_LocTableAdapter();
+        ErpDataSet.InMa_Str_LocDataTable dtstore = new ErpDataSet.InMa_Str_LocDataTable();
+        ListItem lst;
+        dtstore = store.GetAllStore();
+
+        ddlstore.Items.Clear();
+        ddlstore.Items.Add("");
+
+        foreach (ErpDataSet.InMa_Str_LocRow dr in dtstore.Rows)
+        {
+            lst = new ListItem();
+            lst.Text = dr.Str_Loc_Id + ":" + dr.Str_Loc_Name;
+            lst.Value = dr.Str_Loc_Id;
+            ddlstore.Items.Add(lst);
+
+        }
+
+    }
+
+    private void get_all_party()
+    {
+        PuMa_Par_AccTableAdapter acc = new PuMa_Par_AccTableAdapter();
+        ErpDataSet.PuMa_Par_AccDataTable dtacc = new ErpDataSet.PuMa_Par_AccDataTable();
+
+        ListItem lst, lst2;
+        dtacc = acc.GetAllData();
+
+        ddlparty.Items.Clear();
+        ddlparty.Items.Add("");
+
+        ddlcarr.Items.Clear();
+        ddlcarr.Items.Add("");
+
+
+        foreach (ErpDataSet.PuMa_Par_AccRow dr in dtacc.Rows)
+        {
+            lst = new ListItem();
+            lst.Text = dr.Par_Acc_Code + ":" + dr.Par_Acc_Name;
+            lst.Value = dr.Par_Acc_Code;
+            ddlparty.Items.Add(lst);
+
+            lst2 = new ListItem();
+            lst2.Text = dr.Par_Acc_Code + ":" + dr.Par_Acc_Name;
+            lst2.Value = dr.Par_Acc_Code;
+            ddlcarr.Items.Add(lst2);
+
+        }
+
+
+    }
+
+    private void get_all_plant()
+    {
+        tbl_trn_detTableAdapter trn = new tbl_trn_detTableAdapter();
+        SCBLDataSet.tbl_trn_detDataTable dttrn = new SCBLDataSet.tbl_trn_detDataTable();
+        User_Role_DefinitionTableAdapter uda = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable udt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        ListItem lst;
+        string ucode = current.UserId.ToString();
+        int i;
+        string[] items;
+
+        udt = uda.GetDataByUserCodeRole(ucode, "MATR");
+
+
+        ddlUnit.Items.Clear();
+        if (udt.Rows.Count == 0) return;
+
+        items = udt[0].plant_list.Split(',');
+
+
+        ddlUnit.Items.Clear();
+        dttrn = trn.GetAllCodeByType("IN");
+
+        foreach (SCBLDataSet.tbl_trn_detRow dr in dttrn.Rows)
+        {          
+
+            for (i = 0; i < items.Length; i++)
+            {
+                if (dr.trn_code.Substring(0, 2) == items[i].ToString())
+                {
+                    lst = new ListItem();
+                    lst.Value = dr.trn_code.Substring(0, 2);
+                    lst.Text = dr.trn_code.Substring(0, 2) + "MRR";
+                    ddlUnit.Items.Add(lst);
+                    goto nextsrc;
+                }
+            }
+        nextsrc: ;
+
+
+        }
+    }
+
+
+    protected void gdItem_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        int indx = gdItem.SelectedIndex;
+
+        if (indx != -1)
+        {
+            DataTable dt = new DataTable();
+
+            dt = (DataTable)Session[clsStatic.sessionTempDatatable];
+            dt.Rows.RemoveAt(indx);
+            Session[clsStatic.sessionTempDatatable] = dt;
+            set_grid();
+        }
+    }
+
+    protected void btnProceed_Click(object sender, EventArgs e)
+    {
+        tblUserInfoTableAdapter empmas = new tblUserInfoTableAdapter();
+        dsLinkoffice.tblUserInfoDataTable dtemp = new dsLinkoffice.tblUserInfoDataTable();
+        
+        PuMa_Par_AdrTableAdapter adr = new PuMa_Par_AdrTableAdapter();
+        ErpDataSet.PuMa_Par_AdrDataTable adrdt = new ErpDataSet.PuMa_Par_AdrDataTable();
+        InTr_Trn_HdrTableAdapter intrhdr =new InTr_Trn_HdrTableAdapter();
+        ErpDataSet.InTr_Trn_HdrDataTable dthdr = new ErpDataSet.InTr_Trn_HdrDataTable();
+
+        AccCoaGroupCodeSetupTableAdapter grp = new AccCoaGroupCodeSetupTableAdapter();
+        AccDataSet.AccCoaGroupCodeSetupDataTable dtgrp = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+
+
+        string party_code = "", adr_code = "", adrdet = "", carcode = "", cardet = "", caradr = "", caradrdet = "";
+        string party_det = "";
+        string empcode = "";
+        string[] tmp;
+        DataTable dt = new DataTable();
+
+        if (ddlUnit.SelectedValue.ToString() == "") return;
+
+        if (cldmrrdate.SelectedDate > DateTime.Now) return;
+
+
+        //dthdr = intrhdr.GetDataByPlantfordate(ddlUnit.SelectedValue.ToString() + "MRR");
+        //if (dthdr.Count > 0)
+        //{
+        //    if (dthdr[0].Trn_Hdr_DATE > cldmrrdate.SelectedDate) return;
+        //}
+
+        if (ddlparty.Text == "") return;
+
+        party_code = ddlparty.SelectedValue.ToString();
+        party_det = ddlparty.SelectedItem.Text.Split(':')[1];
+
+        if (ddltype.SelectedValue.ToString() == "SPO")
+        {
+            tmp = txtepmdet.Text.Split(':');
+            if (tmp.Length < 2) return;
+
+            dtemp = empmas.GetUserByCode(tmp[0]);
+            if (dtemp.Rows.Count == 0)
+            {
+                return;
+            }
+
+            empcode = tmp[0];
+
+            //optional party info
+            tmp = txtpartydet.Text.Split(':');
+            if (tmp.Length > 1)
+            {
+                adrdt = adr.GetDataByAdrCode(tmp[0]);
+                if (adrdt.Rows.Count > 0)
+                {
+                    adr_code = tmp[0];
+                    adrdet = adrdt[0].par_adr_name;
+                }
+            }
+        }
+        else
+        {
+            tmp = txtpartydet.Text.Split(':');
+            if (tmp.Length < 2) return;
+
+           
+            adrdt = adr.GetDataByAdrCode(tmp[0]);
+            if (adrdt.Rows.Count == 0)
+            {
+                dtgrp = grp.GetDataByCcgCode(tmp[0]);
+                if (dtgrp.Rows.Count == 0)
+                {
+                    return;
+                }
+                else 
+                {
+                    adr_code = tmp[0];
+                    adrdet = dtgrp[0].Ccg_Name;
+                }
+            }
+            else
+            {
+                adr_code = tmp[0];
+                adrdet = adrdt[0].par_adr_name;
+            }
+            //party_code = adrdt[0].Par_Adr_Acc_Code;
+            
+        }
+
+        if ((gdItem.Rows.Count < 1) || (gdItem.Visible == false)) return;
+
+        dt = (DataTable)Session[clsStatic.sessionTempDatatable];
+
+        if (dt == null) return;
+        if (dt.Rows.Count < 1) return;
+
+
+        decimal carcost = 0;
+        //check carring cost
+
+        if (txtcarcost.Text != "")
+        {
+            carcost = Convert.ToDecimal(txtcarcost.Text);
+        }
+
+        if (carcost > 0)
+        {
+            if (ddlcarr.Text == "") return;
+            carcode = ddlcarr.SelectedValue.ToString();
+            cardet = ddlcarr.SelectedItem.Text.Split(':')[1];
+
+            tmp = txtcaranal.Text.Split(':');
+            if (tmp.Length < 2) return;
+
+            adrdt = new ErpDataSet.PuMa_Par_AdrDataTable();
+            adrdt = adr.GetDataByAdrCode(tmp[0]);
+            if (adrdt.Rows.Count == 0)
+            {
+                dtgrp = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+                dtgrp = grp.GetDataByCcgCode(tmp[0]);
+                if (dtgrp.Rows.Count == 0)
+                {
+                    return;
+                }
+                else
+                {
+                    caradr = tmp[0];
+                    caradrdet = dtgrp[0].Ccg_Name;
+                }
+            }
+            else
+            {
+                caradr = tmp[0];
+                caradrdet = adrdt[0].par_adr_name;
+            }
+
+        }
+
+
+        clsMrrData[] mrrdata = new clsMrrData[100];
+        int cnt=0;
+
+        foreach (DataRow dr in dt.Rows)
+        {
+            mrrdata[cnt] = new clsMrrData();
+            mrrdata[cnt].Seqno = cnt + 1;
+            mrrdata[cnt].Ref_no = txtporef.Text;
+            mrrdata[cnt].Plant = "CM";
+            mrrdata[cnt].Icode = dr["icode"].ToString();
+            mrrdata[cnt].Idet = dr["idesc"].ToString();
+            mrrdata[cnt].Uom = dr["uom"].ToString();
+            mrrdata[cnt].Store = dr["store"].ToString();
+            mrrdata[cnt].Brand = dr["brand"].ToString();
+            mrrdata[cnt].Origin = dr["origin"].ToString();
+            mrrdata[cnt].Packing = dr["packing"].ToString();
+            mrrdata[cnt].Entryqty = Convert.ToDecimal(dr["qty"].ToString());
+            mrrdata[cnt].Rate = Convert.ToDecimal(dr["rate"].ToString());
+            mrrdata[cnt].Amnt = Convert.ToDecimal(dr["amnt"].ToString());
+            mrrdata[cnt].Pcode = party_code;
+            mrrdata[cnt].Pdet = party_det;
+            mrrdata[cnt].Adrcode = adr_code;
+            mrrdata[cnt].AdrDet = adrdet;
+            mrrdata[cnt].Purdate = cldmrrdate.SelectedDate;
+            mrrdata[cnt].Pur_by = empcode;
+            mrrdata[cnt].Pur_type = ddltype.SelectedValue.ToString();
+            mrrdata[cnt].Caracc = carcode;
+            mrrdata[cnt].Caraccdet = cardet;
+            mrrdata[cnt].Caradr = caradr;
+            mrrdata[cnt].Caradrdet = caradrdet;
+            mrrdata[cnt].Carcost = carcost;
+            
+            cnt++;           
+           
+        }
+        
+
+        if (cnt == 0) return;
+
+        Session[clsStatic.sessionMrrDetData] = mrrdata;
+        Response.Redirect("./frm_direct_mrr_confirm.aspx");
+    }
+    protected void btnAdd_Click(object sender, EventArgs e)
+    {
+        txtitem.Focus();
+
+        lblmsg.Visible = false;
+        DataTable dt = new DataTable();
+        string[] tdata;
+        string icode, idesc, uom;
+        decimal qty,rate;
+
+        tdata = txtitem.Text.Split(':');
+
+        if ((tdata.Length < 3) || (txtqty.Text == "") || (txtrate.Text == ""))
+        {
+            lblmsg.Text = "Item/Quantity Error";
+            lblmsg.Visible = true;
+            return;
+        }
+
+        qty = Convert.ToDecimal(txtqty.Text);
+
+        if (qty <= 0)
+        {
+            lblmsg.Text = "Quantity Error";
+            lblmsg.Visible = true;
+            return;
+        }
+
+        rate = Convert.ToDecimal(txtrate.Text);
+
+        if (rate <= 0)
+        {
+            lblmsg.Text = "Rate Error";
+            lblmsg.Visible = true;
+            return;
+        }
+
+        if (ddlstore.Text == "")
+        {
+            lblmsg.Text = "Select Store";
+            lblmsg.Visible = true;
+            return;
+        }
+
+        icode = tdata[0].Trim();
+
+        if (chk_duplicate_data(icode) == false)
+        {
+            lblmsg.Text = "Item Already Added or invalid item";
+            lblmsg.Visible = true;
+            return;
+        }       
+        
+        LibraryDAL.ErpDataSetTableAdapters.InMa_Itm_DetTableAdapter itm = new LibraryDAL.ErpDataSetTableAdapters.InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetRow dritm;        
+
+        dritm = itm.GetItemByCode(icode)[0];
+        idesc = dritm.Itm_Det_desc.ToString();
+        uom = dritm.Itm_Det_PUSA_unit.ToString();
+        
+
+        if (Session[clsStatic.sessionTempDatatable] != null)
+        {
+            dt = (DataTable)Session[clsStatic.sessionTempDatatable];
+        }
+        else
+        {
+            dt.Rows.Clear();
+            dt.Columns.Clear();
+                       
+            dt.Columns.Add("icode", typeof(string));
+            dt.Columns.Add("idesc", typeof(string));
+            dt.Columns.Add("uom", typeof(string));
+            dt.Columns.Add("store", typeof(string));
+            dt.Columns.Add("brand", typeof(string));
+            dt.Columns.Add("origin", typeof(string));
+            dt.Columns.Add("packing", typeof(string));
+            dt.Columns.Add("qty", typeof(string));
+            dt.Columns.Add("rate", typeof(decimal));
+            dt.Columns.Add("amnt", typeof(decimal));      
+
+
+        }
+
+        if (dt.Rows.Count > 15) return;
+        dt.Rows.Add(icode, idesc, uom, ddlstore.SelectedValue.ToString(), txtbrand.Text, txtorigin.Text, txtpacking.Text, txtqty.Text, txtrate.Text,(qty*rate).ToString("N2"));
+
+
+        txtitem.Text = "";
+        txtqty.Text = "";
+        txtrate.Text = "";
+        txtbrand.Text = "";
+        txtorigin.Text = "";
+        txtpacking.Text = "";
+        ddlstore.SelectedIndex = -1;
+        Session[clsStatic.sessionTempDatatable] = new DataTable();
+        Session[clsStatic.sessionTempDatatable] = dt;
+        set_grid();
+    }
+
+    private void set_grid()
+    {
+        btnProceed.Visible = false;
+        gdItem.Visible = false;
+
+        if (Session[clsStatic.sessionTempDatatable] != null)
+        {
+            DataTable dt = new DataTable();
+            DataTable dtgrid = new DataTable();
+            int cnt = 0;
+
+            dt = (DataTable)Session[clsStatic.sessionTempDatatable];
+
+            if (dt.Rows.Count > 0)
+            {
+                btnProceed.Visible = true;
+                gdItem.Visible = true;
+
+                dtgrid.Rows.Clear();
+                dtgrid.Columns.Clear();
+
+                dtgrid.Columns.Add("Sl", typeof(int));
+                dtgrid.Columns.Add("Item Code", typeof(string));
+                dtgrid.Columns.Add("Item Desc", typeof(string));
+                dtgrid.Columns.Add("UOM", typeof(string));
+                dtgrid.Columns.Add("Store", typeof(string));
+                dtgrid.Columns.Add("Brand", typeof(string));
+                dtgrid.Columns.Add("Origin", typeof(string));
+                dtgrid.Columns.Add("Packing", typeof(string));
+                dtgrid.Columns.Add("Qty", typeof(string));
+                dtgrid.Columns.Add("Rate", typeof(string));                
+                dtgrid.Columns.Add("Amount", typeof(string));
+
+
+                foreach (DataRow dr in dt.Rows)
+                {
+                    cnt += 1;
+                    dtgrid.Rows.Add(cnt, dr["icode"].ToString(), dr["idesc"].ToString(), dr["uom"].ToString(), dr["store"].ToString(), dr["brand"].ToString(), dr["origin"].ToString(), dr["packing"].ToString(), dr["qty"].ToString(), dr["rate"].ToString(), dr["amnt"].ToString());
+                }
+
+                gdItem.DataSource = dtgrid;
+                gdItem.DataBind();
+
+            }
+
+        }
+    }
+
+    private bool chk_duplicate_data(string icode)
+    {
+        InMa_Itm_DetTableAdapter itmdet = new InMa_Itm_DetTableAdapter();
+        
+        bool flg = true;
+
+        if (itmdet.GetItemByCode(icode).Rows.Count == 0) return false;
+
+        DataTable dt = new DataTable();
+        dt = (DataTable)Session[clsStatic.sessionTempDatatable];
+        if (dt != null)
+            foreach (DataRow dr in dt.Rows)
+            {
+                if (dr["icode"].ToString() == icode) { flg = false; }
+            }
+
+        return flg;
+    }
+      
+    protected void ddlparty_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        txtpartydet.Text = "";
+        AutoCompleteExtender2.ContextKey = ddlparty.SelectedValue.ToString();
+    }
+    protected void ddlcarr_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        txtcaranal.Text = "";
+        txtcaranal_AutoCompleteExtender.ContextKey = ddlcarr.SelectedValue.ToString();
+    }
+}

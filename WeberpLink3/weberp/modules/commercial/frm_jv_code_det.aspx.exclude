@@ -1,0 +1,163 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_jv_code_det.aspx.cs" Inherits="frm_jv_code_det" Title=""   EnableEventValidation="false" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+<asp:UpdatePanel ID="update" runat="server">
+<ContentTemplate>
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                JV CODE DETAIL</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 21px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="text-align: left">
+                <table style="width:100%;">
+                    <tr>
+                        <td style="width: 49px">
+                            &nbsp;</td>
+                        <td style="width: 146px">
+                            TYPE OF PURCHASE</td>
+                        <td style="width: 15px">
+                            :</td>
+                        <td>
+                            <asp:DropDownList ID="ddlpurtype" runat="server" AutoPostBack="True" 
+                                CssClass="txtbox" onselectedindexchanged="ddlpurtype_SelectedIndexChanged" 
+                                Width="316px">
+                                <asp:ListItem></asp:ListItem>
+                                <asp:ListItem>LPO</asp:ListItem>
+                                <asp:ListItem>SPO</asp:ListItem>
+                                <asp:ListItem>FPO</asp:ListItem>
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 49px">
+                            &nbsp;</td>
+                        <td style="width: 146px">
+                            PURCHASE PLANT</td>
+                        <td style="width: 15px">
+                            :</td>
+                        <td>
+                            <asp:DropDownList ID="ddltype" runat="server" AutoPostBack="True" 
+                                CssClass="txtbox" onselectedindexchanged="ddltype_SelectedIndexChanged" 
+                                Width="316px">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 49px">
+                            &nbsp;</td>
+                        <td style="width: 146px">
+                            &nbsp;</td>
+                        <td style="width: 15px">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 49px">
+                            &nbsp;</td>
+                        <td style="width: 146px">
+                            Debit Code (RM)</td>
+                        <td style="width: 15px">
+                            :</td>
+                        <td>
+                            <asp:TextBox ID="txtdcoderm" runat="server" CssClass="txtbox" Width="221px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 49px">
+                            &nbsp;</td>
+                        <td style="width: 146px">
+                            Debit Code</td>
+                        <td style="width: 15px">
+                            :</td>
+                        <td>
+                            <asp:TextBox ID="txtdcode" runat="server" CssClass="txtbox" Width="221px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 49px">
+                            &nbsp;</td>
+                        <td style="width: 146px">
+                            Credit Code</td>
+                        <td style="width: 15px">
+                            :</td>
+                        <td>
+                            <asp:TextBox ID="txtccode" runat="server" CssClass="txtbox" Width="219px"></asp:TextBox>
+                        </td>
+                    </tr>
+                </table>
+                </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="text-align: left; height: 11px;">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="text-align: center; height: 11px;">
+                <asp:Button ID="btnsave" runat="server" CssClass="btn2" onclick="btnsave_Click" 
+                    Text="Add/Update" Width="149px" />
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="text-align: center; height: 11px;">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 23px; text-align: left">
+                
+                
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 23px; text-align: center">
+                <asp:GridView ID="gddetail" runat="server" BackColor="White" 
+                    BorderColor="#41519A" BorderStyle="Solid" BorderWidth="1px" CellPadding="4" 
+                    ForeColor="#333333" GridLines="None" PageSize="100" SkinID="GridView" 
+                    style="border-top-width: 1px; border-left-width: 1px; border-left-color: #e6e6fa; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='white', startcolorstr='#D6DCF9', gradienttype='0'); border-bottom-width: 1px; border-bottom-color: #e6e6fa; border-top-color: #e6e6fa; border-right-width: 1px; border-right-color: #e6e6fa;" 
+                    Width="98%" onselectedindexchanged="gddetail_SelectedIndexChanged">
+                    <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <Columns>
+                        <asp:CommandField ShowSelectButton="True" />
+                    </Columns>
+                    <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                    <SelectedRowStyle Font-Bold="True" />
+                    <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <EditRowStyle BackColor="#2461BF" />
+                    <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" 
+                        Font-Underline="False" />
+                    <RowStyle Font-Size="8pt" />
+                </asp:GridView>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 23px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+    </ContentTemplate>
+</asp:UpdatePanel>
+</asp:Content>
+

@@ -1,0 +1,676 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+
+public partial class frm_sr_approval : System.Web.UI.Page
+{
+   
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.MsgConfirmBox(btnapprove, "Are you sure to approve ? ");
+        clsStatic.MsgConfirmBox(btnreject, "Are you sure to reject ? ");
+        clsStatic.MsgConfirmBox(btnforward, "Are you sure to forward ? ");
+
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";             
+
+        if (!Page.IsPostBack)
+        {
+            load_pending_list();                       
+        }
+        else
+        {
+            generate_comments(ddllist.SelectedValue.ToString());
+        }
+          
+    }
+    private string get_my_app()
+    {
+        User_Role_DefinitionTableAdapter urole = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable udt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        string my_app = "";
+        udt = urole.GetRoleByUser(current.UserId.ToString(),"SR");
+
+        if (udt.Rows.Count > 0) my_app = udt[0].role_as.ToString();
+
+        return my_app;
+    }
+
+    private void load_pending_list()
+    {
+        InTr_Sr_HdrTableAdapter srhdr = new InTr_Sr_HdrTableAdapter();
+        SCBLIN.InTr_Sr_HdrDataTable srdt = new SCBLIN.InTr_Sr_HdrDataTable();
+        ListItem lst;
+        string my_app = get_my_app();
+        
+        srdt = srhdr.GetDataForPending("RUN", my_app);
+
+        if (srdt.Rows.Count == 0)
+        {
+            Response.Redirect("../commercial/frm_com_inbox.aspx");
+        }
+        if (my_app == "") return;
+
+        ddllist.Items.Clear();
+        ddllist.Items.Add("");
+        foreach (SCBLIN.InTr_Sr_HdrRow dr in srdt.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Sr_Hdr_Ref.ToString();
+            lst.Text = dr.Sr_Hdr_Ref.ToString() + "  [" + dr.Sr_Hdr_St_DATE.ToString()+"]";
+            ddllist.Items.Add(lst);
+        }
+
+        lblcount.Text = "(" + srdt.Rows.Count.ToString() + ")";
+               
+        tbl_po.Visible = false;
+    }
+    
+    private void BindMyGridview()
+    {
+        DataTable dt = new DataTable();
+
+        dt = (DataTable)ViewState[clsStatic.sessionTempDatatable];
+
+        gdItem.DataSource = dt;
+        gdItem.DataBind();
+    }
+        
+    
+    protected void gdItem_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        //if (e.Row.RowState==DataControlRowState.Edit)
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+           
+            //e.Row.Cells[3].ForeColor = System.Drawing.Color.Blue;
+           
+            e.Row.Cells[2].Enabled = false;
+            e.Row.Cells[3].Enabled = false;
+            e.Row.Cells[4].Enabled = false;
+            e.Row.Cells[5].Enabled = false;
+            e.Row.Cells[6].Enabled = false;
+            e.Row.Cells[8].Enabled = false;
+            e.Row.Cells[9].Enabled = false;
+            e.Row.Cells[10].Enabled = false;
+            e.Row.Cells[11].Enabled = false;
+            //e.Row.Cells[11].Enabled = false;
+            //e.Row.Cells[12].Enabled = false;
+            //e.Row.Cells[13].Enabled = false;
+            
+
+        }
+
+    }
+    protected void gdItem_RowEditing(object sender, GridViewEditEventArgs e)
+    {
+        gdItem.EditIndex = e.NewEditIndex;        
+        TextBox txt = new TextBox();
+        BindMyGridview();        
+
+    }
+
+    protected void gdItem_RowUpdating(object sender, GridViewUpdateEventArgs e)
+    {
+        decimal valqty,rate;
+        string prio, remarks;
+        DateTime ddate;
+
+        GridViewRow ROW = gdItem.Rows[e.RowIndex];
+        DataTable dt = (DataTable)ViewState[clsStatic.sessionTempDatatable];        
+        DataRow dr = dt.Rows[e.RowIndex];
+
+        try
+        {
+            valqty = Convert.ToDecimal(((TextBox)(ROW.Cells[7].Controls[0])).Text);
+            rate = Convert.ToDecimal(((TextBox)(ROW.Cells[8].Controls[0])).Text);
+            
+            ddate = Convert.ToDateTime(((TextBox)(ROW.Cells[10].Controls[0])).Text);
+            prio = ((TextBox)(ROW.Cells[11].Controls[0])).Text;
+            remarks = ((TextBox)(ROW.Cells[12].Controls[0])).Text;
+
+            dr["Req Qty"] = valqty.ToString("N2");
+            dr["Amnt"] = (valqty * rate).ToString("N2");
+            dr["Due Date"] = ddate.ToShortDateString();
+            dr["Priority"] = prio;
+            dr["Remarks"] = remarks;
+                                  
+
+
+            dr.AcceptChanges();
+            ViewState[clsStatic.sessionTempDatatable] = dt;
+        }
+        catch
+        {
+        }
+
+        gdItem.EditIndex = -1;
+        BindMyGridview();
+    }
+
+    public void gdItem_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+    {
+        gdItem.EditIndex = -1;
+        BindMyGridview();
+        //Session["SelecetdRowIndex"] = -1;
+
+    }
+    protected void gdItem_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        DataTable dt = (DataTable)ViewState[clsStatic.sessionTempDatatable];
+        DataRow dr = dt.Rows[e.RowIndex]; 
+        dt.Rows.Remove(dr);
+        ViewState[clsStatic.sessionTempDatatable] = dt;
+        gdItem.EditIndex = -1;
+        BindMyGridview();
+    }
+
+    private void generate_detail_data(string ref_no)
+    {
+        Hrms_Dept_MasterTableAdapter dept = new Hrms_Dept_MasterTableAdapter();
+       
+        InTr_Sr_HdrTableAdapter hdr = new InTr_Sr_HdrTableAdapter();
+        SCBLIN.InTr_Sr_HdrDataTable dthdr = new SCBLIN.InTr_Sr_HdrDataTable();
+        InTr_Sr_DetTableAdapter det = new InTr_Sr_DetTableAdapter();
+        SCBLIN.InTr_Sr_DetDataTable dtdet = new SCBLIN.InTr_Sr_DetDataTable();
+        DataTable dt = new DataTable();
+
+       
+        decimal amnt;
+
+        dthdr = hdr.GetDataByRef(ref_no);
+        dtdet = det.GetDataByRef(ref_no);
+        lbldate.Text= dtdet[0].Sr_Det_Exp_Dat.ToShortDateString();
+        lblref.Text = ref_no;
+        lblreason.Text = dthdr[0].Sr_Hdr_Com1;
+        lblloc.Text = dthdr[0].Sr_Hdr_Com2;
+        lblfromdept.Text = dthdr[0].Sr_Hdr_Pcode + ":" + dept.GetDataByDept_Code(dthdr[0].Sr_Hdr_Pcode)[0].Dept_Name;
+        lbltodept.Text = dthdr[0].Sr_Hdr_Dcode + ":" + dept.GetDataByDept_Code(dthdr[0].Sr_Hdr_Dcode)[0].Dept_Name;
+              
+        dt.Rows.Clear();
+        dt.Columns.Clear();
+        dt.Columns.Add("Sl", typeof(int));
+        dt.Columns.Add("Item Code", typeof(string));
+        dt.Columns.Add("Item Desc", typeof(string));
+        dt.Columns.Add("UOM", typeof(string));
+        dt.Columns.Add("Cur Qty", typeof(string));
+        dt.Columns.Add("Req Qty", typeof(string));        
+        dt.Columns.Add("Rate", typeof(string));
+        dt.Columns.Add("Amnt", typeof(string));        
+        dt.Columns.Add("Due Date", typeof(string));
+        dt.Columns.Add("Priority", typeof(string));
+        dt.Columns.Add("Remarks", typeof(string));
+        dt.Columns.Add("Dbt Code", typeof(string));
+        dt.Columns.Add("Dbt Anal", typeof(string));
+
+        foreach (SCBLIN.InTr_Sr_DetRow dr in dtdet.Rows)
+        {
+            
+            amnt = (decimal)dr.Sr_Det_Lin_Qty * dr.Sr_Det_Lin_Rat;
+            dt.Rows.Add((int)dr.Sr_Det_Lno, dr.Sr_Det_Icode, dr.Sr_Det_Itm_Desc, dr.Sr_Det_Itm_Uom, dr.Sr_Det_Cur_Stk.ToString(), dr.Sr_Det_Lin_Qty.ToString(), dr.Sr_Det_Lin_Rat.ToString("N2"), amnt, dr.Sr_Det_Exp_Dat.ToShortDateString(), dr.Sr_Det_Priority, dr.Sr_Det_Remarks, dr.T_C1, dr.T_C2);
+        }
+
+        ViewState[clsStatic.sessionTempDatatable] = dt;
+        BindMyGridview();
+    }
+
+    private void generate_comments(string ref_no)
+    {
+        tbl_CommentsTableAdapter com = new tbl_CommentsTableAdapter();
+        SCBLDataSet.tbl_CommentsDataTable dt = new SCBLDataSet.tbl_CommentsDataTable();
+
+        dt = com.GetCommentsByRef(ref_no);
+        phcomm.Controls.Clear();
+        foreach (SCBLDataSet.tbl_CommentsRow dr in dt.Rows)
+        {
+            ClientSide_modules_inventory_usercontrols_ctl_comments ctl = (ClientSide_modules_inventory_usercontrols_ctl_comments)LoadControl("./usercontrols/ctl_comments.ascx");
+            Label lblname = (Label)ctl.FindControl("lblname");
+            Label lbldate = (Label)ctl.FindControl("lbldate");
+            HtmlTableCell celcomm = (HtmlTableCell)ctl.FindControl("celcomm");
+            Image imgimage = (Image)ctl.FindControl("imgimage");
+
+            imgimage.ImageUrl = "~/handler/hndImage.ashx?id=" + dr.app_id;
+
+            ctl.ID = "ctl_" + phcomm.Controls.Count.ToString();
+
+            lblname.Text = dr.app_name.ToString() + " (" + dr.app_designation.ToString() + ")";
+            lbldate.Text = dr.app_date.ToString();
+            celcomm.InnerText = dr.gen_comments.ToString();
+
+            phcomm.Controls.Add(ctl);
+        }
+    }
+
+    private void set_permission(string ref_no)
+    {
+        tbl_app_ruleTableAdapter app = new tbl_app_ruleTableAdapter();
+        SCBLDataSet.tbl_app_ruleDataTable dt = new SCBLDataSet.tbl_app_ruleDataTable();
+        InTr_Sr_HdrTableAdapter hdr = new InTr_Sr_HdrTableAdapter();
+        App_Type_DetTableAdapter apptype = new App_Type_DetTableAdapter();
+
+        ListItem lst;
+
+        string template = hdr.GetDataByRef(ref_no)[0].Sr_Hdr_Template.ToString();         
+        string app_code = get_my_app();
+        string tmpstr;
+
+        ddlforto.Items.Clear();
+        ddlforto.Items.Add("");
+
+        dt = app.GetDataByTypeApp(template, app_code);
+
+        if (dt.Rows.Count == 0)
+        {
+            btnapprove.Visible = false;
+            btnforward.Visible = false;
+            btnreject.Visible = false;            
+        }
+        else
+        {
+            if (dt[0].rej_per == 1) btnreject.Visible = true; else btnreject.Visible = false;
+            if (dt[0].app_per == 1) btnapprove.Visible = true; else btnapprove.Visible = false;
+            if (dt[0].edit_per == 1) gdItem.Enabled = true; else gdItem.Enabled = false;
+
+            tmpstr=dt[0].for_1.ToString();            
+            if ( tmpstr!= "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();                
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_2.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_3.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_4.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_5.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+        } 
+    }
+
+    protected void ddllist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        load_data();
+        txtcomments.Text = "";
+    }
+
+
+    private void load_data()
+    {        
+        string selitem = ddllist.SelectedItem.Value.ToString();
+        lblComm.Visible = false;
+        if (selitem == "")
+        {
+            tbl_po.Visible = false;
+        }
+        else
+        {
+            tbl_po.Visible = true;
+            generate_detail_data(selitem);
+            generate_comments(selitem);
+            set_permission(selitem);
+        }
+    }
+    
+   
+
+    private bool savedata(string status, string pend_for,string hpcflg,string ref_no)
+    {
+        bool flg = true;
+        string uid = current.UserId.ToString();
+        string uname = current.UserName.ToString();
+        string desig = "";
+        string role_as = "";       
+        int rcnt;
+        string icode, ticode, prio, rem;
+        DateTime ddate;
+        
+        decimal qty, rate,amnt;
+        decimal totamnt = 0;
+        bool found;
+      
+        
+
+        DataTable dt = new DataTable();
+        dt = (DataTable)ViewState[clsStatic.sessionTempDatatable];
+
+        if (dt.Rows.Count == 0) { flg = false; goto errhndlr; }
+
+
+        InTr_Sr_HdrTableAdapter hdr = new InTr_Sr_HdrTableAdapter();
+        InTr_Sr_DetTableAdapter det = new InTr_Sr_DetTableAdapter();
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr=new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+        SCBLIN.InTr_Sr_DetDataTable dtdet = new SCBLIN.InTr_Sr_DetDataTable();
+
+        desig = usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+        role_as=get_my_app();
+
+
+        dtdet = det.GetDataByRef(ref_no);
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(hdr.Connection);
+
+        try
+        {
+            hdr.AttachTransaction(myTrn);
+            det.AttachTransaction(myTrn);
+            comm.AttachTransaction(myTrn);
+
+                    
+                      
+
+            //skip detail for reject
+           
+
+            if (status == "REJ") goto skipForReject;
+
+            //delete which not found                      
+
+            foreach (SCBLIN.InTr_Sr_DetRow drdet in dtdet.Rows)
+            {
+                ticode = drdet.Sr_Det_Icode.ToString();
+
+                found=false;
+
+                foreach (DataRow dr in dt.Rows)
+                {
+                    icode = dr["Item Code"].ToString();
+                    if (ticode == icode) found = true;
+                }
+
+                if (found == false)
+                {
+                    det.DeleteByRefItem(ref_no, ticode);
+                }
+            }
+
+            //update which found
+            rcnt = 0;
+            
+            foreach (DataRow dr in dt.Rows)
+            {
+                icode = dr["Item Code"].ToString();
+                qty = Convert.ToDecimal(dr["Req Qty"]);
+                rate = Convert.ToDecimal(dr["Rate"]);
+                ddate = Convert.ToDateTime(dr["Due Date"]);
+                prio = dr["Priority"].ToString();
+                rem = dr["Remarks"].ToString();
+                amnt = qty * rate;
+                totamnt = totamnt + amnt;
+                rcnt = rcnt + 1;
+                det.UpdateSrDet((short)rcnt, (double)qty, (double)qty, amnt, amnt, ddate, prio, rem, ref_no, icode);
+            }
+          
+            skipForReject:
+
+            comm.InsertComments(ref_no, 1, DateTime.Now, uid, uname, desig, 1, role_as, status, txtcomments.Text, "", pend_for);
+
+            hdr.UpdateInHdr(status, pend_for, totamnt, hpcflg, ref_no);   
+
+            if (flg)
+            {
+               // myTrn.Rollback();
+                myTrn.Commit();
+            }
+            else
+            {
+                myTrn.Rollback();
+            }
+
+
+        }
+        catch
+        {
+            myTrn.Rollback();
+            flg = false;
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(hdr.Connection, myTrn);
+        }
+        
+        errhndlr:
+        return flg;
+
+    }
+
+    private bool Check_Approval_Validity(string ref_no)
+    {
+        InTr_Sr_HdrTableAdapter hdr = new InTr_Sr_HdrTableAdapter();
+        bool flg = false;
+        string myapp = get_my_app();
+        if (hdr.GetDataByRef(ref_no)[0].Sr_Hdr_Pending.ToString() == myapp) { flg = true; }
+
+        return flg;
+    }
+
+    protected void btnforward_Click(object sender, EventArgs e)
+    {
+        bool flg = false;
+        if (txtcomments.Text == "") { lblComm.Text = "Pls type your comments "; lblComm.Visible = true; return; }
+        if (ddlforto.Text == "") { lblComm.Text = "Pls select forward to "; lblComm.Visible = true; return; }
+
+        if (Check_Approval_Validity(lblref.Text) == false) { return; }
+
+        if (savedata("RUN", ddlforto.SelectedValue.ToString(), "H", lblref.Text) == true)
+        {
+            load_pending_list();
+            ddllist.Text = "";
+            load_data();
+            flg = true;
+        }
+        else { lblComm.Text = "ERROR "; lblComm.Visible = true; }
+
+        if (flg)
+        {
+
+            string sid, sname, msub, mbody;
+            clsEmailReceiver[] rec_det = new clsEmailReceiver[20];
+            int remailcnt = 0;           
+            dsLinkoffice.tblUserInfoRow  udr;
+            LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+            User_Role_DefinitionTableAdapter roleta = new User_Role_DefinitionTableAdapter();
+            SCBLDataSet.User_Role_DefinitionDataTable roledt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        
+            udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+
+            msub = "A Store requisition forwarded to you [" + lblref.Text + "]";
+            mbody = "\n\n " + "A Store requisition forwarded to you [" + lblref.Text + "]";
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cml/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+            roledt = roleta.GetDataByRole(ddlforto.SelectedValue.ToString());
+
+            foreach (SCBLDataSet.User_Role_DefinitionRow rdr in roledt.Rows)
+            {
+                rec_det[remailcnt] = new clsEmailReceiver();
+                rec_det[remailcnt].Rname = rdr.user_name;
+                rec_det[remailcnt].Rid = usrdal.GetUserByCode(rdr.user_id)[0].UserEmail;
+                remailcnt++;
+            }
+            clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+
+        }
+
+    }
+    protected void btnapprove_Click(object sender, EventArgs e)
+    {
+        bool flg = false;
+        if (Check_Approval_Validity(lblref.Text) == false) { return; }
+
+        if (savedata("APP", "", "P", lblref.Text) == true)
+        {
+            load_pending_list();
+            ddllist.Text = "";
+            load_data();
+            flg = true;
+        }
+        else { lblComm.Text = "ERROR"; lblComm.Visible = true; }
+
+        if (flg)
+        {
+
+            string sid, sname, msub, mbody;
+            clsEmailReceiver[] rec_det = new clsEmailReceiver[20];
+            int remailcnt = 0;
+            dsLinkoffice.tblUserInfoRow  udr;
+            LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+            LibraryDAL.dsLinkoffice.tblUserInfoDataTable dtusr = new LibraryDAL.dsLinkoffice.tblUserInfoDataTable();
+            User_Role_DefinitionTableAdapter roleta = new User_Role_DefinitionTableAdapter();
+            SCBLDataSet.User_Role_DefinitionDataTable roledt = new SCBLDataSet.User_Role_DefinitionDataTable();
+            tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+            SCBLDataSet.tbl_CommentsDataTable dtcom = new SCBLDataSet.tbl_CommentsDataTable();
+
+            udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+
+            msub = "A Store requisition approved [" + lblref.Text + "]";
+            mbody = "\n\n " + "A Store requisition approved and pending for you [" + lblref.Text + "]";
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cml/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+            roledt = roleta.GetDataByRole("MATR");
+
+            foreach (SCBLDataSet.User_Role_DefinitionRow rdr in roledt.Rows)
+            {
+                rec_det[remailcnt] = new clsEmailReceiver();
+                rec_det[remailcnt].Rname = rdr.user_name;
+                rec_det[remailcnt].Rid = usrdal.GetUserByCode(rdr.user_id)[0].UserEmail;
+                remailcnt++;
+            }
+
+            dtcom = comm.GetDataByRefCurStatus(lblref.Text, "INI");
+
+            if (dtcom.Rows.Count > 0)
+            {
+                string srt_ini = comm.GetDataByRefCurStatus(lblref.Text, "INI")[0].app_id;
+                dtusr = usrdal.GetUserByCode(srt_ini);
+                if (dtusr.Rows.Count > 0)
+                {
+                    rec_det[remailcnt] = new clsEmailReceiver();
+                    rec_det[remailcnt].Rname = dtusr[0].UserName;
+                    rec_det[remailcnt].Rid = dtusr[0].UserEmail;
+                }
+            }
+
+            
+
+            clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+
+        }
+
+    }
+    
+    protected void btnreject_Click(object sender, EventArgs e)
+    {
+        if (txtcomments.Text == "") { lblComm.Text = "Pls type your comments "; lblComm.Visible = true; return; }
+        if (Check_Approval_Validity(lblref.Text) == false) { return; }
+
+        if (savedata("REJ", "", "R", lblref.Text) == true)
+        {
+            load_pending_list();
+            ddllist.Text = "";
+            load_data();
+
+            //send email
+
+            string sid, sname, msub, mbody;
+            clsEmailReceiver[] rec_det = new clsEmailReceiver[20];
+            int remailcnt = 0;
+            dsLinkoffice.tblUserInfoRow  udr;
+            LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+            LibraryDAL.dsLinkoffice.tblUserInfoDataTable dtusr = new LibraryDAL.dsLinkoffice.tblUserInfoDataTable();            
+            tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+            SCBLDataSet.tbl_CommentsDataTable dtcom = new SCBLDataSet.tbl_CommentsDataTable();
+
+            udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+
+            msub = "A Store requisition REJECTED [" + lblref.Text + "]";
+            mbody = "\n\n " + "A Store requisition REJECTED [" + lblref.Text + "]";
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cml/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+           
+            dtcom = comm.GetDataByRefCurStatus(lblref.Text, "INI");
+
+            if (dtcom.Rows.Count > 0)
+            {
+                string srt_ini = comm.GetDataByRefCurStatus(lblref.Text, "INI")[0].app_id;
+                dtusr = usrdal.GetUserByCode(srt_ini);
+                if (dtusr.Rows.Count > 0)
+                {
+                    rec_det[remailcnt] = new clsEmailReceiver();
+                    rec_det[remailcnt].Rname = dtusr[0].UserName;
+                    rec_det[remailcnt].Rid = dtusr[0].UserEmail;
+                }
+            }
+            
+            clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+
+
+        }
+        else { lblComm.Text = "ERROR"; lblComm.Visible = true; }
+
+    }
+
+ 
+
+    protected void btnreload_Click(object sender, EventArgs e)
+    {
+        load_data();
+    }
+    protected void gdItem_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+}

@@ -1,0 +1,271 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+
+public partial class frm_item_budget : System.Web.UI.Page
+{   
+    protected void Page_Load(object sender, EventArgs e)
+    {       
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";        
+
+        if (!Page.IsPostBack)
+        {           
+
+        }
+        else
+        {
+
+        }          
+    }
+
+    private void load_search_items(string srcitem, string session)
+    {
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitm = new ErpDataSet.InMa_Itm_DetDataTable();
+
+        tbl_item_budgetTableAdapter bud = new tbl_item_budgetTableAdapter();
+        SCBLDataSet.tbl_item_budgetDataTable dtbud = new SCBLDataSet.tbl_item_budgetDataTable();
+
+        string limit, avail, processing;
+
+        srcitem = "%" + srcitem + "%";
+        dtitm = itm.SearchItem(srcitem);
+
+        DataTable dt = new DataTable();
+
+        dt.Columns.Add(new DataColumn("icode", typeof(string)));
+        dt.Columns.Add(new DataColumn("idet", typeof(string)));
+        dt.Columns.Add(new DataColumn("uom", typeof(string)));
+        dt.Columns.Add(new DataColumn("session", typeof(string)));
+        dt.Columns.Add(new DataColumn("limit", typeof(string)));
+        dt.Columns.Add(new DataColumn("avail", typeof(string)));
+        dt.Columns.Add(new DataColumn("processing", typeof(string)));
+
+
+        foreach (ErpDataSet.InMa_Itm_DetRow dr in dtitm.Rows)
+        {
+            dtbud = bud.GetDataByItemSession(dr.Itm_Det_Icode, session);
+            if (dtbud.Rows.Count == 0)
+            {
+                limit = "";
+                avail = "";
+                processing = "";
+            }
+            else
+            {
+                limit = dtbud[0].maximum_limit.ToString();
+                avail = dtbud[0].available_limit.ToString();
+                processing = dtbud[0].processing_amount.ToString();
+            }
+
+            dt.Rows.Add(dr.Itm_Det_Icode, dr.Itm_Det_desc, dr.Itm_Det_stk_unit, session, limit, avail, processing);
+        }
+
+        gdItem.DataSource = dt;
+        gdItem.DataBind();
+
+
+
+    }
+
+    private void load_item(string icode, string session)
+    {
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitm = new ErpDataSet.InMa_Itm_DetDataTable();
+       
+        tbl_item_budgetTableAdapter bud=new tbl_item_budgetTableAdapter();
+        SCBLDataSet.tbl_item_budgetDataTable dtbud=new SCBLDataSet.tbl_item_budgetDataTable();
+
+        string limit,avail,processing;
+        
+        dtitm = itm.GetItemByCode(icode);
+
+        DataTable dt = new DataTable();
+
+        dt.Columns.Add(new DataColumn("icode", typeof(string)));
+        dt.Columns.Add(new DataColumn("idet", typeof(string)));
+        dt.Columns.Add(new DataColumn("uom", typeof(string)));
+        dt.Columns.Add(new DataColumn("session", typeof(string)));
+        dt.Columns.Add(new DataColumn("limit", typeof(string)));
+        dt.Columns.Add(new DataColumn("avail", typeof(string)));
+        dt.Columns.Add(new DataColumn("processing", typeof(string)));
+       
+
+        foreach (ErpDataSet.InMa_Itm_DetRow dr in dtitm.Rows)
+        {
+            dtbud = bud.GetDataByItemSession(icode, session);
+            if (dtbud.Rows.Count == 0)
+            {
+                limit = ""; 
+                avail = "";
+                processing = "";
+            }
+            else
+            {
+                limit = dtbud[0].maximum_limit.ToString("N2");
+                avail = dtbud[0].available_limit.ToString("N2");
+                processing = dtbud[0].processing_amount.ToString("N2");
+            }
+
+            dt.Rows.Add(dr.Itm_Det_Icode, dr.Itm_Det_desc, dr.Itm_Det_stk_unit, session,limit,avail,processing);
+        }
+        gdItem.DataSource = dt;
+        gdItem.DataBind();
+
+    }
+
+    protected void btnview_Click(object sender, EventArgs e)
+    {
+        string[] tmp = txtitem.Text.Split(':');
+
+
+        if ((ddlsession.Text == "") || (tmp.Length < 2))
+        {
+            gdItem.Visible = false;
+            return;
+        }
+        gdItem.Visible = true;
+
+        string session = ddlsession.SelectedValue.ToString();
+
+        load_item(tmp[0].ToString(), session);
+
+    }
+    protected void btnsearch_Click(object sender, EventArgs e)
+    {
+
+        if ((ddlsession.Text == "") || (txtsearch.Text==""))
+        {
+            gdItem.Visible = false;
+            return;
+        }
+        gdItem.Visible = true;
+
+        string session = ddlsession.SelectedValue.ToString();
+
+        load_search_items(txtsearch.Text, session);
+
+    }
+
+
+    protected void gdItem_RowCreated(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType != DataControlRowType.DataRow) { return; }
+
+        Button btnButton = (Button)e.Row.Cells[0].FindControl("Button1");
+        btnButton.CommandArgument = e.Row.RowIndex.ToString();
+       
+    }
+
+    protected void gdItem_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        if (e.CommandName == "btnupdate")
+        {
+            tbl_item_budgetTableAdapter bud = new tbl_item_budgetTableAdapter();
+            string icode,idet,uom, session;
+           
+            decimal newlimit;
+            DateTime st,en;
+
+            int index = Convert.ToInt32(e.CommandArgument);
+            TextBox txt=new TextBox();
+
+
+            icode = gdItem.Rows[index].Cells[0].Text;
+            idet = gdItem.Rows[index].Cells[1].Text;
+            uom = gdItem.Rows[index].Cells[2].Text;
+            session = gdItem.Rows[index].Cells[3].Text;
+            string[] tmp = session.Split('/');
+
+            st= Convert.ToDateTime("1/7/"+tmp[0]);
+            en= Convert.ToDateTime("30/6/"+tmp[1]);
+
+            txt=(TextBox) gdItem.Rows[index].FindControl("Textbox1");
+
+            if (txt.Text=="") return;
+            try
+            {
+                newlimit=Convert.ToDecimal(txt.Text);
+                if (bud.GetDataByItemSession(icode, session).Rows.Count == 0)
+                    bud.InsertBugdet(icode, idet, uom, session, st, en, newlimit, newlimit, 0, 0, 0, DateTime.Now, "");
+                else
+                    bud.UpdateBudget(newlimit, icode, session);
+
+            }
+            catch
+            {
+            }
+            
+        }
+    }
+
+    protected void gdItem_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+    
+    protected void lnkAllblank_Click(object sender, EventArgs e)
+    {
+        if (ddlsession.Text == "") return;
+    }
+
+
+    protected void lnkAllFill_Click(object sender, EventArgs e)
+    {
+        if (ddlsession.Text == "") return;
+        tbl_item_budgetTableAdapter bud = new tbl_item_budgetTableAdapter();
+        SCBLDataSet.tbl_item_budgetDataTable dtbud = new SCBLDataSet.tbl_item_budgetDataTable();
+
+        dtbud = bud.GetDataBySession(ddlsession.SelectedValue.ToString());
+
+        DataTable dt = new DataTable();
+
+        int cnt = 0;
+
+        //dt.Columns.Add(new DataColumn("item_code", typeof(string)));
+        //dt.Columns.Add(new DataColumn("item_det", typeof(string)));
+        //dt.Columns.Add(new DataColumn("item_uom", typeof(string)));
+        //dt.Columns.Add(new DataColumn("budg_session", typeof(string)));
+        //dt.Columns.Add(new DataColumn("maximum_limit", typeof(decimal)));
+        //dt.Columns.Add(new DataColumn("available_limit", typeof(decimal)));
+        //dt.Columns.Add(new DataColumn("processing_amount", typeof(decimal)));
+
+        dt.Columns.Add(new DataColumn("icode", typeof(string)));
+        dt.Columns.Add(new DataColumn("idet", typeof(string)));
+        dt.Columns.Add(new DataColumn("uom", typeof(string)));
+        dt.Columns.Add(new DataColumn("session", typeof(string)));
+        dt.Columns.Add(new DataColumn("limit", typeof(string)));
+        dt.Columns.Add(new DataColumn("avail", typeof(string)));
+        dt.Columns.Add(new DataColumn("processing", typeof(string)));
+
+
+        foreach (SCBLDataSet.tbl_item_budgetRow dr in dtbud.Rows)
+        {
+            cnt++;
+            dt.Rows.Add(dr.item_code, dr.item_det, dr.item_uom, dr.budg_session, dr.maximum_limit.ToString("N2"), dr.available_limit.ToString("N2"), dr.processing_amount.ToString("N2"));
+            //if (cnt > 1000) break;
+        }
+
+        //gdItem.DataSource = dt;
+        //gdItem.DataBind();
+       
+
+
+    }
+    protected void DataList1_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+}

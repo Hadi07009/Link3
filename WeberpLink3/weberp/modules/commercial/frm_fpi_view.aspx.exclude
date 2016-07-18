@@ -1,0 +1,327 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_fpi_view.aspx.cs" Inherits="frm_fpi_view" Title=""   %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register src="usercontrols/ctl_fpi_mpr_item_view.ascx" tagname="ctl_fpi_mpr_item_view" tagprefix="uc1" %>
+
+<%@ Register assembly="eWorld.UI.Compatibility" namespace="eWorld.UI.Compatibility" tagprefix="ew1" %>
+
+<%@ Register src="usercontrols/ctl_fpi_pi_entry_view.ascx" tagname="ctl_fpi_pi_entry_view" tagprefix="uc3" %>
+<%@ Register src="usercontrols/ctl_fpi_lc_entry_view.ascx" tagname="ctl_fpi_lc_entry_view" tagprefix="uc4" %>
+
+<%@ Register src="usercontrols/ctl_fpi_import_consignment_view.ascx" tagname="ctl_fpi_import_consignment_view" tagprefix="uc5" %>
+
+<%@ Register src="usercontrols/ctl_fpi_custom_clearing_view.ascx" tagname="ctl_fpi_custom_clearing_view" tagprefix="uc6" %>
+
+<%@ Register src="usercontrols/ctl_fpi_ctg_entry_view.ascx" tagname="ctl_fpi_ctg_entry_view" tagprefix="uc7" %>
+
+<%@ Register src="usercontrols/ctl_fpi_download.ascx" tagname="ctl_fpi_download" tagprefix="uc8" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+<table id="tbltop" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" style="text-align: center">
+                FPI DETAIL VIEW</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+           
+                TOTAL PROCESS LIST(<asp:Label ID="lblpcount" runat="server" Text="Label"></asp:Label>
+                ) :
+                <asp:DropDownList ID="ddlpolist" runat="server" Font-Size="9pt" Width="600px" 
+                    AutoPostBack="True" CssClass="txtbox" 
+                    onselectedindexchanged="ddlpolist_SelectedIndexChanged">
+                </asp:DropDownList>
+                   
+            </td>
+        </tr>
+        </table>
+         
+         <asp:UpdatePanel ID= "updall" runat="server">
+         <ContentTemplate>
+        <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc1:ctl_fpi_mpr_item_view ID="ctl_fpi_mpr_item_view1" runat="server" />
+               
+            </td>
+        </tr>
+         <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+         
+               
+                <table id="tbl_upload" runat="server" style="width:100%;">
+                    <tr>
+                        <td class="heading" colspan="3">FILE UPLOAD</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 283px">&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 283px; text-align: right">File Category:</td>
+                        <td>
+                            <asp:DropDownList ID="ddlcat" runat="server"  Width="378px">
+                            </asp:DropDownList>
+                        </td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 283px; text-align: right">Select File:</td>
+                        <td>
+                            <asp:FileUpload ID="updoc" runat="server" Width="375px" />
+                        </td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 283px">&nbsp;</td>
+                        <td>
+                            <asp:Button ID="btn_upload" runat="server"  Text="Upload" Width="100px" OnClick="btn_upload_Click" />
+                        </td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+               
+         
+               
+         </td>
+        </tr>
+
+         <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc8:ctl_fpi_download ID="ctl_fpi_download1" runat="server" />
+               
+            </td>
+        </tr>
+
+         <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc3:ctl_fpi_pi_entry_view ID="ctl_fpi_pi_entry_view1" runat="server" />
+               
+            </td>
+        </tr>
+
+          <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc4:ctl_fpi_lc_entry_view ID="ctl_fpi_lc_entry_view1" runat="server" />
+               
+            </td>
+        </tr>
+          <tr>
+            <td class="tbl" style="height: 24px; text-align: center">
+               
+              
+               
+                Consignment List(<asp:Label ID="lblpcountcon" runat="server" Text="Label"></asp:Label>
+                ) :
+                <asp:DropDownList ID="ddlpolistcon" runat="server" AutoPostBack="True"  Font-Size="9pt"
+                    CssClass="txtbox" 
+                    Width="384px" onselectedindexchanged="ddlpolistcon_SelectedIndexChanged">
+                </asp:DropDownList>
+               
+              
+               
+            </td>
+        </tr>
+
+        <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+                <uc5:ctl_fpi_import_consignment_view ID="ctl_fpi_import_consignment_view1" 
+                    runat="server" />
+               
+            </td>
+        </tr>
+
+
+
+        <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+                 <uc6:ctl_fpi_custom_clearing_view ID="ctl_fpi_custom_clearing_view1" 
+                     runat="server" />
+               
+            </td>
+        </tr>
+
+
+
+         <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+                
+                   
+               
+              <uc7:ctl_fpi_ctg_entry_view ID="ctl_fpi_ctg_entry_view1" runat="server" />
+                
+                   
+               
+            </td>
+        </tr>
+
+
+
+       
+   <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+
+          <table id="tblctgentry" runat="server" style="width:100%;">
+                       
+                        <tr>
+                            <td style="width: 11%; text-align: right;">
+                                <asp:Label ID="lbltrans" runat="server" Text="Transport Detail:"></asp:Label>
+                            </td>
+                            <td style="width: 1%">
+                                &nbsp;</td>
+                            <td style="width: 626px">
+                <asp:GridView ID="gdItem" runat="server" BackColor="White" BorderColor="#41519A" style="border-top-width: 1px; border-left-width: 1px; border-left-color: #e6e6fa;  border-bottom-width: 1px; border-bottom-color: #e6e6fa; border-top-color: #e6e6fa; border-right-width: 1px; border-right-color: #e6e6fa;"
+                    BorderStyle="Solid" BorderWidth="1px" CellPadding="4" ForeColor="#333333" GridLines="None"
+                    
+                    PageSize="100" SkinID="GridView" AutoGenerateColumns="False" 
+                                   
+                              >
+                    <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                    <SelectedRowStyle Font-Bold="True" />
+                    <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <EditRowStyle BackColor="#2461BF" />
+                    <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" 
+                        Font-Underline="False" />
+                    <RowStyle Font-Size="8pt" />
+
+                     <Columns>
+                                           
+                                                              
+                                    
+                                    <asp:TemplateField HeaderText="SL">
+                                        <ItemTemplate>
+                                            <asp:Label ID="lblsl" runat="server"></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField> 
+                                    
+                                    <asp:BoundField DataField="seq_no" HeaderText="Seq No" 
+                                        HeaderStyle-HorizontalAlign="Left">                                  
+<HeaderStyle HorizontalAlign="Left"></HeaderStyle>
+                                    </asp:BoundField>  
+                                    
+                             <asp:BoundField DataField="port_exit_date" HeaderText="Port Exit Date" DataFormatString="{0:dd/MM/yyyy}"
+                                        HeaderStyle-HorizontalAlign="Left">                                  
+<HeaderStyle HorizontalAlign="Left"></HeaderStyle>
+                                    </asp:BoundField>
+
+                                       <asp:BoundField DataField="transport_name" HeaderText="Transport Name" 
+                                        HeaderStyle-HorizontalAlign="Left">                                  
+<HeaderStyle HorizontalAlign="Left"></HeaderStyle>
+                                    </asp:BoundField> 
+
+
+                                       <asp:BoundField DataField="ctg_quantity" HeaderText="Carried Qty" 
+                                        HeaderStyle-HorizontalAlign="Left">                                  
+<HeaderStyle HorizontalAlign="Left"></HeaderStyle>
+                                    </asp:BoundField> 
+
+             <asp:BoundField DataField="survey_date" HeaderText="Surveyed Date" DataFormatString="{0:dd/MM/yyyy}"
+                                        HeaderStyle-HorizontalAlign="Left">                                  
+<HeaderStyle HorizontalAlign="Left"></HeaderStyle>
+                                    </asp:BoundField> 
+                                                                    
+                                    <asp:BoundField DataField="survay_quantity" HeaderStyle-HorizontalAlign="Left" 
+                                            HeaderText="Survey Qty">
+                                        <HeaderStyle HorizontalAlign="Left" />
+                                        </asp:BoundField>
+                         <asp:BoundField DataField="rm_uses_type" HeaderStyle-HorizontalAlign="Left" 
+                                            HeaderText="RM Uses Type">
+                                        <HeaderStyle HorizontalAlign="Left" />
+                                        </asp:BoundField>
+
+                           <asp:BoundField DataField="mr_uses_party_detail" HeaderStyle-HorizontalAlign="Left" 
+                                            HeaderText="RM Uses Party">
+                                        <HeaderStyle HorizontalAlign="Left" />
+                                        </asp:BoundField>
+
+                                        <asp:BoundField DataField="mrr_quantity" HeaderStyle-HorizontalAlign="Left" 
+                                            HeaderText="MRR Qty">
+                                        <HeaderStyle HorizontalAlign="Left" />
+                                        </asp:BoundField>
+                          <asp:BoundField DataField="mrr_Rate" HeaderStyle-HorizontalAlign="Left" 
+                                            HeaderText="MRR Rate">
+                                        <HeaderStyle HorizontalAlign="Left" />
+                                        </asp:BoundField>
+
+                           <asp:BoundField DataField="mrr_no" HeaderStyle-HorizontalAlign="Left" 
+                                            HeaderText="MRR Ref No">
+                                        <HeaderStyle HorizontalAlign="Left" />
+                                        </asp:BoundField>
+
+                                         <asp:BoundField DataField="mrr_jv" HeaderStyle-HorizontalAlign="Left" 
+                                            HeaderText="JV Ref No">
+                                        <HeaderStyle HorizontalAlign="Left" />
+                                        </asp:BoundField>
+
+                                   
+                                </Columns>
+
+                               
+
+                </asp:GridView>                   
+                            </td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 11%">
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                &nbsp;</td>
+                            <td style="width: 626px; text-align: center;">
+                                <asp:Label ID="lblmsg" runat="server" ForeColor="Red" Text="Label" 
+                                    Visible="False"></asp:Label>
+                            </td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 11%">
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                &nbsp;</td>
+                            <td style="width: 626px; text-align: center;">
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        </table>
+
+                            &nbsp;</td>
+        </tr>
+
+       
+        
+
+
+    </table>
+
+
+     </ContentTemplate>
+         <Triggers>
+          
+             <asp:PostBackTrigger ControlID="btn_upload" />
+             
+         </Triggers>
+         </asp:UpdatePanel>
+</asp:Content>
+

@@ -1,0 +1,271 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+
+
+public partial class frm_spo_realize_ini_final : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.MsgConfirmBox(btnproceed, "Are you sure to proceed this ?");
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+
+        if (!Page.IsPostBack)
+        {
+            Generate_Items(); 
+        }
+        else
+        {
+
+        }
+          
+    }
+
+    protected void btnok_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("./frm_spo_realize_ini.aspx");
+    }
+  
+
+    private void Generate_Items()
+    {
+        SCBLDataSet.PuTr_IN_Det_ScblDataTable itm = new SCBLDataSet.PuTr_IN_Det_ScblDataTable();
+        PuTr_IN_Det_ScblTableAdapter det = new PuTr_IN_Det_ScblTableAdapter();
+        clsSpo[] seldet;
+        seldet = (clsSpo[])Session[clsStatic.sessionItemSelForPO];
+        DataTable dt = new DataTable();
+        int i, cnt;
+        decimal totval = 0;
+
+        dt.Columns.Add("SL", typeof(int));
+        dt.Columns.Add("Ref No", typeof(string));        
+        dt.Columns.Add("Icode", typeof(string));
+        dt.Columns.Add("Idet", typeof(string));
+        dt.Columns.Add("Qty", typeof(decimal));
+        dt.Columns.Add("Rate", typeof(decimal));
+        dt.Columns.Add("Amount", typeof(decimal));
+        dt.Columns.Add("Party", typeof(string));
+        dt.Columns.Add("Specific", typeof(string));
+        dt.Columns.Add("Brand", typeof(string));
+        dt.Columns.Add("Origin", typeof(string));
+        dt.Columns.Add("Packing", typeof(string)); 
+        
+        cnt=seldet.Length;
+
+        for (i = 0; i < cnt; i++)
+        {
+            if (seldet[i] != null)
+                if (seldet[i].Seq != null)
+                    if (seldet[i].Qnty != 0)
+                    {                        
+                        totval += seldet[i].Totval;
+                        dt.Rows.Add(seldet[i].Seq + 1, seldet[i].RefNo, seldet[i].Icode, seldet[i].Idet, seldet[i].Qnty, seldet[i].Rate, seldet[i].Totval, seldet[i].Partydet, seldet[i].Specification, seldet[i].Brand, seldet[i].Origin, seldet[i].Packing);                        
+                    }
+        }
+
+        gdItem.DataSource = dt;
+        gdItem.DataBind();
+        lblamnt.Text = totval.ToString("N2");
+        lblby.Text = seldet[0].Empdet;
+        
+    }
+
+   
+
+    private string get_flow_tepmate(string req_type, string cash_type, decimal totval)
+    {
+        App_Flow_DefinitionTableAdapter app = new App_Flow_DefinitionTableAdapter();
+        SCBLDataSet.App_Flow_DefinitionDataTable dt = new SCBLDataSet.App_Flow_DefinitionDataTable();
+
+        string tem_id = "";
+        req_type = req_type.Substring(0, 2) + "MPR";
+
+        dt = app.GetTemplate("ADAPP", req_type, cash_type, totval);
+
+        if (dt.Rows.Count > 0)
+            tem_id = dt[0].flow_id.ToString();
+
+
+        return tem_id;
+    }
+
+    private string get_pend_for(string selval)
+    {
+        string pend_for = "";
+        tbl_app_ruleTableAdapter tbl = new tbl_app_ruleTableAdapter();
+        try
+        {
+            pend_for = tbl.GetDataByTypeSeq(selval, 1)[0].app_id.ToString();
+        }
+        catch
+        {
+            pend_for = "";
+        }
+        return pend_for;
+    }
+    
+    protected void btnproceed_Click(object sender, EventArgs e)
+    {
+         
+        clsSpo[] seldet;
+        seldet = (clsSpo[])Session[clsStatic.sessionItemSelForPO];
+
+        bool flg = true;
+        int i, cnt, lno;
+        decimal totval=0;
+              
+
+        PuTr_IN_Det_ScblTableAdapter indet = new PuTr_IN_Det_ScblTableAdapter();
+        PuTr_PO_Det_ScblTableAdapter podet = new PuTr_PO_Det_ScblTableAdapter();
+        PuTr_PO_Hdr_ScblTableAdapter pohdr = new PuTr_PO_Hdr_ScblTableAdapter();
+
+        SCBLDataSet.PuTr_PO_Det_ScblRow[] podr = new SCBLDataSet.PuTr_PO_Det_ScblRow[seldet.Length];
+           
+       
+       
+        string req_type = "";
+        string app_flow, pend_for;
+        int newPolno = 0;
+        
+        decimal chqty;
+
+        string inid = current.UserId.ToString();
+        string inidet = current.UserName.ToString();              
+           
+
+        string po_ref = seldet[0].RefNo;
+      
+        cnt = seldet.Length;
+        for (i = 0; i < cnt; i++)
+        {
+            if (seldet[i] != null)
+                if (seldet[i].Seq != null)
+                {
+                    podr[i] = podet.GetDataByRefItemLno(seldet[i].RefNo, seldet[i].Icode,(short) seldet[i].Lno)[0];
+                }
+        }
+
+       
+        SqlTransaction myTrn = HelperTA.OpenTransaction(indet.Connection);       
+
+         try
+        {
+           
+            indet.AttachTransaction(myTrn);
+            podet.AttachTransaction(myTrn);
+            pohdr.AttachTransaction(myTrn);
+             
+            lno = 0;
+            cnt = seldet.Length;
+            for (i = 0; i < cnt; i++)
+            {
+                if (seldet[i] != null)
+                    if (seldet[i].Seq != null)
+                    {
+
+                        
+                        req_type = podr[i].PO_Det_Pr_Ref.Substring(0, 2) + "MPR";
+
+                        // update po detail data            
+                        if (seldet[i].Qnty != 0)
+                        {
+                        
+                            totval += seldet[i].Totval;
+
+                            newPolno++;
+                            podet.UpdateFromRealize((short)newPolno, (double)seldet[i].Qnty, (double)seldet[i].Qnty, seldet[i].Rate, seldet[i].Totval, seldet[i].Totval, seldet[i].Partydet, seldet[i].Specification, seldet[i].Brand, seldet[i].Origin, seldet[i].Packing, seldet[i].RefNo, seldet[i].Icode, (short)seldet[i].Lno);
+                        
+                        }
+                        else
+                        {
+                        
+                            podet.DeleteDetByRefItemLine(seldet[i].RefNo, seldet[i].Icode,(short) seldet[i].Lno);
+                        
+                        }
+
+                        //update mpr data
+                        chqty = (decimal)podr[i].PO_Det_Lin_Qty - seldet[i].Qnty;
+                        indet.UpdateForPORevise((double)chqty, podr[i].PO_Det_Pr_Ref, seldet[i].Icode);
+                        
+                    }
+            }
+           
+            if (totval!=Convert.ToDecimal(lblamnt.Text))
+            {
+                flg = false;
+                goto errhndlr;
+            }
+            
+            
+            
+            app_flow = get_flow_tepmate(req_type, "SPO", totval);
+            pend_for = get_pend_for(app_flow);
+            
+            if (pend_for=="")
+            {
+                flg = false;
+                goto errhndlr;
+            }
+            
+            pohdr.UpdateInitiate("ADRUN", pend_for, app_flow, current.UserId.ToString(), totval, "H", seldet[0].RefNo);
+                       
+            errhndlr:
+            
+            if (flg)
+            {
+               // myTrn.Rollback();
+                //myScfTrn.Rollback();
+                myTrn.Commit();
+              
+            }
+
+            else
+            {
+                myTrn.Rollback();               
+            }
+        }
+         catch
+         {
+             
+             flg = false;
+             myTrn.Rollback();            
+         }
+         finally
+         {
+             HelperTA.CloseTransaction(indet.Connection, myTrn);                     
+         }
+
+         if (flg)
+         {
+             Session[clsStatic.sessionItemSelForPO] = null;
+             lblporef.Text = po_ref;
+             ModalPopupExtender5.Show();
+         }
+         else
+         {
+             Response.Redirect("./frm_spo_realize_ini.aspx");
+         }
+
+        
+    }
+
+    protected void btnback_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("./frm_spo_realize_ini.aspx");
+    }
+}
+

@@ -1,0 +1,190 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Data.SqlClient;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using LibraryDAL;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLDataSetTableAdapters;
+
+public partial class frm_adr_code_assign : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btnupdate, "Are you sure to update?");
+        
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            load_add_pending();
+            
+        }
+
+    }
+
+    private void load_add_pending()
+    {
+        SCBLDataSet.PuTr_IN_Det_ScblDataTable dtdet = new SCBLDataSet.PuTr_IN_Det_ScblDataTable();
+        PuTr_IN_Det_ScblTableAdapter det = new PuTr_IN_Det_ScblTableAdapter();
+        PuMa_Par_AdrTableAdapter adr = new PuMa_Par_AdrTableAdapter();
+        ErpDataSet.PuMa_Par_AdrDataTable dtadr = new ErpDataSet.PuMa_Par_AdrDataTable();
+        ListItem lst;
+
+        dtdet = det.GetAdrAssign("APP");
+
+        ddllist.Items.Clear();
+        ddllist.Items.Add("");
+        foreach (SCBLDataSet.PuTr_IN_Det_ScblRow drdet in dtdet.Rows)
+        {
+            dtadr = adr.GetDataByAdrCode(drdet.In_Det_App_Party);
+            if (dtadr.Rows.Count > 0)
+            {
+                lst = new ListItem();
+                lst.Text = dtadr[0].par_adr_code + ":" + dtadr[0].par_adr_name;
+                lst.Value = dtadr[0].par_adr_code;
+                ddllist.Items.Add(lst);
+            }
+        }
+
+        lblcount.Text = "(" + dtdet.Rows.Count.ToString() + ")";
+        tbl_det.Visible = false;
+    }
+
+    private void clear_all()
+    {
+        txtacccode.Text = "";
+        txtnewcode.Text = "";
+        txtcode.Text = "";
+        txtname.Text = "";
+        txtadd1.Text = "";
+        txtadd2.Text = "";
+        txtadd3.Text = "";
+        txtadd4.Text = "";
+        txtadd5.Text = "";
+        txttel.Text = "";
+        txtfax.Text = "";
+        txtemail.Text = "";
+        txtcon.Text = "";
+        txtconstatus.Text = "";
+        txtmob.Text = "";
+
+    }
+    
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        PuMa_Par_AdrTableAdapter adr = new PuMa_Par_AdrTableAdapter();
+        PuMa_Par_AccTableAdapter acc = new PuMa_Par_AccTableAdapter();
+        PuTr_IN_Det_ScblTableAdapter indet = new PuTr_IN_Det_ScblTableAdapter();
+        quotation_detTableAdapter quo = new quotation_detTableAdapter();
+        quotation_logTableAdapter log = new quotation_logTableAdapter();
+
+
+        if (txtcode.Text == "") return;
+        if (txtnewcode.Text.Length < 3) return;
+        if (txtnewcode.Text.Substring(0, 3).ToUpper() == "APN") return;
+
+        string[] tmp = txtacccode.Text.Split(':');
+        if (tmp.Length < 2) return;       
+
+        string paracc_code = tmp[0].ToString();
+
+        if (acc.GetDataByCode(paracc_code).Rows.Count == 0) return;
+
+        if (adr.GetDataByAdrCode(txtnewcode.Text.ToUpper()).Rows.Count > 0) return;
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(indet.Connection);
+        SqlTransaction myScfTrn = HelperTA.OpenTransaction(adr.Connection);
+
+        try
+        {
+
+            indet.AttachTransaction(myTrn);
+            quo.AttachTransaction(myTrn);
+            log.AttachTransaction(myTrn);
+            adr.AttachTransaction(myScfTrn);
+
+
+            adr.UpdateAdrWithAcc(txtnewcode.Text.ToUpper(), txtadd1.Text, txtadd2.Text, txtadd3.Text, txtadd4.Text, txtadd5.Text, txtconstatus.Text, txtmob.Text, txtcon.Text, txttel.Text, txtfax.Text, txtemail.Text, paracc_code, txtcode.Text);
+            indet.UpdateForNewAdrcode(txtnewcode.Text.ToUpper(), txtcode.Text);
+            quo.UpdateForNewAdr(txtnewcode.Text.ToUpper(), txtcode.Text);
+            log.UpdateForNewAdr(txtnewcode.Text.ToUpper(), txtcode.Text);
+
+            
+            myTrn.Commit();
+            myScfTrn.Commit();
+            lblupdate.Visible = true;
+            clear_all();
+            load_add_pending();
+
+        }
+        catch (Exception ex)
+        {
+            myTrn.Rollback();
+            myScfTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(indet.Connection, myTrn);
+            HelperTA.CloseTransaction(adr.Connection, myScfTrn);
+        }
+
+
+    }
+
+    private void load_detail(string adrcode)
+    {
+        tbl_det.Visible = true;
+        lblupdate.Visible = false;
+
+       
+        PuMa_Par_AdrTableAdapter det = new PuMa_Par_AdrTableAdapter();
+        ErpDataSet.PuMa_Par_AdrDataTable dt = new ErpDataSet.PuMa_Par_AdrDataTable();
+
+        dt = det.GetDataByAdrCode(adrcode);
+        if (dt.Rows.Count == 0)
+        {
+            clear_all();
+            return;
+        }
+
+        txtcode.Text = dt[0].par_adr_code;
+        txtname.Text = dt[0].par_adr_name;
+        txtadd1.Text = dt[0].Par_Adr_Line_1;
+        txtadd2.Text = dt[0].Par_Adr_Line_2;
+        txtadd3.Text = dt[0].Par_Adr_Line_3;
+        txtadd4.Text = dt[0].Par_Adr_Line_4;
+        txtadd5.Text = dt[0].Par_Adr_Line_5;
+        txttel.Text = dt[0].Par_Adr_Tel_No;
+        txtfax.Text = dt[0].Par_Adr_Fax_No;
+        txtemail.Text = dt[0].Par_Adr_Email_Id;
+        txtcon.Text = dt[0].Par_Adr_Cnt_No;
+        txtconstatus.Text = dt[0].Par_Adr_Cst_No;
+        txtmob.Text = dt[0].Par_Adr_Lst_No;
+    }
+    
+    protected void ddllist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        string adrcode = ddllist.SelectedValue.ToString();
+        if (adrcode == "") { tbl_det.Visible = false; return; }
+        clear_all();
+        load_detail(adrcode);
+
+
+    }
+    protected void btnreload_Click(object sender, EventArgs e)
+    {
+        string adrcode = ddllist.SelectedValue.ToString();
+        if (adrcode == "") { tbl_det.Visible = false; return; }
+
+        load_detail(adrcode);
+
+    }
+}
+

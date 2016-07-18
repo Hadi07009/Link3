@@ -1,0 +1,142 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using LibraryDAL;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+
+
+public partial class frm_item_loc_update : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        //current.UserId = "MON";
+        //current.UserName = "Monjurul";
+
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btnupdate, "Are you sure to Update ?");
+                
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            clear_all();
+           
+           
+        }
+
+    }
+
+ 
+
+   
+
+    private void clear_all()
+    {
+        txtitemdet.Text = "";
+       
+        txtloccode.Text = "";
+        lblloc.Text = "";
+        lblitem.Text = "";
+       
+    }
+
+    private string getitmloc()
+    {
+        InMa_Itm_LocTableAdapter loc = new InMa_Itm_LocTableAdapter();
+        SCBLIN.InMa_Itm_LocDataTable dtloc = new SCBLIN.InMa_Itm_LocDataTable();
+
+        string locstr = "";
+
+        string[] tmp = txtloccode.Text.Split('.');
+        if (tmp.Length != 4) return "";
+
+        dtloc = loc.GetDataByTypeId("B", tmp[0]);
+        if (dtloc.Count == 0) return ""; else locstr = dtloc[0].Itm_Loc_Name;
+
+        dtloc = loc.GetDataByTypeId("F", tmp[1]);
+        if (dtloc.Count == 0) return ""; else locstr = locstr + "." + dtloc[0].Itm_Loc_Name;
+
+        dtloc = loc.GetDataByTypeId("R", tmp[2]);
+        if (dtloc.Count == 0) return ""; else locstr = locstr + "." + dtloc[0].Itm_Loc_Name;
+
+        dtloc = loc.GetDataByTypeId("L", tmp[3]);
+        if (dtloc.Count == 0) return ""; else locstr = locstr + "." + dtloc[0].Itm_Loc_Name;
+
+        return locstr;
+    }
+
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+
+        string icode = lblitem.Text.Split(':')[0];
+        string loccode = "", locdet = "";
+        locdet = getitmloc();
+        if (locdet != "") loccode = txtloccode.Text;
+
+        DateTime dtdate = Convert.ToDateTime(DateTime.Now.ToShortDateString());
+
+        if (itm.GetItemByCode(icode).Count == 0)
+        {
+
+            lblupdate.Text = "ITEM NOT FOUND";
+        }
+        else
+        {
+
+            itm.UpdateItemLocation(loccode, locdet, icode);
+          
+
+            lblupdate.Text = "UPDATED SUCCESSFULLY";
+           
+            clear_all();
+        }
+
+       
+        lblupdate.Visible = true;
+             
+
+       
+       
+    }
+  
+
+
+    protected void txtitemdet_TextChanged(object sender, EventArgs e)
+    {
+        string[] tmp = txtitemdet.Text.Split(':');
+        if (tmp.Length < 2) { clear_all(); return; }
+        load_itm(tmp[0]);
+    }
+
+    private void load_itm(string icode)
+    {
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitm = new ErpDataSet.InMa_Itm_DetDataTable();
+                
+        dtitm = itm.GetItemByCode(icode);
+        if (dtitm.Count == 0) { clear_all(); return; }
+
+        txtloccode.Text = dtitm[0].Itm_Det_add_des1;
+        lblloc.Text = dtitm[0].Itm_Det_add_des2;
+        lblitem.Text = dtitm[0].Itm_Det_Icode + ":" + dtitm[0].Itm_Det_desc; ;
+
+    }
+
+    
+    protected void txtloccode_TextChanged(object sender, EventArgs e)
+    {
+        lblloc.Text = getitmloc();
+    }
+
+    
+   
+}
+

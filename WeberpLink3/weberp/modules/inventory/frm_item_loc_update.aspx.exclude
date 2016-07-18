@@ -1,0 +1,175 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_item_loc_update.aspx.cs" Inherits="frm_item_loc_update"  Title=""   ValidateRequest="false" EnableEventValidation="false"  %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+  
+
+    <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="3" class="heading" style="text-align: center">
+                ITEM LOCATION UPDATE SCREEN</td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                SELECT ITEM :
+            <asp:TextBox ID="txtitemdet" runat="server" 
+                CssClass="txtbox" autocomplete="off" 
+                    Width="700px" AutoPostBack="True" ontextchanged="txtitemdet_TextChanged"></asp:TextBox>
+                     <ajaxToolkit:AutoCompleteExtender
+                                runat="server"                                
+                                ID="autoComplete1" 
+                                BehaviorID="AutoCompleteEx"                                
+                                TargetControlID="txtitemdet"
+                                ServicePath="../commercial/services/autocomplete.asmx" 
+                                ServiceMethod="GetItemList"
+                                MinimumPrefixLength="1" 
+                                CompletionInterval="100"
+                                EnableCaching="false"
+                                CompletionSetCount="20"                                 
+                                CompletionListCssClass ="autocomplete_completionListElement"                            
+                                CompletionListItemCssClass="autocomplete_listItem" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem"
+                                DelimiterCharacters=","
+                                ShowOnlyCurrentWordInCompletionListItem="true" > 
+                            </ajaxToolkit:AutoCompleteExtender>
+                </td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <asp:UpdatePanel ID="updpnl" runat="server">
+<ContentTemplate>
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="width: 76px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 72px">
+                            ITEM DETAIL</td>
+                        <td style="text-align: left; width: 20px">
+                            :</td>
+                        <td style="text-align: left; width: 299px;">
+                            <asp:Label ID="lblitem" runat="server" Font-Bold="True"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 76px; height: 22px;">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 72px; height: 22px;">
+                            ITEM LOCATION</td>
+                        <td style="text-align: left; width: 20px; height: 22px;">
+                            :</td>
+                        <td style="text-align: left; height: 22px;">
+                            <asp:TextBox ID="txtloccode" runat="server" AutoPostBack="True" 
+                                CssClass="txtbox" ontextchanged="txtloccode_TextChanged" Width="253px"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender
+                                runat="server"                                
+                                ID="AutoCompleteExtender3" 
+                                BehaviorID="AutoCompleteEx3"                                
+                                TargetControlID="txtloccode"
+                                ServicePath="../commercial/services/autocomplete.asmx" 
+                                ServiceMethod="GetItemLoc"
+                                MinimumPrefixLength="1" 
+                                CompletionInterval="100"
+                                EnableCaching="false"
+                                CompletionSetCount="20"                                 
+                                CompletionListCssClass ="autocomplete_completionListElement"                            
+                                CompletionListItemCssClass="autocomplete_listItem" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem"
+                                DelimiterCharacters=","
+                                ShowOnlyCurrentWordInCompletionListItem="true" > 
+                            </ajaxToolkit:AutoCompleteExtender>
+                            &nbsp;<asp:Label ID="lblloc" runat="server" Font-Bold="True"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 76px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 72px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            <asp:Label ID="lblupdate" runat="server" ForeColor="Red" 
+                                Text="ADDED SUCCESSFULLY" Visible="False"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 76px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 72px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            &nbsp;<asp:Button ID="btnupdate" runat="server" CssClass="btn2" 
+                                 Text="UPDATE" Width="143px" onclick="btnupdate_Click" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 76px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 72px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                </table>
+                </ContentTemplate>
+   <Triggers>
+   
+   <asp:AsyncPostBackTrigger ControlID="txtitemdet" EventName="TextChanged" />
+   
+   <asp:AsyncPostBackTrigger ControlID="btnupdate" EventName="Click" />
+   
+   </Triggers>
+</asp:UpdatePanel>
+
+                </td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+    </table>
+    
+</asp:Content>
+

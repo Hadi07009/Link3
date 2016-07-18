@@ -1,0 +1,415 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDTO;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.dsLinkofficeTableAdapters;
+
+public partial class frm_spo_realize_ini : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+        
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+
+        if (!Page.IsPostBack)
+        {            
+            load_plants();
+            load_all_po();
+
+            tblsel.Visible = false;
+        }
+        else
+        {
+
+        }
+          
+    }
+    private string[] get_plant(string apptype)
+    {
+        User_Role_DefinitionTableAdapter urole = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable udt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        string[] plant_list;
+        udt = urole.GetDataByUserCodeRole(current.UserId.ToString(), apptype);
+
+        if (udt.Rows.Count > 0)
+            plant_list = udt[0].plant_list.Split(',');
+        else
+            return null;
+
+        return plant_list;
+    }
+
+    private void load_plants()
+    {
+
+        string plnts = "Plants: ";
+        int i, len;
+        string[] plant_list = get_plant("SPOC");
+
+        if (plant_list == null)
+        {
+            lblplant.Text = "";
+            return;
+        }
+
+        len = plant_list.Length;
+
+        for (i = 0; i < len; i++)
+        {
+            if (plant_list[i].ToString() != "")
+                plnts = plnts + plant_list[i].ToString() + ", ";
+        }
+
+        lblplant.Text = plnts;        
+    }
+
+
+    private void load_all_po()
+    {
+        PuTr_PO_Hdr_ScblTableAdapter pohdr = new PuTr_PO_Hdr_ScblTableAdapter();        
+        SCBLDataSet.PuTr_PO_Hdr_ScblDataTable dthdr = new SCBLDataSet.PuTr_PO_Hdr_ScblDataTable();
+        ListItem lst;
+
+        int i, len, indx, cnt;
+
+        string[] plant_list = get_plant("SPOC");
+        if (plant_list == null)
+            return;
+
+        len = plant_list.Length;
+
+        dthdr = pohdr.GetDataByStatus("ADV");
+
+        cnt = dthdr.Rows.Count;
+        for (indx = cnt; indx > 0; indx--)
+        {
+
+            for (i = 0; i < len; i++)
+            {
+                if (dthdr[indx - 1].PO_Hdr_Code.Substring(0, 2) == plant_list[i])
+                    goto nextcheck1;
+            }
+            dthdr.RemovePuTr_PO_Hdr_ScblRow(dthdr[indx - 1]);
+
+        nextcheck1: ;
+        }
+
+        ddlpolist.Items.Clear();
+        ddlpolist.Items.Add("");
+
+        foreach (SCBLDataSet.PuTr_PO_Hdr_ScblRow dr in dthdr.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.PO_Hdr_Ref;
+            lst.Text = dr.PO_Hdr_Ref + ": " + dr.PO_Hdr_Value.ToString("N2");
+            ddlpolist.Items.Add(lst);
+        }
+
+
+    }
+
+   
+
+    private void Generate_Items(string po_ref)
+    {       
+        
+        PuTr_PO_Det_ScblTableAdapter podet = new PuTr_PO_Det_ScblTableAdapter();
+        PuTr_PO_Hdr_ScblTableAdapter pohdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Det_ScblDataTable dtdet = new SCBLDataSet.PuTr_PO_Det_ScblDataTable();
+
+        
+        int cnt;
+        int slno = 0;
+        CheckBox chk;
+        TextBox txtpoqty, txtrate, txtparty, txtspe, txtbrand, txtorigin, txtpacking; ;
+        Label lblicode;
+        Label lblidet;
+        Label lbluom;
+        Label lblqty;
+        Label lno;
+        dtdet = podet.GetDetByRef(po_ref);
+
+        cnt = dtdet.Rows.Count;
+
+        if (dtdet.Rows.Count < 1)
+        {
+            btnproceed.Visible = false;
+            gdItem.Visible = false;
+            tblsel.Visible = false;            
+            return;
+        }
+        else
+        {            
+            btnproceed.Visible = true;
+            gdItem.Visible = true;          
+            tblsel.Visible = true;
+
+            gdItem.DataSource = dtdet;
+            gdItem.DataBind();
+
+            foreach (SCBLDataSet.PuTr_PO_Det_ScblRow dr in dtdet.Rows)
+            {
+                chk = new CheckBox();
+                txtpoqty = new TextBox();
+                txtrate = new TextBox();
+                txtparty = new TextBox();
+                txtspe = new TextBox();
+                txtbrand = new TextBox();
+                txtorigin = new TextBox();
+                txtpacking = new TextBox();
+                                        
+                lblicode = new Label();
+                lblidet = new Label();
+                lblqty = new Label();
+                lno = new Label();
+
+                chk = (CheckBox)gdItem.Rows[slno].FindControl("CheckBox1");
+
+                txtpoqty = (TextBox)gdItem.Rows[slno].FindControl("TextBox1");
+                txtrate = (TextBox)gdItem.Rows[slno].FindControl("TextBox2");
+                txtparty = (TextBox)gdItem.Rows[slno].FindControl("TextBox3");
+                txtspe = (TextBox)gdItem.Rows[slno].FindControl("TextBox4");
+                txtbrand = (TextBox)gdItem.Rows[slno].FindControl("TextBox5");
+                txtorigin = (TextBox)gdItem.Rows[slno].FindControl("TextBox6");
+                txtpacking = (TextBox)gdItem.Rows[slno].FindControl("TextBox7");
+                                        
+                lblicode = (Label)gdItem.Rows[slno].FindControl("Label1");
+                lblidet = (Label)gdItem.Rows[slno].FindControl("Label2");
+                lbluom = (Label)gdItem.Rows[slno].FindControl("Label3");
+                lblqty = (Label)gdItem.Rows[slno].FindControl("Label4");
+                lno = (Label)gdItem.Rows[slno].FindControl("Label5");
+                chk.Checked = true;
+
+                lblicode.Text = dr.PO_Det_Icode.ToString();
+                lblidet.Text = dr.PO_Det_Itm_Desc.ToString();
+                lbluom.Text = dr.PO_Det_Itm_Uom.ToString();
+                lblqty.Text = dr.PO_Det_Lin_Qty.ToString("N2");
+                lno.Text = dr.PO_Det_Lno.ToString();
+
+                txtpoqty.Text = dr.PO_Det_Lin_Qty.ToString("N2");
+                txtrate.Text = dr.PO_Det_Lin_Rat.ToString("N2");
+
+                
+                txtparty.Text = dr.PO_Det_Party_for_Spo;
+                txtspe.Text = dr.PO_Det_Specification;               
+
+                txtbrand.Text = dr.PO_Det_Brand.ToString();
+                txtorigin.Text = dr.PO_Det_Origin.ToString();
+                txtpacking.Text = dr.PO_Det_Packing.ToString();
+                
+
+                slno++;
+            }
+                        
+        }
+
+        txtemployee.Text = pohdr.GetHdrDataByRef(po_ref)[0].PO_Hdr_Com3;
+        gdItem.Visible = true;
+    }
+
+    private string getemp()
+    {
+        tblUserInfoTableAdapter user = new tblUserInfoTableAdapter();
+        dsLinkoffice.tblUserInfoDataTable dtuser = new dsLinkoffice.tblUserInfoDataTable();
+        string emp = "";
+
+        string[] tmp = txtemployee.Text.Split(':');
+
+        if (tmp.Length < 2) return "";
+
+        dtuser = user.GetUserByCode(tmp[0].ToString());
+        if (dtuser.Rows.Count == 0) return "";
+        else
+            emp = dtuser[0].UserId.ToString() + ":" + dtuser[0].UserName.ToString() + ":" + dtuser[0].UserDesignation.ToString();
+
+
+        return emp;
+    }
+    
+    
+    protected void btnproceed_Click(object sender, EventArgs e)
+    {
+        
+                
+        CheckBox chk;
+        Label lbluom;        
+        Label lblicode;
+        Label lblidet;
+        Label lblqty;
+        Label lno;
+
+        TextBox txtpoqty;
+        TextBox txtrate;
+        TextBox txtparty;
+        TextBox txtspe;
+        TextBox txtbrand;
+        TextBox txtorigin;
+        TextBox txtpacking;
+        
+        clsSpo[] seldet;
+        seldet = new clsSpo[gdItem.Rows.Count];
+        int seqno = 0;
+        int ssno = 0;        
+        string empdet = getemp();
+        if (empdet == "") return;
+        
+
+        try
+        {
+            foreach (GridViewRow gr in gdItem.Rows)
+            {
+
+                chk = new CheckBox();
+                txtpoqty = new TextBox();
+                txtrate = new TextBox();
+                txtspe = new TextBox();
+                txtbrand = new TextBox();
+                txtorigin = new TextBox();
+                txtpacking = new TextBox();
+
+                lblicode = new Label();
+                lblidet = new Label();
+                lblqty = new Label();
+                lbluom = new Label();
+                lno = new Label();
+
+                txtpoqty = (TextBox)gr.FindControl("TextBox1"); 
+                txtrate = (TextBox)gr.FindControl("TextBox2");
+                txtparty = (TextBox)gr.FindControl("TextBox3");
+                txtspe = (TextBox)gr.FindControl("TextBox4");
+                txtbrand = (TextBox)gr.FindControl("TextBox5");
+                txtorigin = (TextBox)gr.FindControl("TextBox6");
+                txtpacking = (TextBox)gr.FindControl("TextBox7");
+
+                chk = (CheckBox)gr.FindControl("CheckBox1");
+               
+                lblicode = (Label)gr.FindControl("Label1");
+                lblidet = (Label)gr.FindControl("Label2");
+                lbluom = (Label)gr.FindControl("Label3");
+                lblqty = (Label)gr.FindControl("Label4");
+                lno = (Label)gr.FindControl("Label5");
+               
+                seldet[seqno] = new clsSpo();
+               
+
+                if (chk.Checked)
+                {
+                    if ((txtpoqty.Text != "") && (txtrate.Text != ""))
+                    {
+                        if ((Convert.ToDecimal(txtpoqty.Text) != 0) && (Convert.ToDecimal(txtrate.Text) != 0) && (Convert.ToDecimal(txtpoqty.Text) <= (Convert.ToDecimal(lblqty.Text)*(decimal)1.5)))
+                        {
+                            seldet[seqno] = new clsSpo();
+
+                            seldet[seqno].Seq = seqno;
+                            seldet[seqno].Lno = Convert.ToInt32(lno.Text);
+                            seldet[seqno].RefNo = ddlpolist.SelectedValue.ToString();
+                            //seldet[seqno].ReqType = lblref.Text.Substring(0,5);
+                            seldet[seqno].Icode = lblicode.Text;
+                            seldet[seqno].Idet = lblidet.Text;
+                            seldet[seqno].Uom = lbluom.Text;
+                            seldet[seqno].Qnty = Math.Round(Convert.ToDecimal(txtpoqty.Text),2);                                                        
+                            seldet[seqno].Rate = Math.Round(Convert.ToDecimal(txtrate.Text), 2);                                                       
+                            seldet[seqno].Totval =  Math.Round((seldet[seqno].Qnty * seldet[seqno].Rate),2);
+                            seldet[seqno].Specification = txtspe.Text;
+                            seldet[seqno].Brand = txtbrand.Text;
+                            seldet[seqno].Origin = txtorigin.Text;
+                            seldet[seqno].Packing = txtpacking.Text;
+                            seldet[seqno].Partydet = txtparty.Text;
+                            seldet[seqno].Empdet = empdet;
+
+                            
+                            ssno++;
+                        }
+                        else
+                        {
+                            seldet[seqno].Seq = seqno;
+                            seldet[seqno].Lno = Convert.ToInt32(lno.Text);
+                            seldet[seqno].RefNo = ddlpolist.SelectedValue.ToString();
+                            seldet[seqno].Icode = lblicode.Text;
+                            seldet[seqno].Idet = lblidet.Text;
+                            seldet[seqno].Uom = lbluom.Text;
+                            seldet[seqno].Qnty = 0;
+                            seldet[seqno].Empdet = empdet;
+                        }
+                    }
+                    else
+                    {
+                        seldet[seqno].Seq = seqno;
+                        seldet[seqno].Lno = Convert.ToInt32(lno.Text);
+                        seldet[seqno].RefNo = ddlpolist.SelectedValue.ToString();
+                        seldet[seqno].Icode = lblicode.Text;
+                        seldet[seqno].Idet = lblidet.Text;
+                        seldet[seqno].Uom = lbluom.Text;
+                        seldet[seqno].Qnty = 0;
+                        seldet[seqno].Empdet = empdet;
+                    }
+                }
+                else
+                {
+                    seldet[seqno].Seq = seqno;
+                    seldet[seqno].Lno = Convert.ToInt32(lno.Text);
+                    seldet[seqno].RefNo = ddlpolist.SelectedValue.ToString();                   
+                    seldet[seqno].Icode = lblicode.Text;
+                    seldet[seqno].Idet = lblidet.Text;
+                    seldet[seqno].Uom = lbluom.Text;
+                    seldet[seqno].Qnty = 0;
+                    seldet[seqno].Empdet = empdet;
+                    
+                }
+                seqno++;
+            }           
+
+        }
+        catch(Exception ex)
+        {
+            Response.Redirect(Request.Url.AbsoluteUri);
+        }
+        if (ssno > 0)
+        {
+            Session[clsStatic.sessionItemSelForPO] = seldet;
+            Response.Redirect("./frm_spo_realize_ini_final.aspx");
+        }  
+        
+    }
+
+    
+
+
+    protected void ddlpolist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        string selplant = ddlpolist.SelectedValue.ToString();
+
+        if (selplant == "")
+        {
+            btnproceed.Visible = false;
+            tblsel.Visible = false;
+            gdItem.Visible = false;
+        }
+        else
+        {
+            Generate_Items(selplant);
+        }
+
+    }
+    protected void gdItem_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+    
+}
+

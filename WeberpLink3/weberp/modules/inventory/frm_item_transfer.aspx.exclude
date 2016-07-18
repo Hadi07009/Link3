@@ -1,0 +1,247 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_item_transfer.aspx.cs" Inherits="frm_item_transfer"  Title=""   ValidateRequest="false" EnableEventValidation="false"  %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register assembly="eWorld.UI, Version=2.0.6.2393, Culture=neutral, PublicKeyToken=24d65337282035f2" namespace="eWorld.UI" tagprefix="ew" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+  <asp:UpdatePanel ID="updpnl" runat="server">
+  <ContentTemplate>
+  
+    <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="3" class="heading" style="text-align: center">
+                ITEM / STOCK TRANSFER SCREEN</td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <table style="width:100%;">
+                    <tr>
+                        <td colspan="5" style="text-align: center">
+                            ITEM WILL BE ISSUED</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 87px">
+                            &nbsp;</td>
+                        <td style="width: 99px">
+                            Item Name</td>
+                        <td style="width: 28px">
+                            :</td>
+                        <td>
+                            <asp:TextBox ID="txtitem" runat="server" autocomplete="off" CssClass="txtbox" 
+                                Width="600px" AutoPostBack="True" ontextchanged="txtitem_TextChanged" 
+                                Font-Size="7pt"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="autoComplete1" runat="server" 
+                                BehaviorID="AutoCompleteEx1" CompletionInterval="1000" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="1" 
+                                ServiceMethod="GetItemList" ServicePath="../commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtitem">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 87px">
+                            &nbsp;</td>
+                        <td style="width: 99px">
+                            Store</td>
+                        <td style="width: 28px">
+                            :</td>
+                        <td>
+                            <asp:DropDownList ID="ddliss" Width="338px" CssClass="txtbox" 
+                                runat="server" AutoPostBack="True" 
+                                onselectedindexchanged="ddliss_SelectedIndexChanged">
+                            </asp:DropDownList>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 87px">
+                            &nbsp;</td>
+                        <td style="width: 99px">
+                            Current Stock
+                        </td>
+                        <td style="width: 28px">
+                            :</td>
+                        <td>
+                            <asp:Label ID="lblcurstk" runat="server"></asp:Label>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 87px">
+                            &nbsp;</td>
+                        <td style="width: 99px">
+                            Average Rate</td>
+                        <td style="width: 28px">
+                            :</td>
+                        <td>
+                            <asp:Label ID="lblavgrate" runat="server"></asp:Label>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 87px">
+                            &nbsp;</td>
+                        <td style="width: 99px">
+                            Transfer Qnty</td>
+                        <td style="width: 28px">
+                            :</td>
+                        <td>
+                            <asp:TextBox ID="txtqty" runat="server" AutoCompleteType="Disabled" 
+                                CssClass="txtbox"></asp:TextBox>
+                            <ajaxToolkit:FilteredTextBoxExtender ID="txtqty_FilteredTextBoxExtender" 
+                                runat="server" FilterType="Custom, Numbers" TargetControlID="txtqty" 
+                                ValidChars=".">
+                            </ajaxToolkit:FilteredTextBoxExtender>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 87px">
+                            &nbsp;</td>
+                        <td style="width: 99px">
+                            Remarks</td>
+                        <td style="width: 28px">
+                            :</td>
+                        <td>
+                            <asp:TextBox ID="txtremarks" runat="server" CssClass="txtbox" Width="400px"></asp:TextBox>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <table style="width:100%;">
+                    <tr>
+                        <td colspan="5" style="text-align: center; height: 47px;">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" style="text-align: center">
+                            ITEM WILL BE RECEIVED</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 87px">
+                            &nbsp;</td>
+                        <td style="width: 99px">
+                            Item Name</td>
+                        <td style="width: 28px">
+                            :</td>
+                        <td>
+                            <asp:TextBox ID="txtitemrec" runat="server" autocomplete="off" CssClass="txtbox" 
+                                Width="600px" AutoPostBack="True" ontextchanged="txtitemrec_TextChanged" 
+                                Font-Size="7pt"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtitemrec_AutoCompleteExtender" runat="server" 
+                                BehaviorID="AutoCompleteEx2" CompletionInterval="1000" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="1" 
+                                ServiceMethod="GetItemList" ServicePath="../commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtitemrec">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 87px">
+                            &nbsp;</td>
+                        <td style="width: 99px">
+                            Store</td>
+                        <td style="width: 28px">
+                            :</td>
+                        <td>
+                            <asp:DropDownList ID="ddlrec" runat="server" CssClass="txtbox" Width="338px" 
+                                AutoPostBack="True" onselectedindexchanged="ddlrec_SelectedIndexChanged">
+                            </asp:DropDownList>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 87px">
+                            &nbsp;</td>
+                        <td style="width: 99px">
+                            Current Stock 
+                        </td>
+                        <td style="width: 28px">
+                            :</td>
+                        <td>
+                            <asp:Label ID="lblcurstkrec" runat="server"></asp:Label>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 87px">
+                            &nbsp;</td>
+                        <td style="width: 99px">
+                            Average Rate</td>
+                        <td style="width: 28px">
+                            :</td>
+                        <td>
+                            <asp:Label ID="lblavgraterec" runat="server"></asp:Label>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center;" colspan="3">
+                <asp:Label ID="lblmsg" runat="server" ForeColor="Red" Visible="False"></asp:Label>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center;" colspan="3">
+                <asp:Button ID="btnTransfer" runat="server" CssClass="btn2" Text="Transfer" 
+                    Width="113px" onclick="btnTransfer_Click" />
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+    </table>
+    </ContentTemplate>
+  <Triggers>
+  <asp:AsyncPostBackTrigger ControlID="txtitem" EventName="TextChanged" />
+  <asp:AsyncPostBackTrigger ControlID="txtitemrec" EventName="TextChanged" />
+  <asp:AsyncPostBackTrigger ControlID="btnTransfer" EventName="Click" />
+  </Triggers>
+  </asp:UpdatePanel>
+
+</asp:Content>
+

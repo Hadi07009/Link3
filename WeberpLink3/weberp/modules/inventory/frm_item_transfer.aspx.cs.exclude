@@ -1,0 +1,484 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using LibraryDAL;
+using System.Data.SqlClient;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLQryTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+using LibraryDAL.AccDataSet2TableAdapters;
+
+public partial class frm_item_transfer : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        //current.UserId = "MON";
+        //current.UserName = "Monjurul";                
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btnTransfer, "Confirm Transfer?");
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            InMa_Str_LocTableAdapter loc = new InMa_Str_LocTableAdapter();
+            ErpDataSet.InMa_Str_LocDataTable dtloc = new ErpDataSet.InMa_Str_LocDataTable();
+            ListItem lst;
+
+            dtloc = loc.GetAllStore();
+            ddliss.Items.Clear();
+            ddliss.Items.Add("");
+            foreach (ErpDataSet.InMa_Str_LocRow drs in dtloc.Rows)
+            {
+                lst = new ListItem();
+                lst.Text = drs.Str_Loc_Id;
+                lst.Value = drs.Str_Loc_Id;
+                ddliss.Items.Add(lst);
+            }
+            ddlrec.Items.Clear();
+            ddlrec.Items.Add("");
+            foreach (ErpDataSet.InMa_Str_LocRow drs in dtloc.Rows)
+            {
+                lst = new ListItem();
+                lst.Text = drs.Str_Loc_Id;
+                lst.Value = drs.Str_Loc_Id;
+                ddlrec.Items.Add(lst);
+            }
+
+        }
+
+    }
+
+
+
+    protected void txtitem_TextChanged(object sender, EventArgs e)
+    {
+
+        iss_itmddl_change();
+    }
+    protected void ddliss_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        iss_itmddl_change();
+    }
+
+    private void iss_itmddl_change()
+    {
+        InMa_Itm_DetTableAdapter idet = new InMa_Itm_DetTableAdapter();
+        InMa_Stk_CtlTableAdapter stk = new InMa_Stk_CtlTableAdapter();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstk = new ErpDataSet.InMa_Stk_CtlDataTable();
+        string[] tdata;
+        lblmsg.Visible = false;
+        tdata = txtitem.Text.Split(':');
+        txtqty.Text = "";
+
+        if (tdata.Length < 3)
+        {
+            txtitem.Text = "";
+            lblavgrate.Text = "";
+            lblcurstk.Text = "";
+            return;
+        }
+        if (idet.GetItemByCode(tdata[0]).Rows.Count == 0)
+        {
+            txtitem.Text = "";
+            lblavgrate.Text = "";
+            lblcurstk.Text = "";
+            return;
+        }
+
+        if (ddliss.Text == "")
+        {
+            lblavgrate.Text = "";
+            lblcurstk.Text = "";
+            return;
+        }
+
+        dtstk = stk.GetDataByItemStore(tdata[0],ddliss.SelectedValue.ToString());
+
+        if (dtstk.Rows.Count == 0)
+        {
+            txtitem.Text = "";
+            lblavgrate.Text = "";
+            lblcurstk.Text = "";
+            return;
+        }
+
+        if (dtstk[0].Stk_Ctl_Free_Stk > 0)
+        {
+            lblavgrate.Text = (dtstk[0].Stk_Ctl_Ave_Val / (decimal) dtstk[0].Stk_Ctl_Free_Stk).ToString("F4");
+        }
+        else 
+        {
+            lblavgrate.Text = "0";
+        }
+
+        lblcurstk.Text = dtstk[0].Stk_Ctl_Free_Stk.ToString("F4");
+
+    }
+
+
+    protected void txtitemrec_TextChanged(object sender, EventArgs e)
+    {
+        rec_itmddl_change();
+    }
+
+    protected void ddlrec_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        rec_itmddl_change();
+    }
+
+    private void rec_itmddl_change()
+    {
+        lblmsg.Visible = false;
+        InMa_Itm_DetTableAdapter idet = new InMa_Itm_DetTableAdapter();
+        InMa_Stk_CtlTableAdapter stk = new InMa_Stk_CtlTableAdapter();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstk = new ErpDataSet.InMa_Stk_CtlDataTable();
+
+        string[] tdata;
+        lblmsg.Visible = false;
+        tdata = txtitemrec.Text.Split(':');
+
+        if (tdata.Length < 3)
+        {
+            txtitemrec.Text = "";
+            lblavgraterec.Text = "";
+            return;
+        }
+        if (idet.GetItemByCode(tdata[0]).Rows.Count == 0)
+        {
+            txtitemrec.Text = "";
+            lblavgraterec.Text = "";
+            return;
+        }
+
+        if (ddlrec.Text == "")
+        {
+            lblavgraterec.Text = "";
+            lblcurstkrec.Text = "";
+            return;
+        }
+
+        dtstk = stk.GetDataByItemStore(tdata[0],ddlrec.SelectedValue.ToString());
+
+        if (dtstk.Rows.Count == 0)
+        {
+            lblavgraterec.Text = "0";
+            lblcurstkrec.Text = "0";
+
+            return;
+        }
+
+        if (dtstk[0].Stk_Ctl_Free_Stk > 0)
+        {
+            lblavgraterec.Text = (dtstk[0].Stk_Ctl_Ave_Val / (decimal)dtstk[0].Stk_Ctl_Free_Stk).ToString("F4");
+        }
+        else
+        {
+            lblavgraterec.Text = "0";
+        }
+
+       
+        lblcurstkrec.Text = dtstk[0].Stk_Ctl_Free_Stk.ToString("F4");
+    }
+
+    
+   
+
+    protected void btnTransfer_Click(object sender, EventArgs e)
+    {
+        lblmsg.Visible = false;
+
+        InMa_Itm_DetTableAdapter idet = new InMa_Itm_DetTableAdapter();
+        
+        ErpDataSet.InMa_Itm_DetDataTable dtiss = new ErpDataSet.InMa_Itm_DetDataTable();
+        ErpDataSet.InMa_Itm_DetDataTable dtrec = new ErpDataSet.InMa_Itm_DetDataTable();
+        InMa_Itm_StkTableAdapter stk = new InMa_Itm_StkTableAdapter();
+        //ErpDataSet.InMa_Itm_StkDataTable dtstk = new ErpDataSet.InMa_Itm_StkDataTable();        
+        InMa_Stk_CtlTableAdapter stkctl = new InMa_Stk_CtlTableAdapter();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstkctl = new ErpDataSet.InMa_Stk_CtlDataTable();
+        InMa_Stk_ValTableAdapter stkval = new InMa_Stk_ValTableAdapter();        
+        AccTransactionHeaderHoldTableAdapter wh = new AccTransactionHeaderHoldTableAdapter();
+        AccTransactionDetailsHoldTableAdapter wd = new AccTransactionDetailsHoldTableAdapter();
+
+        InSu_Trn_SetTableAdapter set = new InSu_Trn_SetTableAdapter();
+        InTr_Trn_HdrTableAdapter trnhdr = new InTr_Trn_HdrTableAdapter();
+        InTr_Trn_DetTableAdapter trndet = new InTr_Trn_DetTableAdapter();
+        budgTableAdapter bug = new budgTableAdapter();
+        AccDataSet.budgDataTable dtbug = new AccDataSet.budgDataTable();
+
+        string issicode, recicode;
+
+        string[] tdata;
+        decimal rate, curissstk, recavrate;
+        lblmsg.Visible = false;
+
+
+        if ((ddliss.Text == "") || (ddlrec.Text == ""))
+        {
+            lblmsg.Visible = true;
+            lblmsg.Text = "STORE ERROR";
+            return;
+        }
+
+        //iss itm
+        tdata = txtitem.Text.Split(':');        
+
+        if (tdata.Length < 3)
+        {
+            lblmsg.Visible = true;
+            lblmsg.Text = "ISSUE ITEM ERROR";
+            return;
+        }
+
+        dtstkctl = stkctl.GetDataByItemStore(tdata[0], ddliss.SelectedValue.ToString());
+
+        if (dtstkctl.Rows.Count == 0)
+        {
+            lblmsg.Visible = true;
+            lblmsg.Text = "ISSUE ITEM ERROR";
+            return;
+        }
+       
+        issicode = tdata[0];
+        //        stock
+
+        if (txtqty.Text == "")
+        {
+            lblmsg.Visible = true;
+            lblmsg.Text = "QUANTITY ERROR";
+            return;
+        }
+
+        if (dtstkctl[0].Stk_Ctl_Free_Stk < Convert.ToDouble(txtqty.Text))
+        {
+            lblmsg.Visible = true;
+            lblmsg.Text = "INSUFICIENT QUANTITY";
+            return;
+        }
+
+        rate = dtstkctl[0].Stk_Ctl_Ave_Val / (decimal)dtstkctl[0].Stk_Ctl_Free_Stk;
+        curissstk = (decimal)dtstkctl[0].Stk_Ctl_Free_Stk;
+
+        //rec itm
+
+        tdata = txtitemrec.Text.Split(':');
+
+        if (tdata.Length < 3)
+        {
+            lblmsg.Visible = true;
+            lblmsg.Text = "RECEIVE ITEM ERROR";
+            return;
+        }
+
+       
+        if (idet.GetItemByCode(tdata[0]).Rows.Count == 0)
+        {
+            lblmsg.Visible = true;
+            lblmsg.Text = "RECEIVE ITEM ERROR";
+            return;
+        }
+
+        recicode = tdata[0];
+
+        if ((issicode == recicode) && (ddliss.SelectedValue.ToString() == ddlrec.SelectedValue.ToString()))
+        {
+
+            lblmsg.Visible = true;
+            lblmsg.Text = "ITEM AND STORE SAME";
+            return;
+        }
+
+        // transaction
+                
+        dtiss = idet.GetItemByCode(issicode);
+        dtrec = idet.GetItemByCode(recicode);
+
+        string period = DateTime.Now.Year.ToString() + "/" + string.Format("{0:00}", DateTime.Now.Month);        
+        string oprcode = current.UserId.ToString();
+        
+        string isslast_num = set.GetDataByType_Code("IT", "CMIST")[0].Trn_Set_Iq_Next_No.ToString();
+        string isstrn_ref_no = "CMIT" + string.Format("{0:00}", Convert.ToInt32(DateTime.Now.Year.ToString().Substring(2, 2))) + string.Format("{0:00}", DateTime.Now.Month) + "-" + isslast_num;
+        string issnext_num = string.Format("{0:00000}", Convert.ToInt32(isslast_num) + 1);
+
+        string reclast_num = set.GetDataByType_Code("RT", "CMTRR")[0].Trn_Set_Iq_Next_No.ToString();
+        string rectrn_ref_no = "CMTR" + string.Format("{0:00}", Convert.ToInt32(DateTime.Now.Year.ToString().Substring(2, 2))) + string.Format("{0:00}", DateTime.Now.Month) + "-" + reclast_num;
+        string recnext_num = string.Format("{0:00000}", Convert.ToInt32(reclast_num) + 1);
+        decimal gqty, gamnt, grate, totamnt, qnty = Convert.ToDecimal(txtqty.Text);
+        string fate_ref = clsAccounts.GetReferenceNoForSave("AJV", "J", "Accounts", "", DateTime.Now);
+        string c_ac_code = dtiss[0].T_C2;
+        string d_ac_code = dtrec[0].T_C2;
+        string narrstr = "Inv Transfer//" + dtiss[0].Itm_Det_desc + " TO " + dtrec[0].Itm_Det_desc + " QTY " + qnty.ToString("N2") + " @" + rate.ToString();
+        double trn_jrn_code = Convert.ToDouble(wh.GetMaxSlS()) + 1;
+        string c_ac_type, d_ac_type, issstr, recstr;
+
+
+        issstr = ddliss.SelectedValue.ToString();
+        recstr = ddlrec.SelectedValue.ToString();
+
+        dtstkctl = new ErpDataSet.InMa_Stk_CtlDataTable();
+        dtstkctl = stkctl.GetDataByItemStore(recicode, recstr);
+                
+        totamnt = qnty * rate;
+  
+
+        dtbug = bug.GetDataByCoaCode(c_ac_code);
+        if (dtbug.Rows.Count == 0)
+        {
+            lblmsg.Visible = true;
+            lblmsg.Text = "GL CODE ERROR";
+            return;
+        }
+        c_ac_type = dtbug[0].Gl_Coa_Type;
+
+        dtbug = new AccDataSet.budgDataTable();
+        dtbug = bug.GetDataByCoaCode(d_ac_code);
+        if (dtbug.Rows.Count == 0)
+        {
+            lblmsg.Visible = true;
+            lblmsg.Text = "GL CODE ERROR";
+            return;
+        }
+        d_ac_type = dtbug[0].Gl_Coa_Type;
+
+        bool flg = true;
+        SqlTransaction myTrn = HelperTA.OpenTransaction(trndet.Connection);
+        
+        try
+        {
+            trndet.AttachTransaction(myTrn);
+            trnhdr.AttachTransaction(myTrn);
+            set.AttachTransaction(myTrn);
+            stk.AttachTransaction(myTrn);
+            stkctl.AttachTransaction(myTrn);
+            stkval.AttachTransaction(myTrn);
+            set.AttachTransaction(myTrn);
+            wh.AttachTransaction(myTrn);
+            wd.AttachTransaction(myTrn);
+
+            //iss
+            trnhdr.InsertTrnHdr("IT", "RTIST", isstrn_ref_no, "", "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", rectrn_ref_no, "", "", "", "", "", "", "", totamnt, "B", period, oprcode, "", "", "", "", "", "", "", "", "", 0, 0, null, null, "", txtremarks.Text);
+            trndet.InsertTrnDet("IT", "RTIST", isstrn_ref_no, 1, "", 0, issicode, dtiss[0].Itm_Det_desc, dtiss[0].Itm_Det_PUSA_unit, issstr, "", rectrn_ref_no, 1, "", DateTime.Now.AddYears(10), DateTime.Now, (double)qnty, 0, (decimal)rate, totamnt, totamnt, (decimal)rate, totamnt, "", (curissstk - qnty).ToString(), "0", 0, 0);
+            set.UpdateNextNum(issnext_num, "IT", "RTIST");
+
+            if (issicode != recicode)
+            {
+                gqty = Convert.ToDecimal(stkctl.GetTotQty(issicode));
+                gamnt = Convert.ToDecimal(stkctl.GetTotValue(issicode));
+
+                if ((gqty - qnty) != 0)
+                {
+                    grate = (gamnt - totamnt) / (gqty - qnty);
+                }
+                else 
+                {
+                    grate = 0;
+                }
+
+                stk.UpdateForIssue((double)qnty, grate, issicode);
+            }
+
+            stkctl.UpdateForMatIssue((double)qnty, qnty * rate, qnty * rate, issicode, issstr);
+            stkval.InsertStkVal("IT", "CMIST", isstrn_ref_no, Convert.ToDateTime(DateTime.Now.ToShortDateString()), issicode, dtiss[0].Itm_Det_desc, issstr, rate, rate, rate, (double)qnty, "", null, null, null);
+
+            //rec
+            trnhdr.InsertTrnHdr("RT", "CMTRR", rectrn_ref_no, "", "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", isstrn_ref_no, "", "", "", "", "", "", "", totamnt, "P", period, oprcode, "", "", "", "", "", "", "", "", "", 0, 0, null, null, "", txtremarks.Text);
+            trndet.InsertTrnDet("RT", "CMTRR", rectrn_ref_no, 1, "", 0, recicode, dtrec[0].Itm_Det_desc, dtrec[0].Itm_Det_PUSA_unit, recstr, "", isstrn_ref_no, 1, "", DateTime.Now.AddYears(10), DateTime.Now, (double)qnty, 0, (decimal)rate, totamnt, totamnt, (decimal)rate, totamnt, "", "", "0", 0, 0);
+            set.UpdateNextNum(recnext_num, "RT", "CMTRR");
+
+
+            if (dtstkctl.Rows.Count == 0)
+            {
+                recavrate = rate;
+            }
+            else
+            {               
+                recavrate = (dtstkctl[0].Stk_Ctl_Ave_Val + totamnt) / (decimal)(dtstkctl[0].Stk_Ctl_Cur_Stk + (double)qnty);
+            }
+
+            gqty = Convert.ToDecimal(stkctl.GetTotQty(recicode));
+
+            if (gqty == 0)
+            {
+                gamnt = 0;
+            }
+            else
+            {
+                gamnt = Convert.ToDecimal(stkctl.GetTotValue(recicode));
+            }
+            grate = (gamnt + totamnt) / (gqty + qnty);
+
+
+            if (stkctl.UpdateForMrrRec((double)qnty, (double)qnty, totamnt, Convert.ToDateTime(DateTime.Now.ToShortDateString()), totamnt, totamnt, recstr, recicode) == 0)
+            {
+                stkctl.InsertStkCtl(recstr, recicode, null, (double)qnty, (double)qnty, 0, 0, 0, 0, 0, 0, 0, totamnt, totamnt, 0, 0, DateTime.Now, DateTime.Now, "", "", "", 0);
+            }
+
+            if (issicode != recicode)
+            {
+                if (stk.UpdateItmStkMrrRec((double)qnty, rate, grate, recicode) == 0)
+                {
+                    stk.InsertItmStk(recicode, (double)qnty, "A", 0, 0, 1, rate, rate, "", "", "", 0);
+                }
+            }
+            stkval.InsertStkVal("RT", "CMTRR", rectrn_ref_no, Convert.ToDateTime(DateTime.Now.ToShortDateString()), recicode, dtrec[0].Itm_Det_desc, issstr, rate, recavrate, rate, (double)qnty, "", null, null, null);
+               
+
+            //jv
+
+            if (issicode != recicode)
+            {
+                wd.InsertDetailS(fate_ref, d_ac_code, trn_jrn_code, 1, narrstr, "D", totamnt, "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", d_ac_type, "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), 0, "", isstrn_ref_no, rectrn_ref_no, "", 0, 0, "", "", "", "", 0,"");
+                wd.InsertDetailS(fate_ref, c_ac_code, trn_jrn_code, 2, narrstr, "C", totamnt, "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", c_ac_type, "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), 0, "", rectrn_ref_no, isstrn_ref_no, "", 0, 0, "", "", "", "", 0,"");
+
+                wh.InsertHeaderS(fate_ref, trn_jrn_code, "AJV", "J", period, DateTime.Now, Convert.ToDateTime(DateTime.Now.ToShortDateString()), "BDT", 1, oprcode, oprcode, Convert.ToDateTime(DateTime.Now), "L", "", "");
+            }
+
+
+            myTrn.Commit();
+            //myTrn.Rollback();
+
+        }
+        catch
+        {
+            myTrn.Rollback();
+            flg = false;
+            
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(trndet.Connection, myTrn);
+        }
+
+        if (flg)
+        {
+            lblmsg.Visible = true;
+            lblmsg.Text = "TRANSFER SUCCESSFULLY COMPLETED";
+
+            txtitem.Text = "";
+            lblavgrate.Text = "";
+            lblcurstk.Text = "";
+            txtitemrec.Text = "";
+            lblavgraterec.Text = "";
+            lblcurstkrec.Text = "";
+            txtqty.Text = "";
+            txtremarks.Text = "";
+            ddliss.SelectedIndex = -1;
+            ddlrec.SelectedIndex = -1;
+        }
+        else
+        {
+            lblmsg.Visible = true;
+            lblmsg.Text = "TRANSFER ERROR";
+            
+        }
+
+    }
+    
+}
+

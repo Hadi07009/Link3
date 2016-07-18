@@ -1,0 +1,232 @@
+using System;
+using System.IO;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDTO;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBL3DataSetTableAdapters;
+using LibraryDAL.FpiDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+
+
+public partial class frm_fpi_vessel_info : System.Web.UI.Page
+{
+
+    tbl_vessel_detailTableAdapter vesseltype = new tbl_vessel_detailTableAdapter();
+    LibraryDAL.FpiDataSet.tbl_vessel_detailDataTable dtvesseltype = new FpiDataSet.tbl_vessel_detailDataTable();
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        if (!Page.IsPostBack)
+        {
+            Load_vessel_type();
+        }
+    }
+
+
+    private void Load_vessel_type()
+    {
+       
+        ListItem lst_vessel_type;
+        ddlvesseltype.Items.Clear();
+        ddlvesseltype.Items.Add("");
+       
+        lst_vessel_type = new ListItem();
+        lst_vessel_type.Value = "LV";
+        lst_vessel_type.Text = "LV";
+        ddlvesseltype.Items.Add(lst_vessel_type);
+        lst_vessel_type = new ListItem();
+        lst_vessel_type.Value = "MV";
+        lst_vessel_type.Text = "MV";
+        ddlvesseltype.Items.Add(lst_vessel_type);
+       
+    }
+
+
+
+    protected void ddlvesseltype_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        Loadgrid(ddlvesseltype.SelectedItem.Text);
+   
+    }
+
+
+    private void Loadgrid(string type)
+    {
+
+        if (type =="") return;
+
+       
+        DataTable dt = new DataTable();
+        dt.Columns.Add("Serial", typeof(Int32));
+        dt.Columns.Add("Vessel Type", typeof(string));
+        dt.Columns.Add("Vessel Code", typeof(string));
+        dt.Columns.Add("Vessel Name", typeof(string));
+
+        dtvesseltype = vesseltype.GetDataByVtype(type);
+        int i = 0;
+        foreach (LibraryDAL.FpiDataSet.tbl_vessel_detailRow dr in dtvesseltype.Rows)
+        {
+
+            i++;
+            dt.Rows.Add(i, dr.vessel_type , dr.vessel_code , dr.vessel_name);
+        }
+        gvvesselinfo.DataSource = dt;
+        gvvesselinfo.DataBind();
+
+    }
+
+
+    private string  get_max_refno()
+    {
+        int ref_no = Convert.ToInt32(vesseltype.GetMaxRef(ddlvesseltype.SelectedItem.Value ));
+        ref_no = ref_no + 1;
+        string str_ref_no = ddlvesseltype.SelectedItem.Value+"-"+ string.Format("{0:000}", ref_no);
+        return str_ref_no;
+
+    }
+
+    private bool checkentry()
+    {
+
+        bool flg = true;
+        if (ddlvesseltype.SelectedItem.Text  == "") return flg = false;
+        if (txtvesselname.Text == "") return flg = false;
+        return flg;
+    }
+
+    private void clear()
+    {
+        txtvesselname.Text = "";
+    }
+  
+   
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        if (checkentry() == false)
+        {
+
+            clsStatic.MsgConfirmBox("Please enter data"); 
+            return;
+        }
+       dtvesseltype = vesseltype.GetDataByCode(txtvesselname.Text.Trim().Split(':')[0]);
+       if (dtvesseltype.Rows.Count > 0)
+       {
+           try
+           {
+
+               vesseltype.UpdateByCode(ddlvesseltype.SelectedItem.Value, txtvesselname.Text.Split(':')[1], txtvesselname.Text.Split(':')[0]);
+
+              
+           }
+           catch (Exception ex)
+           {
+
+               clsStatic.MsgConfirmBox(ex.Message);
+               return;
+           
+           }
+       }
+       else
+
+       {
+
+           clsStatic.MsgConfirmBox("Please enter valid data");
+           clear();
+           return;
+       }
+       clsStatic.MsgConfirmBox("Data Save Successfully ");
+       Loadgrid(ddlvesseltype.SelectedItem.Value);
+       clear();
+    }
+    protected void btnadd_Click(object sender, EventArgs e)
+    {
+        if (checkentry() == false)
+        {
+
+            clsStatic.MsgConfirmBox("Please enter data");
+            return; 
+        
+        }
+        dtvesseltype = vesseltype.GetDataByCode(txtvesselname.Text.Split(':')[0]);
+        if (dtvesseltype.Rows.Count > 0)
+        {
+
+            clsStatic.MsgConfirmBox("Data already exist ");
+            return;
+        }
+        try
+        {
+
+            vesseltype.InsertVessel(ddlvesseltype.SelectedItem.Value, get_max_refno(), txtvesselname.Text.Trim());
+
+           
+        }
+
+        catch(Exception ex)
+
+        {
+
+            clsStatic.MsgConfirmBox(ex.Message);
+            return;
+        
+        }
+        clsStatic.MsgConfirmBox("Data Save successfully ");
+        Loadgrid(ddlvesseltype.SelectedItem.Value);
+        clear();
+
+       
+    }
+    protected void gvvesselinfo_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onmouseover"] = "this.style.cursor='pointer';this.style.textDecoration='underline';this.style.color='green';";
+            e.Row.Attributes["onmouseout"] = "this.style.textDecoration='none';this.style.color='black';";
+            e.Row.Attributes["onclick"] = ClientScript.GetPostBackClientHyperlink(this.gvvesselinfo, "Select$" + e.Row.RowIndex);
+        }
+
+    }
+    protected void gvvesselinfo_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        int indx;
+        string type = "";
+        string code = "";
+
+        indx = gvvesselinfo.SelectedIndex;
+        if (indx != -1)
+        {
+            type = gvvesselinfo.Rows[indx].Cells[1].Text.Trim();
+            code = gvvesselinfo.Rows[indx].Cells[2].Text.Trim();
+        }
+
+        dtvesseltype = vesseltype.GetDataByTypeCode(type, code);
+        ddlvesseltype.SelectedItem.Text = dtvesseltype[0].vessel_type;
+        txtvesselname.Text = dtvesseltype[0].vessel_code + ":" + dtvesseltype[0].vessel_name;
+        gvvesselinfo.SelectedIndex = -1;
+
+    }
+
+    protected void btnclear_Click(object sender, EventArgs e)
+    {
+        clear();
+    }
+}
+
+
+   
+
+
+
+

@@ -1,0 +1,514 @@
+using System;
+using System.IO;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDTO;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBL3DataSetTableAdapters;
+using LibraryDAL.FpiDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+
+public partial class frm_fpi_ctg_info_entry: System.Web.UI.Page
+{
+   
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        Label1.Visible = false;
+        clsStatic.MsgConfirmBox(btnComplete, "Are you sure to Complete ? ");
+        clsStatic.MsgConfirmBox(btnadd, "Are you sure to add ? ");
+        clsStatic.CheckUserAuthentication();
+        if (!Page.IsPostBack)
+        {
+            load_pending();
+            load_vessel();
+            load_uom();
+          
+        }
+    }
+
+    private void load_uom()
+    {
+        LibraryDAL.SCBLINTableAdapters.InMa_UomTableAdapter uom = new LibraryDAL.SCBLINTableAdapters.InMa_UomTableAdapter();
+        SCBLIN.InMa_UomDataTable dtuom = new SCBLIN.InMa_UomDataTable();
+
+
+        dtuom = uom.GetAllData();
+        ListItem lst;
+        txtunitofqty.Items.Clear();
+        txtunitofqty.Items.Add("");
+
+        foreach (SCBLIN.InMa_UomRow dr in dtuom.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Uom_Code;
+            lst.Text = dr.Uom_Code + ":" + dr.Uom_Name;
+            txtunitofqty.Items.Add(lst);
+        }
+    }
+
+    private void load_vessel()
+    {
+        tbl_vessel_detailTableAdapter vdet = new tbl_vessel_detailTableAdapter();
+        FpiDataSet.tbl_vessel_detailDataTable dtves = new FpiDataSet.tbl_vessel_detailDataTable();
+        ListItem lst;
+        dtves = vdet.GetDataByVtype("MV");
+
+
+        ddlmovesselname.Items.Clear();
+        ddlmovesselname.Items.Add("");
+
+        foreach (FpiDataSet.tbl_vessel_detailRow drves in dtves.Rows)
+        {
+            lst = new ListItem();
+            lst.Text = drves.vessel_name;
+            lst.Value = drves.vessel_code;
+            ddlmovesselname.Items.Add(lst);
+
+        }
+
+        dtves = new FpiDataSet.tbl_vessel_detailDataTable();
+        dtves = vdet.GetDataByVtype("LV");
+
+
+        ddllivesselname.Items.Clear();
+        ddllivesselname.Items.Add("");
+
+        foreach (FpiDataSet.tbl_vessel_detailRow drves in dtves.Rows)
+        {
+            lst = new ListItem();
+            lst.Text = drves.vessel_name;
+            lst.Value = drves.vessel_code;
+            ddllivesselname.Items.Add(lst);
+
+        }
+
+
+    }
+
+
+    private void load_info(string selval, int con_no)
+    {
+        tbl_fpi_custom_clearingTableAdapter tacustom = new tbl_fpi_custom_clearingTableAdapter();
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcustom = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+
+        tbl_fpi_consignment_infoTableAdapter cons = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtcon = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+
+        tbl_fpi_cargo_landing_hdrTableAdapter cargo = new tbl_fpi_cargo_landing_hdrTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_hdrDataTable dtcargo_hdr = new FpiDataSet.tbl_fpi_cargo_landing_hdrDataTable();
+
+
+        dtcon = cons.GetDataByRefCon(selval, con_no);
+
+        ctl_fpi_mpr_item_view1.load_all(dtcon[0].mpr_ref_no, dtcon[0].item_code);
+        ctl_fpi_download1.load_all(dtcon[0].ref_no);
+
+        ctl_fpi_pi_entry_view1.load_details(dtcon[0].ref_no);
+        ctl_fpi_lc_entry_view1.load_data(dtcon[0].ref_no);
+        ctl_fpi_import_consignment_view1.load_data(dtcon[0].ref_no, dtcon[0].consign_no);
+        ctl_fpi_custom_clearing_view1.load_all(dtcon[0].ref_no, dtcon[0].consign_no);
+
+       dtcargo_hdr = cargo.GetDataByRefCon(selval, con_no);
+
+
+       if (dtcargo_hdr.Rows.Count == 0)
+       {
+
+           if (dtcon.Rows.Count == 0)
+           {
+               tblmaster.Visible = false;
+               return;
+           }
+           else
+           {
+               lblbalanceqty.Text = dtcon[0].bill_of_lading_quantity.ToString();
+               lblrefno.Text = dtcon[0].ref_no;
+               lblconsignnumber.Text = dtcon[0].consign_no.ToString();
+           }
+       }
+       else
+       {           
+           load_cargo_info(selval, con_no);
+       }
+
+       GridDataBind();
+        
+    }
+
+
+    private void load_pending()
+    {
+        getPendingCustomTableAdapter custom = new getPendingCustomTableAdapter();
+        FpiDataSet.getPendingCustomDataTable dtcustom = new FpiDataSet.getPendingCustomDataTable();
+        InMa_Itm_DetTableAdapter idet = new InMa_Itm_DetTableAdapter();
+        ListItem lst;
+
+
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcust;
+        tbl_fpi_custom_clearingTableAdapter cust = new tbl_fpi_custom_clearingTableAdapter();
+        string lc_no = "";
+
+
+        string my_app = "CTG";
+
+        if (my_app == "") { Response.Redirect("./frm_com_inbox.aspx"); }
+
+        dtcustom = custom.GetDataPendingCustom ("RUN");
+
+        if (dtcustom.Rows.Count == 0)
+        {
+            Response.Redirect("./frm_com_inbox.aspx");
+        }
+
+        lblpcount.Text = dtcustom.Rows.Count.ToString();
+
+        ddlpolist.Items.Clear();
+        ddlpolist.Items.Add("");
+
+        foreach (LibraryDAL.FpiDataSet.getPendingCustomRow  dr in dtcustom.Rows)
+        {
+            lst = new ListItem();
+
+            dtcust = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+            dtcust = cust.GetDataByRefCon(dr.ref_no.ToString(), 1);
+            if (dtcust.Rows.Count == 0) lc_no = ""; else lc_no = dtcust[0].lc_number;
+
+            lst.Value = dr.ref_no.ToString() + ":" + dr.consign_number.ToString();
+            lst.Text = dr.ref_no.ToString() + ":" + dr.consign_number.ToString() + ":" + dr.item_cod.ToString() + ":" + idet.GetItemByCode(dr.item_cod)[0].Itm_Det_desc + ":" + lc_no;
+      
+            ddlpolist.Items.Add(lst);
+        }
+        ddlchange();
+
+    }
+  
+  
+    protected void ddlpolist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        ddlchange();
+    }
+
+    private void ddlchange()
+    {
+        tbl_fpi_consignment_infoTableAdapter cons = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtcon = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+         if (ddlpolist.SelectedItem.Text.Split(':').Length < 3)
+         {
+             tblmaster.Visible = false;
+             return;
+         }
+         string selval = ddlpolist.SelectedItem.Text.Split(':')[0];
+         int con_no = Convert.ToInt32(ddlpolist.SelectedItem.Text.Split(':')[1]);
+         dtcon = cons.GetDataByRefCon(selval, con_no);
+        if (dtcon.Rows.Count == 0)
+        {
+            tblmaster.Visible = false;
+            return;
+        }
+        else
+        {                
+            tblmaster.Visible = true;
+            load_info(selval, con_no);
+        }
+         
+    }
+
+  
+
+    protected void btn_save_forward_Click(object sender, EventArgs e)
+    {
+     
+        ddlchange();
+        
+    }
+    
+
+    private void GridDataBind()
+    {
+        tbl_fpi_custom_clearingTableAdapter cus = new tbl_fpi_custom_clearingTableAdapter();
+        tbl_fpi_cargo_landing_detTableAdapter cargo_det = new tbl_fpi_cargo_landing_detTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_detDataTable dtcargo_det = new FpiDataSet.tbl_fpi_cargo_landing_detDataTable();
+        decimal tot = 0, seqty;
+        
+        string ref_no = lblrefno.Text;
+        int con_no = Convert.ToInt32(lblconsignnumber.Text);
+        DataTable dt = new DataTable();
+
+
+        dt.Columns.Add("SL", typeof(int));
+        dt.Columns.Add("Seq No", typeof(int));
+        dt.Columns.Add("Port Exit Date", typeof(string));
+        dt.Columns.Add("Transport Name/No", typeof(string));
+        dt.Columns.Add("Carried Qty", typeof(string));
+        dt.Columns.Add("Survey Qty", typeof(string));
+
+
+        dtcargo_det = cargo_det.GetDataByRefCon(ref_no, con_no);
+       
+           
+
+        int i = 0;
+        foreach (LibraryDAL.FpiDataSet.tbl_fpi_cargo_landing_detRow dr in dtcargo_det.Rows)
+        {
+            i++;
+            dt.Rows.Add(i, dr.seq_no, (dr.Isport_exit_dateNull() ? "" : dr.port_exit_date.ToShortDateString()), dr.transport_name, dr.ctg_quantity.ToString(), dr.survay_quantity.ToString());
+            tot = tot + dr.survay_quantity;
+        }
+
+        lbllandedqty.Text = tot.ToString();
+
+        seqty = Convert.ToDecimal(lblbalanceqty.Text) - tot;
+        if (seqty == 0)
+        {
+            lblshortexcess.Text = "Landed Quantity short/Excess: NILL";
+        }
+        else if (seqty > 0)
+        {
+            lblshortexcess.Text = "Landed Quantity short: " + seqty.ToString("N2");
+        }
+        else
+        {
+            lblshortexcess.Text = "Landed Quantity Excess: (" + (seqty * (-1)).ToString("N2") + ")";
+        }
+
+
+
+        if (dt.Rows.Count == 0) 
+        {
+            cus.UpdateSurStatusMrrStatus("", "", ref_no, con_no);
+            btnComplete.Visible = false; 
+        }
+        else
+        {
+            cus.UpdateSurStatusMrrStatus("RUN", "RUN", ref_no, con_no);
+            btnComplete.Visible = true; 
+        }
+
+        gdItem.DataSource = dt;
+        gdItem.DataBind();
+
+        
+
+
+        
+
+    }
+
+   
+
+    protected void btnadd_Click(object sender, EventArgs e)
+    {
+        if (ddllivesselname.Text == "") return;
+        if (txttransportqty.Text == "") return;
+               
+
+        tbl_fpi_cargo_landing_hdrTableAdapter cargo_hdr = new tbl_fpi_cargo_landing_hdrTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_hdrDataTable dtcargo_hdr = new FpiDataSet.tbl_fpi_cargo_landing_hdrDataTable();
+
+        tbl_fpi_cargo_landing_detTableAdapter cargo_det = new tbl_fpi_cargo_landing_detTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_detDataTable dt_cargo_det = new FpiDataSet.tbl_fpi_cargo_landing_detDataTable();
+
+        
+        string ref_no = ddlpolist.SelectedItem.Text.Split(':')[0];
+        int con_no = Convert.ToInt16(ddlpolist.SelectedItem.Text.Split(':')[1]);
+                          
+      
+
+        try
+        {
+            if (chk_entry() == false)
+            {
+                lblmsg.Text = "Please enter all Information";
+                lblmsg.Visible = true;
+                return;
+            }
+
+           
+            dt_cargo_det = cargo_det.GetDataByRefCon(ref_no, con_no);
+
+            int seq_no = Convert.ToInt32(cargo_det.GetMaxSeq(ref_no, con_no)) + 1;
+
+            cargo_det.InsertDet(lblrefno.Text.Trim(), Convert.ToInt16(lblconsignnumber.Text.Trim()), seq_no, ddllivesselname.SelectedItem.Text.Trim(), Convert.ToDecimal(txttransportqty.Text), Convert.ToDateTime(dtportexitdate.SelectedDate.ToShortDateString()), 0, null, "", "", "", 0, 0, "", "", null);
+
+            GridDataBind();
+
+            dtcargo_hdr = cargo_hdr.GetDataByRefCon(ref_no, con_no);
+            if (dtcargo_hdr.Rows.Count > 0)
+            {
+                cargo_hdr.Update_tbl_fpi_cargo_landing_hdr(Convert.ToDecimal(lblbalanceqty.Text.Trim()), ddlmovesselname.SelectedItem.Text.Trim(), txtmothervesselorigin.Text.Trim(), txtimportrotation.Text.Trim(), dtarrivaldate.SelectedDate, dtlanding.SelectedDate, dtloadingcomp.SelectedDate, txtunitofqty.SelectedValue.Trim(), txtmodeoftransctg.Text.Trim(), txtcarrierservice.Text.Trim(), Convert.ToDecimal(lbllandedqty.Text), lblshortexcess.Text, lblrefno.Text.Trim(), Convert.ToInt16(lblconsignnumber.Text.Trim()));
+            }
+            else
+            {
+                cargo_hdr.Insert_tbl_fpi_cargo_landing_hdr(lblrefno.Text, Convert.ToInt16(lblconsignnumber.Text.Trim()), Convert.ToDecimal(lblbalanceqty.Text.Trim()), ddlmovesselname.SelectedItem.Text.Trim(), txtmothervesselorigin.Text.Trim(), txtimportrotation.Text.Trim(), dtarrivaldate.SelectedDate, dtlanding.SelectedDate, dtloadingcomp.SelectedDate, txtunitofqty.SelectedValue.Trim(), txtmodeoftransctg.Text.Trim(), txtcarrierservice.Text.Trim(), Convert.ToDecimal(lbllandedqty.Text), lblshortexcess.Text);
+            }
+
+
+
+            ddllivesselname.Text = "";
+            txttransportqty.Text = "";
+
+
+            //SEND MAIL
+
+            LibraryDAL.SCBLDataSetTableAdapters.User_Role_DefinitionTableAdapter urole = new User_Role_DefinitionTableAdapter();
+            SCBLDataSet.User_Role_DefinitionDataTable dtrole = new SCBLDataSet.User_Role_DefinitionDataTable();
+
+            dtrole = urole.GetDataByRole("SER");
+
+            string sid, sname, msub, mbody;
+
+
+            clsEmailReceiver[] rec_det = new clsEmailReceiver[dtrole.Rows.Count + 1];
+            dsLinkoffice.tblUserInfoRow udr;
+            LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+
+
+            udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+
+            msub = "A Cargo Landing and Transportation to Factory completed and pending for loan/MRR [" + ref_no + "]" + " Consignment No : " + con_no.ToString();
+            mbody = "\n\n " + "A Cargo Landing and Transportation to Factory completed and pending for loan/MRR [" + ref_no + "]" + " Consignment No : " + con_no.ToString();
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cm/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+
+            int cnt = 0;
+            foreach (SCBLDataSet.User_Role_DefinitionRow dr in dtrole.Rows)
+            {
+                rec_det[cnt] = new clsEmailReceiver();
+                rec_det[cnt].Rname = dr.user_name;
+                rec_det[cnt].Rid = usrdal.GetUserByCode(dr.user_id)[0].UserEmail;
+                cnt++;
+            }
+
+
+
+
+        }
+        catch
+        {
+          
+        }
+       
+    }
+
+    private bool chk_entry()
+    {
+        bool flg = true;
+        if (ddlmovesselname.SelectedItem.Text == "") flg = false;
+        if (txtmothervesselorigin.Text  == "") flg = false;
+        if (txtimportrotation.Text == "") flg = false;
+        if (txtunitofqty.Text == "") flg = false;
+        if (txtmodeoftransctg.Text == "") flg = false;
+        if (txtcarrierservice.Text == "") flg = false;
+
+        return flg;
+    }
+
+
+    private void load_cargo_info( string ref_no,int con_no)
+    {
+        tbl_fpi_cargo_landing_hdrTableAdapter cargo = new tbl_fpi_cargo_landing_hdrTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_hdrDataTable dtcargo_hdr = new FpiDataSet.tbl_fpi_cargo_landing_hdrDataTable();
+
+       dtcargo_hdr = cargo.GetDataByRefCon(ref_no, con_no);
+       if (dtcargo_hdr.Rows.Count == 0)
+       {
+           return;
+       }
+       else
+
+       {
+
+           lblrefno.Text  = dtcargo_hdr[0].ref_no;
+           lblconsignnumber.Text = dtcargo_hdr[0].consign_number.ToString();
+           lblbalanceqty.Text = dtcargo_hdr[0].balance_qty.ToString();
+           try
+           {
+               ddlmovesselname.SelectedItem.Text = dtcargo_hdr[0].mother_vessel_name;
+           }
+           catch
+           {
+               ddlmovesselname.Text = "";
+           }
+           txtmothervesselorigin.Text = dtcargo_hdr[0].mother_vessel_origin;
+           txtimportrotation.Text = dtcargo_hdr[0].Import_rotation_no;
+           dtarrivaldate.SelectedDate = dtcargo_hdr[0].arrival_date;
+           dtlanding.SelectedDate = dtcargo_hdr[0].date_of_landing;
+           try
+           {
+               txtunitofqty.SelectedValue = dtcargo_hdr[0].unit_of_quantity;
+           }
+           catch
+           {
+               txtunitofqty.SelectedValue = "";
+           }
+
+           dtloadingcomp.SelectedDate = dtcargo_hdr[0].loading_completion_date;
+           txtmodeoftransctg.Text = dtcargo_hdr[0].mode_of_transport;
+           txtcarrierservice.Text = dtcargo_hdr[0].carrier_service;
+       }
+
+       
+        
+    }
+
+    
+
+   
+    protected void gdItem_SelectedIndexChanged(object sender, EventArgs e)
+    {
+       
+        tbl_fpi_cargo_landing_detTableAdapter cargo_det = new tbl_fpi_cargo_landing_detTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_detDataTable dt_cargo_det = new FpiDataSet.tbl_fpi_cargo_landing_detDataTable();
+
+        int seq_no = Convert.ToInt32(gdItem.Rows[gdItem.SelectedIndex].Cells[2].Text);
+
+        if (cargo_det.GetDataByRefConSeq(lblrefno.Text, Convert.ToInt32(lblconsignnumber.Text), seq_no)[0].survay_quantity > 0) return;
+        cargo_det.DeleteBySeq(lblrefno.Text, Convert.ToInt32(lblconsignnumber.Text), seq_no);
+
+        GridDataBind();
+       
+
+    }
+    protected void btnComplete_Click(object sender, EventArgs e)
+    {
+
+        tbl_fpi_custom_clearingTableAdapter cus = new tbl_fpi_custom_clearingTableAdapter();
+        cus.UpdateCtgStatus("COM", lblrefno.Text, Convert.ToInt32(lblconsignnumber.Text));
+        Response.Redirect(Request.Url.AbsoluteUri);
+
+    }
+    protected void gdItem_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            if (Convert.ToDecimal(e.Row.Cells[6].Text) > 0) 
+            {
+                e.Row.Enabled = false;
+            }
+            else
+            {
+                e.Row.Enabled = true;
+            }
+
+            
+        }
+    }
+}
+
+
+
+
+

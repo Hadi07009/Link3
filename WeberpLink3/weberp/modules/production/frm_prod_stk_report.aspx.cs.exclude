@@ -1,0 +1,86 @@
+﻿using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using CrystalDecisions.CrystalReports.Engine;
+using CrystalDecisions.Shared;
+using LibraryDTO;
+using System.Net.Mail;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.ProdReportDataSetTableAdapters;
+using LibraryDAL.ProdDataSetTableAdapters;
+
+public partial class frm_prod_stk_report : System.Web.UI.Page
+{
+
+    ReportDocument rpt1 = new ReportDocument();
+    protected void Page_Init(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        show_report();
+    }
+
+
+
+
+    private void show_report()
+    {
+        ConnectionInfo ConnInfo = new ConnectionInfo();
+        string SCBLconnStr = System.Configuration.ConfigurationManager.AppSettings["SCFConnectionString"].ToString();
+
+        string[] ff;
+        string[] ss;
+
+        ff = SCBLconnStr.Split('=');
+
+        ss = ff[1].Split(';');
+        ConnInfo.ServerName = ss[0];
+
+        ss = ff[2].Split(';');
+        ConnInfo.DatabaseName = ss[0];
+       
+        ss = ff[3].Split(';');
+        ConnInfo.UserID = ss[0];
+
+        ss = ff[4].Split(';');
+        ConnInfo.Password = ss[0];
+
+
+        rpt1.Load(Server.MapPath("reports/files/reptProdStock.rpt"));
+
+        foreach (CrystalDecisions.CrystalReports.Engine.Table RepTbl in rpt1.Database.Tables)
+        {
+            TableLogOnInfo RepTblLogonInfo = RepTbl.LogOnInfo;
+            RepTblLogonInfo.ConnectionInfo = ConnInfo;
+            RepTbl.ApplyLogOnInfo(RepTblLogonInfo);
+        }
+
+        CrystalReportViewer1.ReportSource = rpt1;
+        CrystalReportViewer1.DataBind();
+        
+   }
+
+     
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+    }
+    protected void CrystalReportViewer1_Unload(object sender, EventArgs e)
+    {
+        rpt1.Close();
+        rpt1.Dispose();
+        GC.Collect();
+
+        
+    }
+
+   
+}

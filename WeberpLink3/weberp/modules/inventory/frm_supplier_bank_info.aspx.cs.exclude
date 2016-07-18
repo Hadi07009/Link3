@@ -1,0 +1,141 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using LibraryDAL;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBL3DataSetTableAdapters;
+
+public partial class frm_supplier_bank_info : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btnupdate, "Are you sure to update?");
+        
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            tbldet.Visible = false;
+        }
+
+    }
+
+    private void clear_all()
+    {
+        txtcode.Text = "";
+        txtname.Text = "";
+        txtadd1.Text = "";
+        txtadd2.Text = "";
+        txtadd3.Text = "";
+        txtadd4.Text = "";
+        txtadd5.Text = "";
+        txtacname.Text = "";
+        txtacno.Text = "";
+        txtactype.Text = "";
+        txtbankname.Text = "";
+        txtbranch.Text = "";
+
+        tbldet.Visible = false;
+    }
+    
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        if (txtacname.Text == "") return;
+
+        string adrcode = txtcode.Text;
+
+        if (adrcode == "") return;
+
+        PuMa_Par_AdrTableAdapter adr = new PuMa_Par_AdrTableAdapter();
+        ErpDataSet.PuMa_Par_AdrDataTable dtadr = new ErpDataSet.PuMa_Par_AdrDataTable();
+        tbl_supplier_bnk_infoTableAdapter bnk = new tbl_supplier_bnk_infoTableAdapter();
+       
+
+        dtadr = adr.GetDataByAdrCode(adrcode);
+        if (dtadr.Rows.Count == 0)
+        {
+            clear_all();
+            return;
+        }
+
+        if (bnk.GetDataByAdrCode(adrcode).Rows.Count == 0)
+        {
+            bnk.InsertBankInfo(adrcode, dtadr[0].Par_Adr_Acc_Code, dtadr[0].par_adr_name, txtacname.Text, txtacno.Text, txtactype.Text, txtbankname.Text, txtbranch.Text);
+        }
+        else 
+        {
+            bnk.UpdateBankInfo(txtacname.Text, txtacno.Text, txtactype.Text, txtbankname.Text, txtbranch.Text, adrcode);
+        }
+
+        lblupdate.Visible = true;
+        
+    }
+   
+    protected void txtpartydet_TextChanged(object sender, EventArgs e)
+    {
+        lblupdate.Visible = false;
+
+        string[] tmp = txtpartydet.Text.Split(':');
+
+        txtpartydet.Text = "";
+
+        if (tmp.Length < 2)
+        {
+            clear_all();
+            return;
+        }
+        tbldet.Visible = true;
+
+        string adrcode = tmp[0];
+        PuMa_Par_AdrTableAdapter det = new PuMa_Par_AdrTableAdapter();
+        ErpDataSet.PuMa_Par_AdrDataTable dt = new ErpDataSet.PuMa_Par_AdrDataTable();
+
+        dt = det.GetDataByAdrCode(adrcode);
+        if (dt.Rows.Count == 0)
+        {
+            clear_all();
+            return;
+        }
+
+        txtcode.Text = dt[0].par_adr_code;
+        txtname.Text = dt[0].par_adr_name;
+        txtadd1.Text = dt[0].Par_Adr_Line_1;
+        txtadd2.Text = dt[0].Par_Adr_Line_2;
+        txtadd3.Text = dt[0].Par_Adr_Line_3;
+        txtadd4.Text = dt[0].Par_Adr_Line_4;
+        txtadd5.Text = dt[0].Par_Adr_Line_5;
+
+        tbl_supplier_bnk_infoTableAdapter bnk = new tbl_supplier_bnk_infoTableAdapter();
+        SCBL3DataSet.tbl_supplier_bnk_infoDataTable dtbnk = new SCBL3DataSet.tbl_supplier_bnk_infoDataTable();
+
+        dtbnk = bnk.GetDataByAdrCode(txtcode.Text);
+
+        if (dtbnk.Rows.Count > 0)
+        {
+            txtacname.Text = dtbnk[0].supp_ac_name;
+            txtacno.Text = dtbnk[0].supp_ac_no;
+            txtactype.Text = dtbnk[0].supp_ac_type;
+            txtbankname.Text = dtbnk[0].supp_bank_name;
+            txtbranch.Text = dtbnk[0].supp_br_name;
+        }
+        else 
+        {
+            txtacname.Text = "";
+            txtacno.Text = "";
+            txtactype.Text = "";
+            txtbankname.Text = "";
+            txtbranch.Text = "";
+        }
+
+
+
+    }
+}
+

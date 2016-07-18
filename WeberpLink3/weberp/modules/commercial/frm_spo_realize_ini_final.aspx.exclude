@@ -1,0 +1,145 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_spo_realize_ini_final.aspx.cs" Inherits="frm_spo_realize_ini_final" Title=""   ValidateRequest="false" %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                                PURCHASE ORDER REALIZATION SCREEN&nbsp;(SPO)</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+                Total Amount Tk.<asp:Label ID="lblamnt" runat="server" Font-Bold="True" 
+                    Text="100"></asp:Label>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+                Purchased By&nbsp;&nbsp; :
+                <asp:Label ID="lblby" runat="server" Font-Bold="True" Text="Label"></asp:Label>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+                &nbsp;</td>
+        </tr>
+    <tr>
+        <td class="tbl" colspan="3" style="height: 19px; text-align: left">
+                <asp:GridView ID="gdItem" runat="server" BackColor="White" 
+                BorderColor="#41519A" style="border-top-width: 1px; border-left-width: 1px; border-left-color: #e6e6fa; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='white', startcolorstr='#D6DCF9', gradienttype='0'); border-bottom-width: 1px; border-bottom-color: #e6e6fa; border-top-color: #e6e6fa; border-right-width: 1px; border-right-color: #e6e6fa;"
+                    BorderStyle="Solid" BorderWidth="1px" CellPadding="4" 
+                ForeColor="#333333" GridLines="None"
+                    
+                    PageSize="100" SkinID="GridView" Width="98%">
+                    <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                    <SelectedRowStyle Font-Bold="True" />
+                    <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <EditRowStyle BackColor="#2461BF" />
+                    <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" 
+                        Font-Underline="False" />
+                    <RowStyle Font-Size="8pt" />
+                
+                </asp:GridView>                   
+                        </td>
+    </tr>
+    <tr>
+        <td class="tbl" colspan="3" style="height: 24px; text-align: center">
+           <asp:Panel ID="Panel4" runat="server" BorderStyle="Solid" BorderWidth="2px" CssClass="tbl"
+                    DefaultButton="btncancel" Height="200px" ScrollBars="Auto"  Style="border-right: black 2px solid;
+                    padding-right: 20px; border-top: black 2px solid; padding-left: 20px; display: none;
+                    padding-bottom: 20px;  border-left: black 2px solid; padding-top: 20px; border-bottom: black 2px solid;
+                    background-color: white" Width="329px">
+                    <div style="border-color: #e6e6fa; border-width: 1px; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='white', startcolorstr='#D6DCF9', gradienttype='0');
+                        width: 94%; height: 177px; text-align: center; ">
+                        &nbsp;&nbsp;<table id="tblmsg" runat="server" style="width: 286px">
+                        <tr>
+                            <td colspan="1" style="width: 364px; height: 18px; text-align: center">
+                                <span style="color: #ff0000"><strong>PO CREATED SUCCESSFULLY</strong></span></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 364px; height: 13px">
+                            </td>
+                        </tr>
+                            <tr>
+                                <td style="width: 364px; text-align: center">
+                                PO REF NO:</td>
+                            </tr>
+                        <tr>
+                            <td style="width: 364px; text-align: center">
+                                &nbsp;
+                                
+                                <asp:Label ID="lblporef" runat="server" Font-Bold="True" Width="162px"></asp:Label>
+                                                               
+                                </td>
+                        </tr>
+                        <tr>
+                            <td colspan="1" style="height: 19px; text-align: center; width: 364px;">
+                            </td>
+                        </tr>
+                            <tr>
+                                <td colspan="1" style="width: 364px; height: 29px; text-align: center">
+                                    <asp:Button ID="btncancel" runat="server" CssClass="btn2" Width="0px" Height="0px" />
+                                    <asp:Button ID="btnok" runat="server" CssClass="btn2" OnClick="btnok_Click" Text="OK"
+                                        Width="102px" />
+                                        </td>
+                            </tr>
+                    </table>
+                    </div>
+                </asp:Panel>
+                <ajaxToolkit:ConfirmButtonExtender ID="ConfirmButtonExtender5" runat="server" DisplayModalPopupID="ModalPopupExtender5"
+                    TargetControlID="Button1">
+                </ajaxToolkit:ConfirmButtonExtender>
+                <ajaxToolkit:ModalPopupExtender ID="ModalPopupExtender5" runat="server" BackgroundCssClass="modalBackground"
+                    CancelControlID="btncancel" PopupControlID="Panel4" TargetControlID="Button1">
+                </ajaxToolkit:ModalPopupExtender> 
+                <asp:Button ID="Button1" runat="server" Text="Button" Visible="False" />
+        </td>
+    </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 16px; text-align: center">
+                <asp:Button ID="btnback" runat="server" CssClass="btn2" Text="Back" 
+                    Width="109px" onclick="btnback_Click" />
+                &nbsp;<asp:Button ID="btnproceed" runat="server" onclick="btnproceed_Click" 
+                    Text="Confirm" CssClass="btn2" Width="109px" />
+            
+                &nbsp; &nbsp; &nbsp; &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 25px; text-align: center">
+            
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 22px; text-align: left">
+                
+                
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+</asp:Content>
+

@@ -1,0 +1,384 @@
+﻿<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frmLocalTourExpenseClaim.aspx.cs" Inherits="modules_HRMS_SelfService_frmLocalTourExpenseClaim" %>
+
+<%@ Register Assembly="ProudMonkey.Common.Controls" Namespace="ProudMonkey.Common.Controls" TagPrefix="cc1" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register assembly="TimePicker" namespace="MKB.TimePicker" tagprefix="MKB" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <cc1:MessageBox ID="MessageBox1" runat="server" />
+    <asp:UpdatePanel ID="updpnl2" runat="server">
+        <ContentTemplate>
+            <asp:Panel ID="PanelLeaveHdr" runat="server" CssClass="cpHeaderContent" Width="100%">
+                <asp:Label ID="lblleave" Text="LOCAL TOUR EXPENSE CLAIM" runat="server" />
+            </asp:Panel>
+            <asp:Panel ID="PanelLeaveDet" runat="server" CssClass="cpBodyContent" Width="100%" Height="100%">
+                <table style="width: 99%; text-align: left">
+                    <tr>
+                        <td>
+                            <asp:Label ID="Label7" runat="server" Text="Employee Information"></asp:Label>
+                        </td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <table style="width: 50%;">
+                            <tr>
+                                <td class="style10" style="width: 92px">
+                                    <asp:Label ID="Label8" runat="server" Text="ID"></asp:Label>
+                                </td>
+                                <td class="style11">:</td>
+                                <td style="text-align: left">
+                                    <asp:Label ID="lblId" runat="server"></asp:Label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="style10" style="width: 92px">
+                                    <asp:Label ID="Label9" runat="server" Text="Name"></asp:Label>
+                                </td>
+                                <td class="style11">:</td>
+                                <td style="text-align: left">
+                                    <asp:Label ID="lblName" runat="server"></asp:Label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="style10" style="width: 92px">
+                                    <asp:Label ID="Label10" runat="server" Text="Department"></asp:Label>
+                                </td>
+                                <td class="style11">:</td>
+                                <td style="text-align: left">
+                                    <asp:Label ID="lbldept" runat="server"></asp:Label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="style10" style="width: 92px">
+                                    <asp:Label ID="Label11" runat="server" Text="Designation"></asp:Label>
+                                </td>
+                                <td class="style11">:</td>
+                                <td style="text-align: left">
+                                    <asp:Label ID="lblDesignation" runat="server"></asp:Label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="style10" style="width: 92px">
+                                    <asp:Label ID="Label12" runat="server" Text="Joining Date"></asp:Label>
+                                </td>
+                                <td class="style11">:</td>
+                                <td style="text-align: left">
+                                    <asp:Label ID="lblJoiningDate" runat="server"></asp:Label>
+                                </td>
+                            </tr>
+                        </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <asp:Label ID="Label13" runat="server" Font-Underline="True" Text="Details of Tour :"></asp:Label>
+                        </td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <table style="width:70%; text-align:left">
+                                <tr>
+                                    <td style="width: 115px">
+                                        <asp:Label ID="Label14" runat="server" Text="Date of Departure"></asp:Label>
+                                    </td>
+                                    <td>:</td>
+                                    <td style="width: 359px">
+                                        <asp:TextBox ID="txtDateofDeparture" runat="server" placeholder="Select Date" Width="350px"></asp:TextBox>
+                                        <ajaxToolkit:CalendarExtender ID="txtDateofDeparture_CalendarExtender" runat="server" Enabled="True" Format="dd/MM/yyyy" TargetControlID="txtDateofDeparture">
+                                        </ajaxToolkit:CalendarExtender>
+                                    </td>
+                                    <td style="width: 39px">
+                                        <asp:Label ID="Label16" runat="server" Text="Time"></asp:Label>
+                                    </td>
+                                    <td>:</td>
+                                    <td>
+                                        <MKB:TimeSelector ID="timeofDeparture" runat="server" AmPm="AM" DisplaySeconds="False" Hour="9">
+                                        </MKB:TimeSelector>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 115px">
+                                        <asp:Label ID="Label15" runat="server" Text="Date of Arrival"></asp:Label>
+                                    </td>
+                                    <td>:</td>
+                                    <td style="width: 359px">
+                                        <asp:TextBox ID="txtDateofArrival" runat="server" placeholder="Select Date" Width="350px"></asp:TextBox>
+                                        <ajaxToolkit:CalendarExtender ID="txtDateofArrival_CalendarExtender" runat="server" Enabled="True" Format="dd/MM/yyyy" TargetControlID="txtDateofArrival">
+                                        </ajaxToolkit:CalendarExtender>
+                                    </td>
+                                    <td style="width: 39px">
+                                        <asp:Label ID="Label17" runat="server" Text="Time"></asp:Label>
+                                    </td>
+                                    <td>:</td>
+                                    <td>
+                                        <MKB:TimeSelector ID="timeofArrival" runat="server" AmPm="AM" DisplaySeconds="False" Hour="9">
+                                        </MKB:TimeSelector>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 115px">
+                                        <asp:Label ID="Label18" runat="server" Text="Place of Visit :"></asp:Label>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 359px">&nbsp;</td>
+                                    <td style="width: 39px">&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 115px">
+                                        <asp:Label ID="Label19" runat="server" Text="From"></asp:Label>
+                                    </td>
+                                    <td>:</td>
+                                    <td style="width: 359px">
+                                        <asp:TextBox ID="txtFrom" runat="server" Width="350px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 39px">&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 115px">
+                                        <asp:Label ID="Label20" runat="server" Text="To"></asp:Label>
+                                    </td>
+                                    <td>:</td>
+                                    <td style="width: 359px">
+                                        <asp:TextBox ID="txtTo" runat="server" Width="350px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 39px">&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 115px">&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 359px">&nbsp;</td>
+                                    <td style="width: 39px">&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <asp:Label ID="Label21" runat="server" Font-Underline="True" Text="EXPENDITURE DETAILS AS FOLLOWS :"></asp:Label>
+                        </td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <table style="width:99%;text-align:left">
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 221px">&nbsp;</td>
+                                    <td style="width: 105px">&nbsp;</td>
+                                    <td style="width: 35px">&nbsp;</td>
+                                    <td>
+                                        <asp:Label ID="Label27" runat="server" Font-Underline="True" Text="Amount in Taka"></asp:Label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <asp:Label ID="Label22" runat="server" Text="a)"></asp:Label>
+                                    </td>
+                                    <td style="width: 221px">
+                                        <asp:Label ID="lblExpenditure1" runat="server" Text="Air Ticket/....Class Train / Bus fare"></asp:Label>
+                                    </td>
+                                    <td style="width: 105px">&nbsp;</td>
+                                    <td style="width: 35px">&nbsp;</td>
+                                    <td>
+                                        <asp:TextBox ID="txtAmountExpenditure1" runat="server" onkeypress="return isNumberKey(event)" Width="350px"></asp:TextBox>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <asp:Label ID="Label23" runat="server" Text="b)"></asp:Label>
+                                    </td>
+                                    <td style="width: 221px">
+                                        <asp:Label ID="lblExpenditure2" runat="server" Text="Local Conveyance"></asp:Label>
+                                    </td>
+                                    <td style="width: 105px">&nbsp;</td>
+                                    <td style="width: 35px">&nbsp;</td>
+                                    <td>
+                                        <asp:TextBox ID="txtAmountExpenditure2" runat="server" onkeypress="return isNumberKey(event)" Width="350px"></asp:TextBox>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <asp:Label ID="Label24" runat="server" Text="c)"></asp:Label>
+                                    </td>
+                                    <td style="width: 221px">
+                                        <asp:Label ID="lblExpenditure3_1" runat="server" Text="Fooding / Daily Allowance "></asp:Label>
+                                    </td>
+                                    <td style="width: 105px">
+                                        <asp:TextBox ID="txtAllowanceDays" runat="server" onkeypress="return isNumberKey(event)" Width="100px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 35px">
+                                        <asp:Label ID="lblExpenditure3_2" runat="server" Text="Days"></asp:Label>
+                                    </td>
+                                    <td>
+                                        <asp:TextBox ID="txtAmountExpenditure3" runat="server" onkeypress="return isNumberKey(event)" Width="350px"></asp:TextBox>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <asp:Label ID="Label25" runat="server" Text="d)"></asp:Label>
+                                    </td>
+                                    <td style="width: 221px">
+                                        <asp:Label ID="lblExpenditure4_1" runat="server" Text="Accommodation"></asp:Label>
+                                    </td>
+                                    <td style="width: 105px">
+                                        <asp:TextBox ID="txtAccommodationDays" runat="server" onkeypress="return isNumberKey(event)" Width="100px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 35px">
+                                        <asp:Label ID="lblExpenditure4_2" runat="server" Text="Days"></asp:Label>
+                                    </td>
+                                    <td>
+                                        <asp:TextBox ID="txtAmountExpenditure4" runat="server" onkeypress="return isNumberKey(event)" Width="350px"></asp:TextBox>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <asp:Label ID="Label26" runat="server" Text="e)"></asp:Label>
+                                    </td>
+                                    <td style="width: 221px">
+                                        <asp:Label ID="lblExpenditure5" runat="server" Text="Other Expenses (if)"></asp:Label>
+                                    </td>
+                                    <td style="width: 105px">&nbsp;</td>
+                                    <td style="width: 35px">&nbsp;</td>
+                                    <td>
+                                        <asp:TextBox ID="txtAmountExpenditure5" runat="server" onkeypress="return isNumberKey(event)" Width="350px"></asp:TextBox>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <table style="width:99%;text-align:left">
+                                <tr>
+                                    <td style="width: 175px">
+                                        <asp:Label ID="Label28" runat="server" Text="Advanced received on BDT"></asp:Label>
+                                    </td>
+                                    <td>:</td>
+                                    <td style="width: 307px">
+                                        <asp:TextBox ID="txtAdvancedReceivedBDT" runat="server" onkeypress="return isNumberKey(event)" Width="300px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 32px">
+                                        <asp:Label ID="Label29" runat="server" Text="Date"></asp:Label>
+                                    </td>
+                                    <td>:</td>
+                                    <td>
+                                        <asp:TextBox ID="txtAdvancedReceivedDate" runat="server" placeholder="Select Date" Width="190px"></asp:TextBox>
+                                        <ajaxToolkit:CalendarExtender ID="txtAdvancedReceivedDate_CalendarExtender" runat="server" Enabled="True" Format="dd/MM/yyyy" TargetControlID="txtAdvancedReceivedDate">
+                                        </ajaxToolkit:CalendarExtender>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 175px">
+                                        <asp:Label ID="Label30" runat="server" Text="Actual Claim Amount BDT"></asp:Label>
+                                    </td>
+                                    <td>:</td>
+                                    <td style="width: 307px">
+                                        <asp:TextBox ID="txtActualClaimAmountBDT" runat="server" onkeypress="return isNumberKey(event)" Width="300px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 32px">&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 175px">
+                                        <asp:Label ID="Label31" runat="server" Text="Net Claim / (Refund) BDT"></asp:Label>
+                                    </td>
+                                    <td>:</td>
+                                    <td style="width: 307px">
+                                        <asp:TextBox ID="txtNetClaimBDT" runat="server" onkeypress="return isNumberKey(event)" Width="300px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 32px">&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 175px">&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 307px">
+                                        <asp:Button ID="btnApply" runat="server" Text="Apply For Expenses" OnClick="btnApply_Click" />
+                                        <asp:Button ID="btnClear" runat="server" OnClick="btnClear_Click" Text="Clear" Width="100px" />
+                                    </td>
+                                    <td style="width: 32px">&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+            </asp:Panel>
+        </ContentTemplate>
+        <Triggers>
+            <asp:PostBackTrigger ControlID="btnApply" />
+        </Triggers>
+    </asp:UpdatePanel>
+    <script type="text/javascript">
+
+        function isNumberKey(evt) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                alert("Please Enter Only Numeric Value:");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</asp:Content>

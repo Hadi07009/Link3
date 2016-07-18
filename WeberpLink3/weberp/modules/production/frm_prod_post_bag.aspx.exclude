@@ -1,0 +1,185 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_prod_post_bag.aspx.cs" Inherits="frm_prod_post_bag"  EnableEventValidation="false" MaintainScrollPositionOnPostback="true" %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register src="~/modules/commercial/usercontrols/ctl_comments.ascx" tagname="ctl_comments" tagprefix="uc1" %> 
+
+<%@ Register assembly="CrystalDecisions.Web, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304" namespace="CrystalDecisions.Web" tagprefix="CR" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <asp:UpdatePanel ID="update" runat="server">
+<ContentTemplate>
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                BAG PRODUCTION POST SCREEN</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 25px; text-align: left">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pending List:<asp:Label ID="lblcount" runat="server" Text="(0)"></asp:Label>
+                &nbsp; &nbsp;
+                <asp:DropDownList ID="ddllist" runat="server" Width="576px" 
+                    onselectedindexchanged="ddllist_SelectedIndexChanged" AutoPostBack="True" 
+                    CssClass="txtbox">
+                </asp:DropDownList>
+                </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 25px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 25px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 22px; text-align: center">
+                
+                
+                <table id="tbl_po" width="99%" runat="server" style="text-align: left; border-top-width: 1px; border-left-width: 1px; border-left-color: #e6e6fa; ">
+                    <tr>
+                        <td style="text-align: left; height: 15px;">
+                            Ref No&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; :
+                            <asp:Label ID="lblref" runat="server" Font-Bold="True" Width="150px"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left">
+                            Production Name&nbsp;&nbsp; :
+                            <asp:Label ID="lblprodname" runat="server" Font-Bold="True" ></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left">
+                            Production Date&nbsp;&nbsp; &nbsp; :&nbsp;<asp:Label ID="lbldate" runat="server" Font-Bold="True" 
+                                Width="300px"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center">
+                            RAW MATERIAL</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left">
+                            <asp:GridView ID="gdItem" runat="server" BackColor="White" BorderColor="#41519A" BorderStyle="Solid" BorderWidth="1px" CellPadding="4" ForeColor="#333333" GridLines="None" PageSize="100" SkinID="GridView" style="border-color: #e6e6fa; border-width: 1px; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='#FFCC0A', startcolorstr='#41519A', gradienttype='0'); text-align: left;" Width="98%">
+                                <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                                <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                                <SelectedRowStyle Font-Bold="True" />
+                                <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                                <EditRowStyle BackColor="#2461BF" />
+                                <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" Font-Underline="False" />
+                                <RowStyle Font-Size="8pt" />
+                            </asp:GridView>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                    <td  style="text-align: center">FINISH GOODS</td>
+                        
+                    </tr>
+                    <tr>
+                        <td style="text-align: left">
+                            <asp:GridView ID="gdfinnItem" runat="server" AutoGenerateColumns="False" BackColor="White" BorderColor="#41519A" BorderStyle="Solid" BorderWidth="1px" CellPadding="4" ForeColor="#333333" GridLines="Vertical" PageSize="100" SkinID="GridView" style="border-color: #e6e6fa; border-width: 1px; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='#FFCC0A', startcolorstr='#41519A', gradienttype='0'); text-align: left;" Width="98%">
+                                <EmptyDataRowStyle HorizontalAlign="Left" />
+                                <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" HorizontalAlign="Left" />
+                                <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                                <SelectedRowStyle Font-Bold="True" />
+                                <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" HorizontalAlign="Left" />
+                                <EditRowStyle BackColor="#2461BF" HorizontalAlign="Left" />
+                                <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" Font-Underline="False" HorizontalAlign="Left" />
+                                <RowStyle Font-Size="8pt" />
+                                <Columns>
+                                    <asp:BoundField DataField="itm_code" HeaderStyle-HorizontalAlign="Left" HeaderText="Item Code" />
+                                    <asp:BoundField DataField="itm_det" HeaderStyle-HorizontalAlign="Left" HeaderText="Item Detail" />
+                                    <asp:BoundField DataField="itm_store_code" HeaderStyle-HorizontalAlign="Left" HeaderText="Store" />
+                                    <asp:BoundField DataField="itm_qty" HeaderStyle-HorizontalAlign="Left" HeaderText="Quantity"  DataFormatString="{0:00}"/>
+                                    <asp:BoundField DataField="itm_uom" HeaderStyle-HorizontalAlign="Left" HeaderText="UOM" />
+                                                                        
+                                </Columns>
+                            </asp:GridView>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center">
+                            COMMENTS</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left">
+                            <asp:PlaceHolder ID="phcomments" runat="server"></asp:PlaceHolder>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center">Comments (If any):
+                            <asp:TextBox ID="txtcomm" runat="server" CssClass="txtbox" Width="454px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; height: 22px;">
+                            <asp:Label ID="lblComm" runat="server" ForeColor="Red" 
+                                Text="ERROR" Visible="False" Width="477px"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center">
+                            &nbsp;<asp:Button ID="btnpost" runat="server" CssClass="btn2" Text="POST" 
+                                Width="96px" onclick="btnpost_Click"  />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; height: 25px;">
+                            <div style="text-align: center">
+                                <CR:CrystalReportViewer ID="CrystalReportViewer1" runat="server" HasCrystalLogo="False" HasToggleGroupTreeButton="False" Height="50px" onunload="CrystalReportViewer1_Unload" PrintMode="ActiveX" ReuseParameterValuesOnRefresh="true" style="text-align: left" ToolbarStyle-BorderStyle="None" ToolPanelView="None" Visible="False" Width="350px" />
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center">
+                            &nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 119px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+    </ContentTemplate>
+    <Triggers>
+    <asp:AsyncPostBackTrigger ControlID="ddllist" EventName="SelectedIndexChanged" />    
+    <asp:AsyncPostBackTrigger ControlID="btnpost" EventName="Click" />
+        
+    
+    
+    
+    </Triggers>
+    </asp:UpdatePanel>
+</asp:Content>
+

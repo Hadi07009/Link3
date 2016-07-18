@@ -1,0 +1,313 @@
+using System;
+using System.IO;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDTO;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBL3DataSetTableAdapters;
+using LibraryDAL.FpiDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+
+public partial class frm_fpi_view : System.Web.UI.Page
+{
+   
+    protected void Page_Load(object sender, EventArgs e)
+    {
+      //  Label1.Visible = false;
+
+        clsStatic.CheckUserAuthentication();
+
+        if (!Page.IsPostBack)
+        {
+            load_file_type();
+            load_pending();          
+        }
+    }
+
+
+    private void load_file_type()
+    {
+        tbl_file_categoryTableAdapter cat=new tbl_file_categoryTableAdapter();       
+        ddlcat.DataSource = cat.GetData();
+        ddlcat.DataTextField = "cat_name";
+        ddlcat.DataValueField = "cat_id";
+        ddlcat.DataBind();
+    }
+    private void load_info(string ref_no,string mpr_ref,string itm_code )
+    {
+
+        User_Role_DefinitionTableAdapter role = new User_Role_DefinitionTableAdapter();
+        tbl_fpi_approval_dataTableAdapter fpi = new tbl_fpi_approval_dataTableAdapter();
+        FpiDataSet.tbl_fpi_approval_dataDataTable dtfpi = new FpiDataSet.tbl_fpi_approval_dataDataTable();
+
+        dtfpi = fpi.GetDataRefConICode(ref_no, mpr_ref, itm_code);
+        
+
+        ctl_fpi_mpr_item_view1.load_all(dtfpi[0].mpr_ref_no, dtfpi[0].mpr_itm_code);
+
+        ctl_fpi_pi_entry_view1.load_details(dtfpi[0].ref_no);
+
+
+        ctl_fpi_lc_entry_view1.load_data(dtfpi[0].ref_no);
+
+        ctl_fpi_download1.load_all(dtfpi[0].ref_no);
+
+        if (role.GetDataByUserCodeRole(current.UserId, "FPUPL").Rows.Count > 0)
+        {
+            tbl_upload.Visible = true;
+        }
+        else
+        {
+            tbl_upload.Visible = false;
+        }
+
+      
+       
+      
+       //dtcargo_hdr = cargo.GetDataByRefCon(selval, con_no);
+
+      // GridDataBind();
+   
+        
+    }
+
+
+    private void load_pending()
+    {
+        tbl_fpi_approval_dataTableAdapter fpi = new tbl_fpi_approval_dataTableAdapter();
+        FpiDataSet.tbl_fpi_approval_dataDataTable dtfpi = new FpiDataSet.tbl_fpi_approval_dataDataTable();
+
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcust;
+        tbl_fpi_custom_clearingTableAdapter cust = new tbl_fpi_custom_clearingTableAdapter();
+        string lc_no = "";
+
+        ListItem lst;
+        dtfpi = fpi.GetDataByAll();
+
+        lblpcount.Text = dtfpi.Rows.Count.ToString();
+
+        ddlpolist.Items.Clear();
+        ddlpolist.Items.Add("");
+
+        foreach (LibraryDAL.FpiDataSet.tbl_fpi_approval_dataRow  dr in dtfpi.Rows)
+        {
+            lst = new ListItem();
+
+            dtcust = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+            dtcust = cust.GetDataByRefCon(dr.ref_no.ToString(), 1);
+            if (dtcust.Rows.Count == 0) lc_no = ""; else lc_no = dtcust[0].lc_number;
+
+            lst.Value = dr.ref_no.ToString();
+            lst.Text = "(" + dr.status + ")" + ":" + dr.ref_no.ToString() + ":" + dr.mpr_ref_no + ":" + dr.supp_id + ":" + dr.supplier + ":" + dr.mpr_itm_code + ":" + dr.Item_details + ":" + lc_no;
+            ddlpolist.Items.Add(lst);
+        }
+        ddlchange();
+    }
+
+    private void load_pendingcon(string ref_no)
+    {
+
+        getpendingconsignmentinfoTableAdapter getcon = new getpendingconsignmentinfoTableAdapter();
+        FpiDataSet.getpendingconsignmentinfoDataTable dtgetcon = new FpiDataSet.getpendingconsignmentinfoDataTable();
+        ListItem lst;
+        dtgetcon = getcon.GetDataByRef(ref_no);
+
+        lblpcountcon.Text = dtgetcon.Rows.Count.ToString();
+
+        ddlpolistcon.Items.Clear();
+      
+        foreach (LibraryDAL.FpiDataSet.getpendingconsignmentinfoRow dr in dtgetcon.Rows)
+        {
+            lst = new ListItem();
+
+            lst.Value = dr.ref_no.ToString() + ":" + Convert.ToInt32(dr.consign_no);
+
+            lst.Text = dr.ref_no.ToString() + ":" + Convert.ToInt32(dr.consign_no);
+           
+            ddlpolistcon.Items.Add(lst);
+        }
+
+        ddlpolistcon_SelectedIndexChanged(null, null);
+     
+
+    }
+
+  
+  
+    protected void ddlpolist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        ddlchange();
+    }
+
+    private void ddlchange()
+    {
+
+       
+
+        tbl_fpi_approval_dataTableAdapter fpi = new tbl_fpi_approval_dataTableAdapter();
+        FpiDataSet.tbl_fpi_approval_dataDataTable dtfpi = new FpiDataSet.tbl_fpi_approval_dataDataTable();
+ 
+
+         if (ddlpolist.SelectedItem.Text.Split(':').Length < 3)
+         {
+             tblmaster.Visible = false;
+             return;
+         }
+         string ref_no = ddlpolist.SelectedItem.Text.Split(':')[1];
+         string  mpr_ref_no =ddlpolist.SelectedItem.Text.Split(':')[2];
+
+         string itm_code = ddlpolist.SelectedItem.Text.Split(':')[5];
+         dtfpi = fpi.GetDataRefConICode(ref_no, mpr_ref_no, itm_code);
+
+
+         if (dtfpi.Rows.Count == 0)
+        {
+            tblmaster.Visible = false;
+            return;
+        }
+        else
+        {                
+            tblmaster.Visible = true;
+            load_info(ref_no, mpr_ref_no, itm_code);
+        }
+
+         load_pendingcon(ref_no);
+         
+    }
+
+
+
+
+
+
+    private void GridDataBind(string refno, int con_number)
+    {
+                
+        tbl_fpi_custom_clearingTableAdapter cus = new tbl_fpi_custom_clearingTableAdapter();
+        tbl_fpi_cargo_landing_detTableAdapter cargo_det = new tbl_fpi_cargo_landing_detTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_detDataTable dtcargo_det = new FpiDataSet.tbl_fpi_cargo_landing_detDataTable();
+     
+        dtcargo_det = cargo_det.GetDataByRefCon(refno, con_number);
+        gdItem.DataSource = dtcargo_det;
+        gdItem.DataBind();
+
+        for (int i = 0; i < dtcargo_det.Rows.Count; i++)
+        {
+            Label lbl = (Label)gdItem.Rows[i].FindControl("lblsl");
+            lbl.Text = (i + 1).ToString();
+            //TextBox txt = (TextBox)gdItem.Rows[i].FindControl("txt_survey_qty");
+            //txt.Text = dtcargo_det[i].survay_quantity.ToString();
+
+        }
+    }
+            
+  
+   
+    protected void ddlpolistcon_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (ddlpolistcon.Text == "")
+        {
+            ctl_fpi_import_consignment_view1.Visible = false;
+            ctl_fpi_custom_clearing_view1.Visible = false;
+            ctl_fpi_ctg_entry_view1.Visible = false;
+            lbltrans.Visible = false;
+            gdItem.Visible = false;
+            return;
+        }
+
+        ctl_fpi_import_consignment_view1.Visible = true;
+        ctl_fpi_custom_clearing_view1.Visible = true;
+        ctl_fpi_ctg_entry_view1.Visible = true;
+        lbltrans.Visible = true;
+        gdItem.Visible = true;
+
+        string ref_no = ddlpolistcon.SelectedItem.Text.Split(':')[0];
+        int con_no = Convert.ToInt32(ddlpolistcon.SelectedItem.Text.Split(':')[1]);
+
+
+        tbl_fpi_custom_clearingTableAdapter tacustom = new tbl_fpi_custom_clearingTableAdapter();
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcustom = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+        tbl_fpi_consignment_infoTableAdapter cons = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtcon = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+        tbl_fpi_cargo_landing_hdrTableAdapter cargo = new tbl_fpi_cargo_landing_hdrTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_hdrDataTable dtcargo_hdr = new FpiDataSet.tbl_fpi_cargo_landing_hdrDataTable();
+
+        dtcon = cons.GetDataByRefCon(ref_no, con_no);
+
+
+        ctl_fpi_import_consignment_view1.load_data(dtcon[0].ref_no, dtcon[0].consign_no);
+        ctl_fpi_custom_clearing_view1.load_all(dtcon[0].ref_no, dtcon[0].consign_no);
+
+        ctl_fpi_ctg_entry_view1.load_all(dtcon[0].ref_no, dtcon[0].consign_no);
+
+        GridDataBind(dtcon[0].ref_no, dtcon[0].consign_no);
+
+    }
+
+    private string save_file(string fpi_ref, string mpr_ref_no, string itm_code)
+    {
+        tbl_file_detailTableAdapter fl = new tbl_file_detailTableAdapter();
+        string retstr = "";        
+        
+        string ref_no, fpath, floc, orgfilename;
+        string uid = current.UserId.ToString();
+
+        double max_ref = Convert.ToDouble(fl.GetmaxSL());
+        int nFileLen;
+
+        HttpPostedFile myFile = updoc.PostedFile;
+        if (myFile != null)
+        {
+            nFileLen = myFile.ContentLength;
+
+            if ((myFile.ContentType == "application/pdf") && (nFileLen > 0) && (nFileLen < 5000001))
+            {
+                try
+                {
+                    ref_no = "DOC-" + string.Format("{0:00000000}", max_ref + 1);
+                    orgfilename = updoc.FileName;
+                    fpath = Server.MapPath("~/Upload") + "\\";
+                    floc = fpath + ref_no + ".pdf";
+                    myFile.SaveAs(floc);
+
+                    fl.InsertFileDet(ref_no, fpi_ref, mpr_ref_no, itm_code, "", "PI", ddlcat.SelectedItem.Text, uid, DateTime.Now, "PDF", (decimal)nFileLen, orgfilename, ref_no + ".pdf", floc, floc, floc);
+
+                    retstr = ref_no;
+                }
+                catch
+                {
+                    retstr = "";
+                }
+            }
+        }
+
+        return retstr;
+    }
+
+
+    protected void btn_upload_Click(object sender, EventArgs e)
+    {
+        string ref_no = ddlpolist.SelectedItem.Text.Split(':')[1];
+        string mpr_ref_no = ddlpolist.SelectedItem.Text.Split(':')[2];
+        string itm_code = ddlpolist.SelectedItem.Text.Split(':')[5];
+        if (save_file(ref_no, mpr_ref_no, itm_code) != "")
+        {
+            ctl_fpi_download1.load_all(ref_no);
+        }
+    }
+}
+
+
+
+
+

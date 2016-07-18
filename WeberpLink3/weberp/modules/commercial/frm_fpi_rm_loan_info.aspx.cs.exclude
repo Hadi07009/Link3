@@ -1,0 +1,536 @@
+using System;
+using System.IO;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDTO;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBL3DataSetTableAdapters;
+using LibraryDAL.FpiDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+
+
+public partial class frm_fpi_rm_loan_info : System.Web.UI.Page
+{
+    
+
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.MsgConfirmBox(btnsave, "Are you sure to Submit ? ");           
+        clsStatic.CheckUserAuthentication();
+            
+            if (!Page.IsPostBack)
+            {
+                txtloanrefno.Text = getnextrefno().ToUpper();
+                load_vessel();
+                loaditem();
+                load_vessel();
+                loadpartyreceivedloan();
+                loadpartygivenloan();
+                ddlpartyloangiven.Enabled = false;      
+            }
+    }
+
+    private void MessageBoxShow(Page page, string message)
+    {
+        Literal ltr = new Literal();
+        ltr.Text = @"<script type='text/javascript'> alert('" + message + "') </script>";
+        page.Controls.Add(ltr);
+    }
+
+    private void clearall()
+    {
+        dtloandate.SelectedDate = DateTime.Now;
+        ddlloantype.Text   = "";
+        ddlpartyloangiven.Text   = "";
+        ddlitem.Text   = "";
+        ddlpartyloanreceived.Text   = "";
+        txtsurveyedqty.Text = "";
+        txtmprprice.Text = "";
+        ddlmothervessel.Text   = "";
+        ddllightervessel.Text   = "";
+        txtsurveyername.Text = "";
+        txtsurveyedrefno.Text = "";
+        dtsurveyeddate.SelectedDate = DateTime.Now;
+        lblamount.Text = "";
+        txtlcno.Text = "";
+        txtremarks.Text = "";
+    }
+
+    private string getnextrefno()
+    {
+        tbl_fpi_loan_detailsTableAdapter loan = new tbl_fpi_loan_detailsTableAdapter();
+        string loan_ref_no = "RMLN" + dtloandate.SelectedDate.Year.ToString().Substring(2, 2) + string.Format("{0:00}", dtloandate.SelectedDate.Month) + "-" + string.Format("{0:000000}", Convert.ToInt32(loan.GetMaxRef()) + 1);
+        return loan_ref_no;
+    }
+      
+     
+
+
+    private bool chk_entry()
+    {
+        bool flg = true;
+
+        if (ddlloantype.Text == "") flg = false;
+        if (ddlloantype.SelectedItem.Text == "Loan to Loan")
+        {
+            if (ddlpartyloangiven.Text == "") flg = false;
+        }
+        if (ddlitem.Text == "") flg = false;
+        if (ddlpartyloanreceived.Text == "") flg = false;
+        if (txtsurveyedqty.Text == "") flg = false;
+        if (txtmprprice.Text == "") flg = false;
+        if (ddlmothervessel.Text == "") flg = false;
+        if (ddllightervessel.Text == "") flg = false;
+       
+        if ((txtsurveyedqty.Text == "") || (txtmprprice.Text == "")) flg = false;
+        if ((Convert.ToDecimal(txtsurveyedqty.Text) * Convert.ToDecimal(txtmprprice.Text)) <= 0) flg = false;
+        
+        return flg;
+    }
+
+    private void loadpartygivenloan()
+    {
+        AccCoaGroupCodeSetupTableAdapter party = new AccCoaGroupCodeSetupTableAdapter();
+        LibraryDAL.AccDataSet.AccCoaGroupCodeSetupDataTable dtparty = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+        ListItem lst;
+        ddlpartyloangiven.Items.Clear();
+        ddlpartyloangiven.Items.Add("");
+        dtparty = party.GetDataByForLoanParty("T05", 1);
+        foreach (AccDataSet.AccCoaGroupCodeSetupRow dr in dtparty.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Ccg_Code;
+            lst.Text = dr.Ccg_Code + ":" + dr.Ccg_Name;
+            ddlpartyloangiven.Items.Add(lst);
+        }
+    
+    }
+
+    private void load_vessel()
+    {
+        tbl_vessel_detailTableAdapter vdet = new tbl_vessel_detailTableAdapter();
+        FpiDataSet.tbl_vessel_detailDataTable dtves = new FpiDataSet.tbl_vessel_detailDataTable();
+        ListItem lst;
+        dtves = vdet.GetDataByVtype("MV");
+        ddlmothervessel.Items.Clear();
+        ddlmothervessel.Items.Add("");
+        foreach (FpiDataSet.tbl_vessel_detailRow drves in dtves.Rows)
+        {
+            lst = new ListItem();
+            lst.Text = drves.vessel_name;
+            lst.Value = drves.vessel_code;
+            ddlmothervessel.Items.Add(lst);
+        }
+
+        dtves = new FpiDataSet.tbl_vessel_detailDataTable();
+        dtves = vdet.GetDataByVtype("LV");
+        ddllightervessel.Items.Clear();
+        ddllightervessel.Items.Add("");
+        foreach (FpiDataSet.tbl_vessel_detailRow drves in dtves.Rows)
+        {
+            lst = new ListItem();
+            lst.Text = drves.vessel_name;
+            lst.Value = drves.vessel_code;
+            ddllightervessel.Items.Add(lst);
+        }
+    }
+
+    private void loadpartyreceivedloan()
+    {
+        AccCoaGroupCodeSetupTableAdapter party = new AccCoaGroupCodeSetupTableAdapter();
+        LibraryDAL.AccDataSet.AccCoaGroupCodeSetupDataTable dtparty = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+        ListItem lst;
+        ddlpartyloanreceived.Items.Clear();
+        ddlpartyloanreceived.Items.Add("");
+        dtparty = party.GetDataByForLoanParty("T05", 1);
+        foreach (AccDataSet.AccCoaGroupCodeSetupRow dr in dtparty.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Ccg_Code;
+            lst.Text = dr.Ccg_Code + ":" + dr.Ccg_Name;
+            ddlpartyloanreceived.Items.Add(lst);
+        }
+    }
+
+
+    private void loaditem()
+    {
+        
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitm = new ErpDataSet.InMa_Itm_DetDataTable();
+        dtitm = itm.GetDataByItmType("R");
+        ListItem lst;
+        ddlitem.Items.Clear();
+        ddlitem.Items.Add("");
+
+        foreach (LibraryDAL.ErpDataSet.InMa_Itm_DetRow dr in dtitm.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Itm_Det_Sec_Code;
+            lst.Text = dr.Itm_Det_desc ;
+            ddlitem.Items.Add(lst);
+        }
+    
+    }
+  
+    protected void ddlloantype_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (ddlloantype.SelectedItem.Text == "Loan to Loan")
+        {
+            ddlpartyloangiven.SelectedIndex = -1;
+            ddlpartyloangiven.Enabled = true;             
+        }
+
+        else
+        {
+            ddlpartyloangiven.SelectedIndex = -1;
+            ddlpartyloangiven.Enabled = false;         
+
+        }
+    }
+    protected void dtloandate_DateChanged(object sender, EventArgs e)
+    {
+        getnextrefno();
+    }
+    private string save_file(string refno)
+    {
+        tbl_file_detailTableAdapter fl = new tbl_file_detailTableAdapter();
+            
+
+        string retstr = "";
+        
+
+        string ref_no, fpath, floc, orgfilename;
+        string uid = current.UserId.ToString();
+
+        double max_ref = Convert.ToDouble(fl.GetmaxSL());
+        int nFileLen;
+
+        HttpPostedFile myFile = updoc.PostedFile;
+        if (myFile != null)
+        {
+            nFileLen = myFile.ContentLength;
+
+            if ((myFile.ContentType == "application/pdf") && (nFileLen > 0) && (nFileLen < 5000001))
+            {
+                try
+                {
+                    ref_no = "DOC-" + string.Format("{0:00000000}", max_ref + 1);
+                    orgfilename = updoc.FileName;
+                    fpath = Server.MapPath("~/Upload") + "\\";
+                    floc = fpath + ref_no + ".pdf";
+                    myFile.SaveAs(floc);
+
+                    fl.InsertFileDet(ref_no, refno ,"", "", "", "LN", "LOAN", uid, DateTime.Now, "PDF", (decimal)nFileLen, orgfilename, ref_no + ".pdf", floc, floc, floc);
+
+                    retstr = ref_no;
+                }
+                catch
+                {
+                    retstr = "";
+                }
+            }
+        }
+
+        return retstr;
+    }
+
+  
+    protected void btnsave_Click(object sender, EventArgs e)
+    {
+
+        if (chk_entry() == false)
+        {
+            MessageBoxShow(this, "Please Enter All Info");
+            return;
+        }
+
+        string ref_no = getnextrefno();
+        string ufile = "";
+        if (updoc.HasFile == true)
+        {
+            ufile = save_file(ref_no);
+            if (ufile == "") { MessageBoxShow(this, "File Upload Error"); return; }
+        }
+
+
+        bool flg = create_mrr(ufile, ddlloantype.SelectedItem.Text);
+
+       if (flg)
+       {
+           txtloanrefno.Text = getnextrefno().ToUpper();
+           clearall();
+           MessageBoxShow(this, "Data Save Successfully");
+       }
+
+        
+       
+
+    }
+    private string get_mat_mrr_ref(string mrrtype, DateTime curdate)
+    {
+        string ref_no = "";
+        InSu_Trn_SetTableAdapter set = new InSu_Trn_SetTableAdapter();
+        ErpDataSet.InSu_Trn_SetDataTable dtset = new ErpDataSet.InSu_Trn_SetDataTable();
+
+        dtset = set.GetDataByType_Code("RC", mrrtype);
+
+        string set_ref = dtset[0].Trn_Set_Iq_Next_No;
+
+        double max_ref = Convert.ToDouble(set_ref);
+        ref_no = dtset[0].Trn_Set_Tr_Pfix + string.Format("{0:00}", Convert.ToInt32(curdate.Year.ToString().Substring(2, 2))) + string.Format("{0:00}", curdate.Month) + "-" + string.Format("{0:00000}", max_ref);
+        return ref_no;
+    }
+
+    private bool create_mrr(string upload_ref_no, string loan_type)
+    {
+        tbl_fpi_loan_detailsTableAdapter loan = new tbl_fpi_loan_detailsTableAdapter();
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        InTr_Trn_HdrTableAdapter scfhdr = new InTr_Trn_HdrTableAdapter();
+        InTr_Trn_DetTableAdapter scfdet = new InTr_Trn_DetTableAdapter();
+        InTr_Trn_CalTableAdapter scfcal = new InTr_Trn_CalTableAdapter();
+        InTr_Trn_ExtTableAdapter scfext = new InTr_Trn_ExtTableAdapter();
+        InSu_Trn_SetTableAdapter scfset = new InSu_Trn_SetTableAdapter();
+        InMa_Stk_ValTableAdapter scfstkval = new InMa_Stk_ValTableAdapter();
+        InMa_Stk_CtlTableAdapter scfstkctl = new InMa_Stk_CtlTableAdapter();
+        InMa_Itm_StkTableAdapter scfitmstk = new InMa_Itm_StkTableAdapter();
+        AccTransactionHeaderTableAdapter scfwh = new AccTransactionHeaderTableAdapter();
+        AccTransactionDetailsTableAdapter scfwd = new AccTransactionDetailsTableAdapter();
+        AccTransactionAnalysisTableAdapter scfanal = new AccTransactionAnalysisTableAdapter();
+
+        InMa_Itm_DetTableAdapter itmdet = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitmdet = new ErpDataSet.InMa_Itm_DetDataTable();
+        tbl_fpi_lc_infoTableAdapter lc = new tbl_fpi_lc_infoTableAdapter();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstkctl = new ErpDataSet.InMa_Stk_CtlDataTable();
+        ErpDataSet.InMa_Itm_StkDataTable dtitmstk = new ErpDataSet.InMa_Itm_StkDataTable();
+        budgTableAdapter budg = new budgTableAdapter();
+        AccDataSet.budgDataTable dtbudg = new AccDataSet.budgDataTable();
+        AccCoaGroupCodeSetupTableAdapter ccg = new AccCoaGroupCodeSetupTableAdapter();
+        AccDataSet.AccCoaGroupCodeSetupDataTable dtccg = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+        
+        tbl_fpi_anal_mapTableAdapter map = new tbl_fpi_anal_mapTableAdapter();
+        FpiDataSet.tbl_fpi_anal_mapDataTable dtmap = new FpiDataSet.tbl_fpi_anal_mapDataTable();
+
+        
+        dtitmdet = itmdet.GetItemByCode(ddlitem.SelectedValue);
+               
+
+        string loan_ref_no = txtloanrefno.Text;
+        string r_party_code, r_party_name, g_party_code, g_party_name;
+
+       
+
+        bool flg = true;
+        decimal mrr_qty, mrr_rate, mrr_amnt;
+        string dcode = "", ccode = "", narrstr = "";
+      
+        
+        mrr_qty = Convert.ToDecimal(txtsurveyedqty.Text);
+        mrr_rate = Convert.ToDecimal(txtmprprice.Text);
+        mrr_amnt = mrr_rate * mrr_qty;
+        if (mrr_amnt == 0) return false;
+        r_party_code = ddlpartyloanreceived.SelectedValue;
+        r_party_name = ddlpartyloanreceived.SelectedItem.Text.Split(':')[1];
+
+        if (loan_type == "Loan to Loan")
+        {
+            g_party_code = ddlpartyloangiven.SelectedValue;
+            g_party_name = ddlpartyloangiven.SelectedItem.Text.Split(':')[1];
+            ccode = "07.003.001.0001";
+            dcode = "07.003.001.0001";
+        }
+        else
+        {
+            g_party_code = "SSCML";
+            g_party_name = "Shun Shing Cement Mills Ltd.";
+            ccode = "07.003.001.0001";
+            dcode = dtitmdet[0].T_C2;
+        }
+
+        
+       
+        //dtmap = map.GetDataByMapCode(r_party_code);
+        //if (dtmap.Rows.Count == 0) { return false; }
+
+        dtccg = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+        dtccg = ccg.GetDataByCcgCode(r_party_code);
+        if (dtccg.Rows.Count == 0) { return false; }
+       
+        string anal1 = r_party_code, analgrp1 = dtccg[0].Ccg_Cost_Id;
+
+        dtmap = new FpiDataSet.tbl_fpi_anal_mapDataTable();
+        dtmap = map.GetDataByMapCode(ddlitem.SelectedValue);
+        if (dtmap.Rows.Count == 0) { return false; }
+        string anal2 = dtmap[0].anal_code, analgrp2 = dtmap[0].anal_grp;
+
+        
+
+        string fate_ref = clsAccounts.GetReferenceNumber("AJV", dtloandate.SelectedDate);
+        if (fate_ref == "") return false;
+        string period = DateTime.Now.Year.ToString() + "/" + string.Format("{0:00}", dtloandate.SelectedDate.Month);
+        string oprcode = current.UserId.ToString();
+        double trn_jrn_code = Convert.ToDouble(scfwh.GetMaxJrnCode()) + 1;
+        string last_num = scfset.GetDataByType_Code("RC", "CMMRR")[0].Trn_Set_Iq_Next_No.ToString();
+        string next_num = string.Format("{0:00000}", Convert.ToInt32(last_num) + 1);
+        string mrr_ref = get_mat_mrr_ref("CMMRR", DateTime.Now);
+        decimal avrate, stdrate, avval, totqty, totfreeqty, totd, totc, sdtval, latval, gqty, gamnt, grate;
+
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(loan.Connection);
+
+        try
+        {
+            loan.AttachTransaction(myTrn);
+            scfhdr.AttachTransaction(myTrn);
+            scfdet.AttachTransaction(myTrn);
+            scfcal.AttachTransaction(myTrn);
+            scfext.AttachTransaction(myTrn);
+            scfset.AttachTransaction(myTrn);
+            scfstkval.AttachTransaction(myTrn);
+            scfstkctl.AttachTransaction(myTrn);
+            scfitmstk.AttachTransaction(myTrn);
+            scfwh.AttachTransaction(myTrn);
+            scfwd.AttachTransaction(myTrn);
+            scfanal.AttachTransaction(myTrn);
+
+            //mrr
+
+            if (loan_type == "Loan to Loan")
+            {
+                mrr_ref = "";
+            }
+            else 
+            {
+                scfhdr.InsertTrnHdr("RC", "CMMRR", mrr_ref, ccode, r_party_code, ccode, Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", "", "", r_party_name, "", "", "", "", "", mrr_amnt, "P", period, oprcode, "", "", "", loan_ref_no, "", "", "", "", "", 0, 0, Convert.ToDateTime(DateTime.Now.ToShortDateString()), null, "", "");
+                scfdet.InsertTrnDet("RC", "CMMRR", mrr_ref, 1, "", 0, dtitmdet[0].Itm_Det_Icode, dtitmdet[0].Itm_Det_desc, dtitmdet[0].Itm_Det_PUSA_unit, "CMGEN", "", loan_ref_no, 0, "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), Convert.ToDateTime(DateTime.Now.ToShortDateString()), (double)mrr_qty, 0, mrr_rate, mrr_amnt, mrr_amnt, mrr_rate, mrr_amnt, "", "", "", 0, 0);
+                scfcal.InsertTrnCal("RC", "CMMRR", mrr_ref, 1, "QTY", mrr_qty, null, null, null, null);
+                scfext.InsertTrnExt("RC", "CMMRR", mrr_ref, "", "", "", "", "", "", "", ddlmothervessel.SelectedItem.Text, dtsurveyeddate.SelectedDate, txtsurveyedrefno.Text, dtloandate.SelectedDate, "", "", "", 0, dtloandate.SelectedDate, loan_ref_no, null, "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()));
+
+                gqty = Convert.ToDecimal(scfstkctl.GetTotQty(dtitmdet[0].Itm_Det_Icode));
+
+                if (gqty == 0)
+                {
+                    gamnt = 0;
+                }
+                else
+                {
+                    gamnt = Convert.ToDecimal(scfstkctl.GetTotValue(dtitmdet[0].Itm_Det_Icode));
+                }
+                grate = (gamnt + mrr_amnt) / (gqty + mrr_qty);
+                stdrate = 1;
+                dtstkctl = scfstkctl.GetDataByItemStore(dtitmdet[0].Itm_Det_Icode, "CMGEN");
+                //dtitmstk = scfitmstk.GetDataByItm(dtitmdet[0].Itm_Det_Icode);
+                if (dtstkctl.Rows.Count == 0)
+                {
+                    totqty = 0;
+                    totfreeqty = 0;
+                    avval = 0;
+                    avrate = mrr_rate;
+                    scfstkctl.InsertStkCtl("CMGEN", dtitmdet[0].Itm_Det_Icode, null, (double)mrr_qty, (double)mrr_qty, 0, 0, 0, 0, 0, 0, 0, mrr_amnt, 0, 0, 0, DateTime.Now, DateTime.Now, "", "", "", 0);
+
+                }
+                else
+                {
+                    totqty = (decimal)dtstkctl[0].Stk_Ctl_Cur_Stk;
+                    totfreeqty = (decimal)dtstkctl[0].Stk_Ctl_Free_Stk;
+                    avval = dtstkctl[0].Stk_Ctl_Ave_Val;
+                    avrate = (dtstkctl[0].Stk_Ctl_Ave_Val + mrr_amnt) / (decimal)(dtstkctl[0].Stk_Ctl_Cur_Stk + (double)mrr_qty);
+
+                    dtitmstk = scfitmstk.GetDataByItm(dtitmdet[0].Itm_Det_Icode);
+
+                    sdtval = ((decimal)dtitmstk[0].Itm_Stk_Cur + mrr_qty) * dtitmstk[0].Itm_Stk_STD_Rat;
+                    latval = ((decimal)dtitmstk[0].Itm_Stk_Cur + mrr_qty) * mrr_rate;
+                    scfstkctl.UpdateForMrrRec((double)mrr_qty, (double)mrr_qty, mrr_amnt, Convert.ToDateTime(DateTime.Now.ToShortDateString()), sdtval, latval, "CMGEN", dtitmdet[0].Itm_Det_Icode);
+                }
+
+
+
+                if (scfitmstk.UpdateItmStkMrrRec((double)mrr_qty, mrr_rate, grate, dtitmdet[0].Itm_Det_Icode) == 0)
+                {
+                    scfitmstk.InsertItmStk(dtitmdet[0].Itm_Det_Icode, (double)mrr_qty, "A", 0, 0, 1, avrate, avrate, "", "", "", 0);
+                }
+                scfstkval.InsertStkVal("RC", "CMMRR", mrr_ref, Convert.ToDateTime(DateTime.Now.ToShortDateString()), dtitmdet[0].Itm_Det_Icode, dtitmdet[0].Itm_Det_desc, "CMGEN", mrr_rate, avrate, stdrate, (double)mrr_qty, "", null, null, null);
+                scfset.UpdateNextNumMrr(last_num, next_num, "RC", "CMMRR");
+            }
+
+
+            // ajv
+            narrstr = "REF: " + loan_ref_no + " " + loan_type + " From " + r_party_code + (g_party_code == "" ? "" : "TO " + g_party_code) + " //MRR NO: " + mrr_ref + " // QTY " + mrr_qty.ToString() + " @ " + mrr_rate.ToString();
+            dtbudg = new AccDataSet.budgDataTable();
+            dtbudg = budg.GetDataByCoaCode(dcode);
+            if (dtbudg.Rows.Count == 0) { flg = false; goto end_of_trn; }
+            scfwd.InsertDetail(fate_ref, dcode, trn_jrn_code, 1, narrstr, "D", mrr_amnt, "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), dtbudg[0].Gl_Coa_Name, dtbudg[0].Gl_Coa_Type, "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), 0, "", loan_ref_no, mrr_ref, "", 1, 0, "", "", "", "", 0, "");
+            scfanal.InsertAna(fate_ref, dcode, 1, 1, anal1, anal2, "", "", "", analgrp1, analgrp2, "", "", "");
+
+            dtbudg = new AccDataSet.budgDataTable();
+            dtbudg = budg.GetDataByCoaCode(ccode);
+            if (dtbudg.Rows.Count == 0) { flg = false; goto end_of_trn; }
+            scfwd.InsertDetail(fate_ref, ccode, trn_jrn_code, 2, narrstr, "C", mrr_amnt, "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), dtbudg[0].Gl_Coa_Name, dtbudg[0].Gl_Coa_Type, "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), 0, "", loan_ref_no, mrr_ref, "", 1, 0, "", "", "", "", 0, "");
+
+            scfanal.InsertAna(fate_ref, ccode, 2, 1, anal1, anal2, "", "", "", analgrp1, analgrp2, "", "", "");
+
+            scfwh.InsertHeader(fate_ref, trn_jrn_code, "AJV", "J", period, DateTime.Now, Convert.ToDateTime(dtloandate.SelectedDate.ToShortDateString()), "BDT", 1, oprcode, oprcode, Convert.ToDateTime(DateTime.Now), "L", "", "", "");
+
+
+            loan.InsertLoanInfo(txtloanrefno.Text.Trim(), loan_type, "P", DateTime.Now, current.UserId, Convert.ToDateTime(dtloandate.SelectedDate.ToShortDateString()), r_party_code, r_party_name, g_party_code, g_party_name, ddlitem.SelectedItem.Value, ddlitem.SelectedItem.Text, dtitmdet[0].Itm_Det_PUSA_unit, mrr_qty, mrr_rate, mrr_amnt, ddlmothervessel.SelectedItem.Text, ddllightervessel.SelectedItem.Text, txtsurveyername.Text.Trim(), txtsurveyedrefno.Text.Trim(), dtsurveyeddate.SelectedDate, txtlcno.Text, mrr_ref, fate_ref, "", 1, 1, upload_ref_no, txtremarks.Text);
+            
+
+            totc = Convert.ToDecimal(scfwd.GetTotAmountByRef("D", fate_ref));
+            totd = Convert.ToDecimal(scfwd.GetTotAmountByRef("C", fate_ref));
+
+            if ((totc == 0) || (totc != totd)) { flg = false; goto end_of_trn; }
+
+        end_of_trn:
+            if (flg)
+            {
+                myTrn.Commit();
+                // myTrn.Rollback();
+            }
+            else
+            {
+                myTrn.Rollback();
+            }
+        }
+        catch (Exception ex)
+        {
+            flg = false;
+            myTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(loan.Connection, myTrn);
+        }
+
+
+        return flg;
+    }
+
+
+
+
+    protected void txtsurveyedqty_TextChanged(object sender, EventArgs e)
+    {
+        lblamount.Text = (((txtsurveyedqty.Text.Trim() == "") ? 0 : Convert.ToDecimal(txtsurveyedqty.Text.Trim())) * ((txtmprprice.Text.Trim() == "") ? 0 : Convert.ToDecimal(txtmprprice.Text.Trim()))).ToString("N2");
+    }
+    protected void txtmprprice_TextChanged(object sender, EventArgs e)
+    {
+        lblamount.Text = (((txtsurveyedqty.Text.Trim() == "") ? 0 : Convert.ToDecimal(txtsurveyedqty.Text.Trim())) * ((txtmprprice.Text.Trim() == "") ? 0 : Convert.ToDecimal(txtmprprice.Text.Trim()))).ToString("N2");
+    }
+ 
+}
+
+
+
+

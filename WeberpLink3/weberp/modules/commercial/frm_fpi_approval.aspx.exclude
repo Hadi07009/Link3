@@ -1,0 +1,443 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_fpi_approval.aspx.cs" Inherits="frm_fpi_approval" Title=""   ValidateRequest="false" %>
+<%@ Register src="usercontrols/ctl_comments.ascx" tagname="ctl_comments" tagprefix="uc1" %> 
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register assembly="eWorld.UI.Compatibility" namespace="eWorld.UI.Compatibility" tagprefix="ew1" %>
+
+<%@ Register src="usercontrols/ctl_fpi_mpr_item_view.ascx" tagname="ctl_fpi_mpr_item_view" tagprefix="uc2" %>
+<%@ Register src="usercontrols/ctl_fpi_pi_entry_view.ascx" tagname="ctl_fpi_pi_entry_view" tagprefix="uc3" %>
+
+<%@ Register src="usercontrols/ctl_fpi_lc_entry_view.ascx" tagname="ctl_fpi_lc_entry_view" tagprefix="uc5" %>
+<%@ Register src="usercontrols/ctl_fpi_download.ascx" tagname="ctl_fpi_download" tagprefix="uc6" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+  
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                PI AND LC APPROVAL SCREEN</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+           
+                PENDING LIST(<asp:Label ID="lblpcount" runat="server" Text="Label"></asp:Label>
+                ) :
+                <asp:DropDownList ID="ddlpolist" runat="server" Width="711px" 
+                    AutoPostBack="True" CssClass="txtbox"  Font-Size="9pt"
+                    onselectedindexchanged="ddlpolist_SelectedIndexChanged" Height="16px">
+                </asp:DropDownList>
+                   
+            
+             
+                   
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+         
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+                <table id ="tblpodet" runat="server" 
+                    style="border: 1px solid #000080; width:100%;">
+                    <tr>
+                        <td>
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: center" class="heading">
+                            DETAIL</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <uc2:ctl_fpi_mpr_item_view ID="ctl_fpi_mpr_item_view1" runat="server" />
+                        </td>
+                    </tr>
+
+                     <tr>
+                        <td colspan="3">
+                            <uc6:ctl_fpi_download ID="ctl_fpi_download1" runat="server" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: left">
+                            <uc3:ctl_fpi_pi_entry_view ID="ctl_fpi_pi_entry_view1" runat="server" />
+                        </td></tr><tr>
+                        <td colspan="3" style="text-align: left; height: 1px;">
+                            </td></tr><tr>
+                        <td colspan="3" style="text-align: left">
+                            &nbsp;</td></tr><tr>
+                        <td colspan="3" style="text-align: left">
+                       
+
+                            <asp:UpdatePanel ID="pnl1" runat="server">
+                                <ContentTemplate>
+                                    <table id="tbllcentry" runat="server" style="width: 100%;">
+                                        <tr>
+                                            <td>
+                                                <tr>
+                                                    <td class="heading" colspan="5" style="text-align: center">
+                                                        LC RELATED INFORMATION
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: right" >
+                                                        LC/LCA O Bank Name:
+                                                    </td>
+                                                    <td  colspan="3">
+                                                        <asp:DropDownList ID="ddlbank" runat="server" Width="477px" OnSelectedIndexChanged="ddlbank_SelectedIndexChanged"
+                                                            AutoPostBack="True">
+                                                        </asp:DropDownList>
+                                                    </td>
+                                                    <td >
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: right" >
+                                                        Branch Name:
+                                                    </td>
+                                                    <td class="style3" colspan="3">
+                                                        <asp:DropDownList ID="ddlbranch" runat="server" Width="477px">
+                                                        </asp:DropDownList>
+                                                    </td>
+                                                    <td>
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: right" >
+                                                        LC/LCA Opening Margin:
+                                                    </td>
+                                                    <td >
+                                                        <asp:TextBox ID="txt_LC_opening_margin" runat="server" Width="175px"></asp:TextBox>
+                                                        <ajaxToolkit:FilteredTextBoxExtender ID="txt_LC_opening_margin_FilteredTextBoxExtender" runat="server"
+                                                            Enabled="True" TargetControlID="txt_LC_opening_margin" FilterMode="ValidChars"
+                                                            FilterType="Custom, Numbers" ValidChars=".">
+                                                        </ajaxToolkit:FilteredTextBoxExtender>
+                                                    </td>
+                                                    <td style="text-align: right" >
+                                                        Currency:
+                                                    </td>
+                                                    <td class="style31">
+                                                        <asp:TextBox ID="txt_currency_opening_margin" runat="server" Width="175px" ReadOnly="True">BDT</asp:TextBox>
+                                                    </td>
+                                                    <td>
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: right" >
+                                                        LC/LCA Cash Margin:
+                                                    </td>
+                                                    <td >
+                                                        <asp:TextBox ID="txt_LC_cash_margin" runat="server" Width="175px"></asp:TextBox>
+                                                        <ajaxToolkit:FilteredTextBoxExtender ID="txt_LC_cash_margin_FilteredTextBoxExtender" runat="server"
+                                                            Enabled="True" TargetControlID="txt_LC_cash_margin" FilterMode="ValidChars" FilterType="Custom, Numbers"
+                                                            ValidChars=".">
+                                                        </ajaxToolkit:FilteredTextBoxExtender>
+                                                    </td>
+                                                    <td style="text-align: right" >
+                                                        Currency:
+                                                    </td>
+                                                    <td class="style31">
+                                                        <asp:TextBox ID="txt_currency_cash_margin" runat="server" Width="175px" ReadOnly="True">BDT</asp:TextBox>
+                                                    </td>
+                                                    <td>
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: right" >
+                                                        LC/LCA FDR Margin:
+                                                    </td>
+                                                    <td >
+                                                        <asp:TextBox ID="txt_LC_fdr_margin" runat="server" Width="175px"></asp:TextBox>
+                                                        <ajaxToolkit:FilteredTextBoxExtender ID="txt_LC_fdr_margin_FilteredTextBoxExtender" runat="server"
+                                                            Enabled="True" TargetControlID="txt_LC_fdr_margin" FilterMode="ValidChars" FilterType="Custom, Numbers"
+                                                            ValidChars=".">
+                                                        </ajaxToolkit:FilteredTextBoxExtender>
+                                                    </td>
+                                                    <td class="style25">
+                                                        currency:
+                                                    </td>
+                                                    <td class="style24">
+                                                        <asp:TextBox ID="txt_currency_fdr_margin" runat="server" Width="175px" ReadOnly="True">BDT</asp:TextBox>
+                                                    </td>
+                                                    <td >
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: right" >
+                                                        Insurance Company Name:
+                                                    </td>
+                                                    <td class="style3" colspan="3">
+                                                        <asp:TextBox ID="txt_insurance_company" runat="server" Width="477px"></asp:TextBox>
+                                                    </td>
+                                                    <td>
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: right" >
+                                                        Insurance Branch Name:
+                                                    </td>
+                                                    <td class="style3" colspan="3">
+                                                        <asp:TextBox ID="txt_insurance_branch" runat="server" Width="477px"></asp:TextBox>
+                                                    </td>
+                                                    <td>
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: right" >
+                                                        Insurance Total Amount:
+                                                    </td>
+                                                    <td >
+                                                        <asp:TextBox ID="txt_insurance_total_amt" runat="server" Width="175px"></asp:TextBox>
+                                                        <ajaxToolkit:FilteredTextBoxExtender ID="FilteredTextBoxExtender1" runat="server"
+                                                            Enabled="True" TargetControlID="txt_insurance_total_amt" FilterMode="ValidChars" FilterType="Custom, Numbers"
+                                                            ValidChars=".">
+                                                        </ajaxToolkit:FilteredTextBoxExtender>
+                                                    </td>
+                                                    <td style="text-align: right" >
+                                                        Currency:
+                                                    </td>
+                                                    <td class="style31">
+                                                        <asp:TextBox ID="txt_currency_total_amt" runat="server" Width="175px" ReadOnly="True">BDT</asp:TextBox>
+                                                    </td>
+                                                    <td>
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: right" >
+                                                        Premium Amount:
+                                                    </td>
+                                                    <td >
+                                                        <asp:TextBox ID="txt_premimum_amt" runat="server" Width="175px"></asp:TextBox>
+                                                        <ajaxToolkit:FilteredTextBoxExtender ID="txt_premimum_amt_FilteredTextBoxExtender" runat="server"
+                                                            Enabled="True" TargetControlID="txt_premimum_amt" FilterMode="ValidChars" FilterType="Custom, Numbers"
+                                                            ValidChars=".">
+                                                        </ajaxToolkit:FilteredTextBoxExtender>
+                                                    </td>
+                                                    <td style="text-align: right" >
+                                                        Currency:
+                                                    </td>
+                                                    <td class="style31">
+                                                        <asp:TextBox ID="txt_currency_premium_amt" runat="server" Width="175px" ReadOnly="True">BDT</asp:TextBox>
+                                                    </td>
+                                                    <td>
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: right" >
+                                                        VAT Amount:
+                                                    </td>
+                                                    <td >
+                                                        <asp:TextBox ID="txt_vat_amt" runat="server" Width="175px"></asp:TextBox>
+                                                        <ajaxToolkit:FilteredTextBoxExtender ID="txt_vat_amt_FilteredTextBoxExtender" runat="server"
+                                                            Enabled="True" TargetControlID="txt_vat_amt" FilterMode="ValidChars" FilterType="Custom, Numbers"
+                                                            ValidChars=".">
+                                                        </ajaxToolkit:FilteredTextBoxExtender>
+                                                    </td>
+                                                    <td style="text-align: right" >
+                                                        Currency:
+                                                    </td>
+                                                    <td class="style31">
+                                                        <asp:TextBox ID="txt_currency_vat_amt" runat="server" Width="175px" ReadOnly="True">BDT</asp:TextBox>
+                                                    </td>
+                                                    <td>
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: right" >
+                                                        Stamp Duty Amount:
+                                                    </td>
+                                                    <td >
+                                                        <asp:TextBox ID="txt_stamp_duty_amt" runat="server" Width="175px"></asp:TextBox>
+                                                        <ajaxToolkit:FilteredTextBoxExtender ID="txt_stamp_duty_amt_FilteredTextBoxExtender" runat="server"
+                                                            Enabled="True" TargetControlID="txt_stamp_duty_amt" FilterMode="ValidChars" FilterType="Custom, Numbers"
+                                                            ValidChars=".">
+                                                        </ajaxToolkit:FilteredTextBoxExtender>
+                                                    </td>
+                                                    <td style="text-align: right" >
+                                                        Currency:
+                                                    </td>
+                                                    <td class="style31">
+                                                        <asp:TextBox ID="txt_currency_stamp_amt" runat="server" Width="175px" ReadOnly="True">BDT</asp:TextBox>
+                                                    </td>
+                                                    <td>
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: right" >
+                                                        &nbsp;
+                                                    </td>
+                                                    <td >
+                                                        &nbsp;
+                                                    </td>
+                                                    <td style="text-align: right" >
+                                                        &nbsp;
+                                                    </td>
+                                                    <td class="style31">
+                                                        &nbsp;
+                                                    </td>
+                                                    <td>
+                                                        &nbsp;
+                                                    </td>
+                                                </tr>
+                                                <caption>
+                                                    &nbsp;
+                                                </caption>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </ContentTemplate>
+
+
+                                 <Triggers>
+   <asp:AsyncPostBackTrigger ControlID="ddlbank" EventName="SelectedIndexChanged" />
+  <%-- <asp:AsyncPostBackTrigger ControlID="txt_unit_rate" EventName="TextChanged" />--%>
+   </Triggers>
+
+                            </asp:UpdatePanel>
+
+                            <tr>
+            <td style="height: 28px; text-align: center;">
+               
+                <asp:Label ID="lbllcdoc" runat="server" Text="LC Document (PDF):"></asp:Label>
+                            <asp:FileUpload ID="updoc" runat="server" Width="492px" />
+               
+            </td>
+        </tr>
+                         
+
+                     
+                        </td></tr><tr>
+                        <td colspan="3" style="text-align: left">
+                            &nbsp;</td></tr><tr>
+                        <td colspan="3" style="text-align: left">
+                            <table id="tbllcview" runat="server" style="width: 100%;">
+                                <tr>
+                                    <td>
+                                        <uc5:ctl_fpi_lc_entry_view ID="ctl_fpi_lc_entry_view1" runat="server" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </td></tr><tr>
+                        <td colspan="3" style="text-align: center" class="heading">
+                            COMMENTS</td></tr><tr>
+                        <td colspan="3" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: left">
+                            <asp:PlaceHolder ID="phcomments" runat="server"></asp:PlaceHolder>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: left">
+                            <table style="width:100%;">
+                                <tr>
+                                    <td style="width: 31px">
+                                        &nbsp;</td><td style="width: 89px">
+                                        COMMENTS</td><td style="width: 15px">
+                                        :</td><td>
+                                        <asp:TextBox ID="txtcomments" runat="server" TextMode="MultiLine" Width="500px"></asp:TextBox></td></tr><tr>
+                                    <td style="width: 31px">
+                                        &nbsp;</td><td style="width: 89px">
+                                        &nbsp;</td><td style="width: 15px">
+                                        &nbsp;</td><td>
+                                        &nbsp;</td></tr><tr>
+                                    <td style="width: 31px">
+                                        &nbsp;</td><td style="width: 89px">
+                                        FORWARD TO</td><td style="width: 15px">
+                                        :</td><td>
+                            <asp:DropDownList ID="ddlforto" runat="server" CssClass="txtbox" Width="500px">
+                            </asp:DropDownList>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: center">
+                            <asp:Label ID="lblComm" runat="server" ForeColor="Red" 
+                                Text="Please type your comments." Visible="False" Width="477px"></asp:Label></td></tr>
+                    <tr>
+                        <td colspan="3" style="text-align: center; height: 23px;">
+                            </td></tr><tr>
+                        <td colspan="3" style="text-align: left">
+            
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            
+                            <asp:Button ID="btnreject" runat="server" CssClass="btn2" 
+                                onclick="btnreject_Click" Text="Reject" Width="99px" />
+&nbsp;
+            
+                <asp:Button ID="btnForward" runat="server" onclick="btnForward_Click" 
+                    Text="Forward" CssClass="btn2" Width="109px" />
+            
+                        &nbsp;
+            
+                <asp:Button ID="btnApprove" runat="server" onclick="btnApprove_Click" 
+                    Text="Approve" CssClass="btn2" Width="109px" />
+            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &nbsp;</td><td>
+                            &nbsp;</td><td>
+                            &nbsp;</td></tr>
+                    <tr>
+                        <td>
+                            &nbsp;</td><td>
+                            &nbsp;</td><td>
+                            &nbsp;</td></tr></table></td></tr><tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+                &nbsp;</td></tr><tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+                &nbsp;</td></tr><tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+    
+</asp:Content>
+

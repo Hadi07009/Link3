@@ -1,0 +1,56 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.OleDb;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class modules_HRMS_Details_frmCheckinDataTransfer : System.Web.UI.Page
+{
+    private string _connectionStringExcel = ConfigurationManager.ConnectionStrings["Excel07ConStringFixed"].ConnectionString;
+    readonly string _connectionString = ConfigurationManager.AppSettings["UbasysConnectionString"];
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+    }
+    protected void btnImportData_Click(object sender, EventArgs e)
+    {
+        TransferCheckinData();
+
+    }
+
+    private void TransferCheckinData()
+    {
+        try
+        {
+            var sheetName = "Sheet1$";
+            CommonMethods objCommonMethods = new CommonMethods();
+            DataTable dtFromExcel = objCommonMethods.GetDataFromExcel(_connectionStringExcel, sheetName);
+            CheckinDataController objCheckinDataController = new CheckinDataController();
+            foreach (DataRow dtRow in dtFromExcel.Rows)
+            {
+                CheckinData objCheckInData = new CheckinData();
+                objCheckInData.EmployeeCode = dtRow[1].ToString();
+                if (dtRow[2].ToString() != "")
+                {
+                    objCheckInData.CheckinDate = Convert.ToDateTime((Convert.ToDateTime(dtRow[0]).ToString("dd-MM-yyyy") +" "+ dtRow[2].ToString()));
+                    objCheckinDataController.Save(_connectionString, objCheckInData);
+                }
+                if (dtRow[3].ToString() != "")
+                {
+                    objCheckInData.CheckinDate = Convert.ToDateTime((Convert.ToDateTime(dtRow[0]).ToString("dd-MM-yyyy")+ " " + dtRow[3].ToString()));
+                    objCheckinDataController.Save(_connectionString, objCheckInData);
+                }
+            }
+            objCheckinDataController.AttendanceUpdate(_connectionString);
+        }
+        catch (Exception msgException)
+        {
+
+            MessageBox1.ShowError(msgException.Message);
+        }
+    }
+}

@@ -1,0 +1,486 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_fpi_ctg_info_entry.aspx.cs" Inherits="frm_fpi_ctg_info_entry" Title=""   %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register assembly="eWorld.UI.Compatibility" namespace="eWorld.UI.Compatibility" tagprefix="ew" %>
+<%@ Register src="usercontrols/ctl_fpi_mpr_item_view.ascx" tagname="ctl_fpi_mpr_item_view" tagprefix="uc1" %>
+<%@ Register src="usercontrols/ctl_fpi_pi_entry_view.ascx" tagname="ctl_fpi_pi_entry_view" tagprefix="uc3" %>
+<%@ Register src="usercontrols/ctl_fpi_lc_entry_view.ascx" tagname="ctl_fpi_lc_entry_view" tagprefix="uc4" %>
+
+<%@ Register src="usercontrols/ctl_fpi_import_consignment_view.ascx" tagname="ctl_fpi_import_consignment_view" tagprefix="uc5" %>
+
+<%@ Register src="usercontrols/ctl_fpi_custom_clearing_view.ascx" tagname="ctl_fpi_custom_clearing_view" tagprefix="uc6" %>
+
+<%@ Register src="usercontrols/ctl_fpi_download.ascx" tagname="ctl_fpi_download" tagprefix="uc7" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+<table id="tbltop" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" style="text-align: center">
+                Cargo Landing and Transportation to Factory</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+           
+                PENDING LIST(<asp:Label ID="lblpcount" runat="server" Text="Label"></asp:Label>
+                ) :
+                <asp:DropDownList ID="ddlpolist" runat="server" Width="600px" 
+                    AutoPostBack="True" CssClass="txtbox" Font-Size="9pt"
+                    onselectedindexchanged="ddlpolist_SelectedIndexChanged">
+                </asp:DropDownList>
+                   
+            </td>
+        </tr>
+        </table>
+         
+         <asp:UpdatePanel ID= "updall" runat="server">
+         <ContentTemplate>
+        <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc1:ctl_fpi_mpr_item_view ID="ctl_fpi_mpr_item_view1" runat="server" />
+               
+            </td>
+        </tr>
+
+
+          <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc7:ctl_fpi_download ID="ctl_fpi_download1" runat="server" />
+               
+            </td>
+        </tr>
+
+         <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc3:ctl_fpi_pi_entry_view ID="ctl_fpi_pi_entry_view1" runat="server" />
+               
+            </td>
+        </tr>
+
+          <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc4:ctl_fpi_lc_entry_view ID="ctl_fpi_lc_entry_view1" runat="server" />
+               
+            </td>
+        </tr>
+        <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+                <uc5:ctl_fpi_import_consignment_view ID="ctl_fpi_import_consignment_view1" 
+                    runat="server" />
+               
+            </td>
+        </tr>
+
+
+
+        <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+                 <uc6:ctl_fpi_custom_clearing_view ID="ctl_fpi_custom_clearing_view1" 
+                     runat="server" />
+               
+            </td>
+        </tr>
+       
+   <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+
+                            <table id="tblctgentry" runat="server" style="width:100%;">
+                        <tr>
+                            <td style="text-align: center;"  colspan="5" class="heading">
+                                CARGO LANDING AND TRANSPORTATION TO FACTORY</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right; width: 4%;">
+                                &nbsp;</td>
+                            <td style="text-align: left; width: 11%;">
+                                Consign Number</td>
+                            <td style="text-align: right;">
+                                :</td>
+                            <td style="text-align: left;">
+                                <asp:Label ID="lblconsignnumber" runat="server" CssClass="txtbox" 
+                                    ReadOnly="True" style="font-weight: 700" Width="188px"></asp:Label>
+                            </td>
+                            <td style="text-align: right; width: 1%;">
+                                &nbsp;</td>
+                        </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 4%;">
+                                        &nbsp;</td>
+                                    <td style="text-align: left; width: 11%;">
+                                        Ref No</td>
+                                    <td style="text-align: right;">
+                                        :</td>
+                                    <td style="text-align: left;">
+                                        <asp:Label ID="lblrefno" runat="server" CssClass="txtbox" ReadOnly="True" 
+                                            style="font-weight: 700" Width="188px"></asp:Label>
+                                    </td>
+                                    <td style="text-align: right; width: 1%;">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 4%;">
+                                        &nbsp;</td>
+                                    <td style="text-align: left; width: 11%;">
+                                        Balance Qty</td>
+                                    <td style="text-align: right;">
+                                        :</td>
+                                    <td style="text-align: left;">
+                                        <asp:Label ID="lblbalanceqty" runat="server" CssClass="txtbox" 
+                                            ReadOnly="True" Width="188px" style="font-weight: 700"></asp:Label>
+                                    </td>
+                                    <td style="text-align: right; width: 1%;">
+                                        &nbsp;</td>
+                                </tr>
+                        <tr>
+                            <td style="width: 4%" >
+                                &nbsp;</td>
+                            <td style="width: 11%">
+                                Mother Vessel Name</td>
+                            <td  style="width: 1%">
+                                :</td>
+                            <td style="width: 626px">
+                                
+                                <asp:DropDownList ID="ddlmovesselname" runat="server" Width="188px">
+                                </asp:DropDownList>
+                            </td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                                <tr>
+                                    <td style="width: 4%">
+                                        &nbsp;</td>
+                                    <td style="width: 11%">
+                                        Mother Vessel Origin</td>
+                                    <td style="width: 1%">
+                                        :</td>
+                                    <td style="width: 626px">
+                                        <asp:TextBox ID="txtmothervesselorigin" runat="server" CssClass="txtbox" 
+                                            Width="188px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 1%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 4%">
+                                        &nbsp;</td>
+                                    <td style="width: 11%">
+                                        Import Rotation No</td>
+                                    <td style="width: 1%">
+                                        :</td>
+                                    <td style="width: 626px">
+                                        <asp:TextBox ID="txtimportrotation" runat="server" CssClass="txtbox" 
+                                            Width="188px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 1%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 4%">
+                                        &nbsp;</td>
+                                    <td style="width: 11%">
+                                        Arrival Date</td>
+                                    <td style="width: 1%">
+                                        :</td>
+                                    <td style="width: 626px">
+                                        <ew:CalendarPopup ID="dtarrivaldate" runat="server" 
+                                            Culture="English (United Kingdom)" DisableTextBoxEntry="False" Nullable="True" 
+                                            SelectedDate="12/22/2013 14:17:44" Text="" Width="85px">
+                                            <ButtonStyle CssClass="btn2" />
+                                        </ew:CalendarPopup>
+                                    </td>
+                                    <td style="width: 1%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 4%">
+                                        &nbsp;</td>
+                                    <td style="width: 11%">
+                                        &nbsp;</td>
+                                    <td style="width: 1%">
+                                        &nbsp;</td>
+                                    <td style="width: 626px">
+                                        &nbsp;</td>
+                                    <td style="width: 1%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 4%">
+                                        &nbsp;</td>
+                                    <td style="width: 11%">
+                                        Date of Landing</td>
+                                    <td style="width: 1%">
+                                        :</td>
+                                    <td style="width: 626px">
+                                        <ew:CalendarPopup ID="dtlanding" runat="server" 
+                                            Culture="English (United Kingdom)" DisableTextBoxEntry="False" Nullable="True" 
+                                            SelectedDate="12/22/2013 14:17:44" Text="" Width="85px">
+                                            <ButtonStyle CssClass="btn2" />
+                                        </ew:CalendarPopup>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Loading Completion Date:&nbsp;&nbsp;&nbsp;
+                                        <ew:CalendarPopup ID="dtloadingcomp" runat="server" 
+                                            Culture="English (United Kingdom)" DisableTextBoxEntry="False" Nullable="True" 
+                                            SelectedDate="12/22/2013 14:17:49" Width="85px">
+                                            <ButtonStyle CssClass="btn2" />
+                                        </ew:CalendarPopup>
+                                    </td>
+                                    <td style="width: 1%">
+                                        &nbsp;</td>
+                                </tr>
+                        <tr>
+                            <td style="width: 4%">
+                                &nbsp;</td>
+                            <td style="width: 11%">
+                                Unit of Quantity</td>
+                            <td style="width: 1%">
+                                :</td>
+                            <td style="width: 626px">
+                                <asp:DropDownList ID="txtunitofqty" runat="server" 
+                CssClass="txtbox"  
+                    Width="191px"></asp:DropDownList>
+           
+                            </td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4%">
+                                &nbsp;</td>
+                            <td style="width: 11%">
+                                Mode of Transport</td>
+                            <td style="width: 1%">
+                                :</td>
+                            <td style="width: 626px">
+                                <asp:TextBox ID="txtmodeoftransctg" runat="server" 
+                CssClass="txtbox"  
+                    Width="188px"></asp:TextBox>
+           
+                            </td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                                <tr>
+                                    <td style="width: 4%">
+                                        &nbsp;</td>
+                                    <td style="width: 11%">
+                                        Carrier service</td>
+                                    <td style="width: 1%">
+                                        :</td>
+                                    <td style="width: 626px">
+                                        <asp:TextBox ID="txtcarrierservice" runat="server" CssClass="txtbox" 
+                                            Width="188px"></asp:TextBox>
+                                    </td>
+                                    <td style="width: 1%">
+                                        &nbsp;</td>
+                                </tr>
+                        <tr>
+                            <td style="width: 4%">
+                                &nbsp;</td>
+                            <td style="width: 11%">
+                                Landed Quantity</td>
+                            <td style="width: 1%">
+                                :</td>
+                            <td style="width: 626px">
+                                <asp:Label ID="lbllandedqty" runat="server" 
+                
+                    Width="188px"></asp:Label>
+           
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <asp:Label ID="lblshortexcess" runat="server">Landed Quantity </asp:Label>
+           
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4%">
+                                &nbsp;</td>
+                            <td style="width: 11%">
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                &nbsp;</td>
+                            <td style="width: 626px; text-align: center;">
+                                <asp:Label ID="Label1" runat="server" style="color: #CC3300" Text="Label"></asp:Label>
+                            </td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4%">
+                                &nbsp;</td>
+                            <td style="width: 11%">
+                                Transport Detail</td>
+                            <td style="width: 1%">
+                                :</td>
+                            <td style="width: 626px">
+                <asp:GridView ID="gdItem" runat="server" BackColor="White" BorderColor="#41519A" style="border-top-width: 1px; border-left-width: 1px; border-left-color: #e6e6fa;  border-bottom-width: 1px; border-bottom-color: #e6e6fa; border-top-color: #e6e6fa; border-right-width: 1px; border-right-color: #e6e6fa;"
+                    BorderStyle="Solid" BorderWidth="1px" CellPadding="4" ForeColor="#333333" GridLines="None"
+                    
+                    PageSize="100" SkinID="GridView" Width="95%" 
+                                    onselectedindexchanged="gdItem_SelectedIndexChanged" onrowdatabound="gdItem_RowDataBound" 
+                              >
+                    <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                    <SelectedRowStyle Font-Bold="True" />
+                    <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <EditRowStyle BackColor="#2461BF" />
+                    <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" 
+                        Font-Underline="False" />
+                    <Columns>
+                        <asp:CommandField SelectText="Remove" ShowSelectButton="True" >
+                            <ItemStyle ForeColor="Red" />
+                        </asp:CommandField>
+                    </Columns>
+                    <RowStyle Font-Size="8pt" />
+                </asp:GridView>                   
+                            </td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4%">
+                                &nbsp;</td>
+                            <td style="width: 11%">
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                &nbsp;</td>
+                            <td style="width: 626px; text-align: center;">
+                                <asp:Label ID="lblmsg" runat="server" ForeColor="Red" Text="Label" 
+                                    Visible="False"></asp:Label>
+                            </td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4%">
+                                &nbsp;</td>
+                            <td style="width: 11%">
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                &nbsp;</td>
+                            <td style="width: 626px; text-align: center;">
+                                <asp:Button ID="btnComplete" runat="server" CssClass="btn2"  
+                                    Text="Entry Complete" Width="100px" Visible="false" onclick="btnComplete_Click" />
+                            </td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4%">
+                                &nbsp;</td>
+                            <td style="width: 11%">
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                &nbsp;</td>
+                            <td style="width: 626px; text-align: left;">
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4%">
+                                &nbsp;</td>
+                            <td style="width: 11%">
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                &nbsp;</td>
+                            <td style="width: 626px">
+                                <table bgcolor="#FFFFCC" style="width:125%;">
+                                    <tr>
+                                        <td style="width: 242px; text-align: center">
+                                            Transport Name/No</td>
+                                        <td style="width: 192px; text-align: center">
+                                            Carried Quantity as per Transport Contract or Boat Note</td>
+                                        <td style="width: 154px; text-align: center">
+                                            Port Exit Date</td>
+                                        <td>
+                                            &nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 242px">
+                                            <asp:DropDownList ID="ddllivesselname" runat="server" Width="230px">
+                                            </asp:DropDownList>
+           
+                                        </td>
+                                        <td style="width: 192px">
+                                <asp:TextBox ID="txttransportqty" runat="server" 
+                CssClass="txtbox"  
+                    Width="161px"></asp:TextBox>
+           <ajaxToolkit:FilteredTextBoxExtender ID="txttransportqtyFilteredTextBoxExtender" 
+                                runat="server" FilterType="Custom, Numbers" TargetControlID="txttransportqty" 
+                                ValidChars=".">
+                            </ajaxToolkit:FilteredTextBoxExtender>
+                                        </td>
+                                        <td style="width: 154px">
+                                            <ew:CalendarPopup ID="dtportexitdate" runat="server" Culture="English (United Kingdom)" DisableTextBoxEntry="False" Nullable="True" SelectedDate="12/22/2013 14:17:49" Width="85px">
+                                                <ButtonStyle CssClass="btn2" />
+                                            </ew:CalendarPopup>
+                                        </td>
+                                        <td>
+                                            <asp:Button ID="btnadd" runat="server" CssClass="btn2" 
+                                                Text="Add" Width="100px" onclick="btnadd_Click" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 242px">
+                                            &nbsp;</td>
+                                        <td style="width: 192px">
+                                            &nbsp;</td>
+                                        <td style="width: 154px">
+                                            &nbsp;</td>
+                                        <td>
+                                            &nbsp;</td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4%">
+                                &nbsp;</td>
+                            <td style="width: 11%">
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                &nbsp;</td>
+                            <td style="width: 626px">
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        </table>           
+            </td>
+        </tr>
+
+    </table>
+
+
+     </ContentTemplate>
+         <Triggers>
+           <asp:AsyncPostBackTrigger ControlID="ddlpolist" EventName="SelectedIndexChanged" />
+             <%--<asp:PostBackTrigger ControlID="btn_save" />
+             <asp:PostBackTrigger ControlID="btn_save_forward" />
+             <asp:PostBackTrigger ControlID="btn_complete" />
+             <asp:AsyncPostBackTrigger ControlID="txt_invoice_value" EventName="TextChanged" />--%>
+           
+          
+           
+         </Triggers>
+         </asp:UpdatePanel>
+</asp:Content>
+

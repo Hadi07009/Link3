@@ -1,0 +1,975 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_fpi_custom_clearing_app.aspx.cs" Inherits="frm_fpi_custom_clearing_app" Title=""   %>
+
+<%@ Register assembly="AjaxControlToolkit" namespace="AjaxControlToolkit" tagprefix="cc1" %>
+
+<%@ Register assembly="eWorld.UI.Compatibility" namespace="eWorld.UI.Compatibility" tagprefix="ew" %>
+
+<%@ Register src="usercontrols/ctl_fpi_mpr_item_view.ascx" tagname="ctl_fpi_mpr_item_view" tagprefix="uc1" %>
+
+<%@ Register src="usercontrols/ctl_fpi_pi_entry_view.ascx" tagname="ctl_fpi_pi_entry_view" tagprefix="uc3" %>
+<%@ Register src="usercontrols/ctl_fpi_lc_entry_view.ascx" tagname="ctl_fpi_lc_entry_view" tagprefix="uc4" %>
+
+<%@ Register src="usercontrols/ctl_fpi_import_consignment_view.ascx" tagname="ctl_fpi_import_consignment_view" tagprefix="uc5" %>
+
+<%@ Register src="usercontrols/ctl_fpi_download.ascx" tagname="ctl_fpi_download" tagprefix="uc6" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+    <table id="tbltop" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" style="text-align: center">
+                Custom Clearing Information Approval</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+           
+                PENDING LIST(<asp:Label ID="lblpcount" runat="server" Text="Label"></asp:Label>
+                ) :
+                <asp:DropDownList ID="ddlpolist" runat="server" Width="600px" 
+                    AutoPostBack="True" CssClass="txtbox" Font-Size="9pt"
+                    onselectedindexchanged="ddlpolist_SelectedIndexChanged">
+                </asp:DropDownList>
+                   
+            </td>
+        </tr>
+        </table>
+         
+         <asp:UpdatePanel ID= "updall" runat="server">
+         <ContentTemplate>
+        <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc1:ctl_fpi_mpr_item_view ID="ctl_fpi_mpr_item_view1" runat="server" />
+               
+            </td>
+        </tr>
+
+
+          <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc6:ctl_fpi_download ID="ctl_fpi_download1" runat="server" />
+               
+            </td>
+        </tr>
+
+         <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc3:ctl_fpi_pi_entry_view ID="ctl_fpi_pi_entry_view1" runat="server" />
+               
+            </td>
+        </tr>
+
+          <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc4:ctl_fpi_lc_entry_view ID="ctl_fpi_lc_entry_view1" runat="server" />
+               
+            </td>
+        </tr>
+        <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+                <uc5:ctl_fpi_import_consignment_view ID="ctl_fpi_import_consignment_view1" 
+                    runat="server" />
+               
+            </td>
+        </tr>
+       
+   <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+        <table  id="top2"  runat="server"   style="width:100%; ">
+        
+                                <tr>
+                                    <td style="text-align: center; " 
+                                        class="heading" colspan="5">
+                                        CUSTOM CLEARING INFORMATION</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Consignment No:</td>
+                                    <td style="width: 17%">
+                                        <asp:Label ID="lbl_consign_no" runat="server" style="font-weight: bold" 
+                                            Width="175px"></asp:Label>
+                                    </td>
+                                    <td style="text-align: right; width: 6%;">
+                                        Consignment Quantity:</td>
+                                    <td class="style32" style="width: 20%">
+
+                                        <asp:Label ID="lbl_consign_qty" runat="server" style="font-weight: bold" 
+                                            Width="175px"></asp:Label>
+                                    </td>
+                                    <td class="style32" style="width: 20%">
+
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        &nbsp;LC/LCA No:</td>
+                                    <td style="width: 17%">
+                                        <asp:TextBox ID="txt_lc_number" runat="server" Width="250px" 
+                                            AutoPostBack="True" 
+                                            ></asp:TextBox>
+                                        <cc1:AutoCompleteExtender ID="txt_lc_number_AutoCompleteExtender" runat="server"
+                                            Enabled="True" BehaviorID="AutoCompleteEx2" CompletionInterval="1000" CompletionListCssClass="autocomplete_completionListElement"
+                                            CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" CompletionListItemCssClass="autocomplete_listItem"
+                                            CompletionSetCount="20" DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3"
+                                            ServiceMethod="GetLC" ServicePath="~/modules/commercial/services/autocomplete.asmx" ShowOnlyCurrentWordInCompletionListItem="true"
+                                            TargetControlID="txt_lc_number">
+                                        </cc1:AutoCompleteExtender>
+                                                                               
+                                    </td>
+                                    <td style="text-align: right; width: 6%;">
+                                        LC/LCA Date: </td>
+                                    <td class="style32" style="width: 20%">
+
+                               <%--         <ew:CalendarPopup ID="dt_lc_date" runat="server" CssClass="txtbox" 
+                                                    Culture="English (United Kingdom)" DisableTextBoxEntry="False" 
+                                            Width="76px">
+                                                    <ButtonStyle CssClass="btn2" />
+                                                </ew:CalendarPopup>--%>
+
+
+
+                                        <ew:CalendarPopup ID="dt_lc_date" runat="server" CssClass="txtbox" Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="76px">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew:CalendarPopup>
+
+
+
+                                    </td>
+                                    <td class="style32" style="width: 20%">
+
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        &nbsp;LC/LCA Expire Date: </td>
+                                    <td style="width: 17%">
+
+                                        <ew:CalendarPopup ID="dt_lc_expire_date" runat="server" CssClass="txtbox" 
+                                                    Culture="English (United Kingdom)" DisableTextBoxEntry="False" 
+                                            Width="76px">
+                                                    <ButtonStyle CssClass="btn2" />
+                                                </ew:CalendarPopup>
+                                      
+                                    </td>
+                                    <td style="text-align: right; width: 6%;" class="style11">
+                                        Shipment Date:</td>
+                                    <td class="style33" style="width: 20%">
+
+                                        <ew:CalendarPopup ID="dt_shipment_date" runat="server" CssClass="txtbox" 
+                                                    Culture="English (United Kingdom)" DisableTextBoxEntry="False" 
+                                            Width="76px">
+                                                    <ButtonStyle CssClass="btn2" />
+                                                </ew:CalendarPopup>
+                                      
+                                    </td>
+                                    <td class="style33" style="width: 20%">
+
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%; height: 26px;">
+                                        &nbsp;LC Value:</td>
+                                    <td style="width: 17%; height: 26px;">
+                                        <asp:TextBox ID="txt_LC_value" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_LC_value_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_LC_value" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                        <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" 
+                                            ControlToValidate="txt_LC_value" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                    </td>
+                                    <td style="text-align: right; width: 6%; height: 26px;">
+                                        LC Amendment Value: </td>
+                                    <td class="style32" style="width: 20%; height: 26px;">
+                                        <asp:TextBox ID="txt_LC_amendment_value" runat="server" Width="175px"></asp:TextBox>
+                                    </td>
+                                    <td class="style32" style="width: 20%; height: 26px;">
+                                        </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        &nbsp;Invoice Value: </td>
+                                    <td style="width: 17%">
+                                        <asp:TextBox ID="txt_invoice_value" runat="server" Width="175px" 
+                                            AutoPostBack="True" ontextchanged="txt_invoice_value_TextChanged"></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_invoice_value_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_invoice_value" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars="." >
+                                        </cc1:filteredtextboxextender>
+                                     <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" 
+                                            ControlToValidate="txt_invoice_value" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                    </td>
+                                    <td style="text-align: right; width: 6%;">
+                                        * Curr:</td>
+                                    <td class="style32" style="width: 20%">
+                                        <asp:TextBox ID="txt_currency_invoice" runat="server" Width="175px"></asp:TextBox>
+                                        <asp:RequiredFieldValidator ID="RequiredFieldValidator3" runat="server" 
+                                            ControlToValidate="txt_currency_invoice" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                    </td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        *Exchange Rate: </td>
+                                    <td style="width: 17%">
+                                        <asp:TextBox ID="txt_exchange_rate" runat="server" Width="175px" 
+                                            AutoPostBack="True" ontextchanged="txt_exchange_rate_TextChanged"></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_exchange_rate_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_exchange_rate" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                        <asp:RequiredFieldValidator ID="RequiredFieldValidator4" runat="server" 
+                                            ControlToValidate="txt_exchange_rate" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                    </td>
+                                    <td class="style25" style="width: 6%">
+                                        &nbsp;</td>
+                                    <td class="style34" style="width: 20%">
+                                        &nbsp;</td>
+                                    <td class="style34" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right">
+                                        &nbsp;Total Value in (Taka): </td>
+                                    <td style="width: 17%">
+                                        <asp:Label ID="lbl_total_value" runat="server" style="font-weight: bold" 
+                                            Width="175px"></asp:Label>
+                                    </td>
+                                    <td style="text-align: right; width: 6%;">
+                                        &nbsp;</td>
+                                    <td style="width: 20%">
+                                        &nbsp;</td>
+                                    <td style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Payment Tems:</td>
+                                    <td colspan="3">
+                                        <asp:TextBox ID="txt_payment_terms" runat="server" Width="468px"></asp:TextBox>
+                                    </td>
+                                    <td>
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Maturity Date: </td>
+                                    <td style="width: 17%">
+
+                                        <ew:CalendarPopup ID="dtmaturitydate" runat="server" CssClass="txtbox" 
+                                                    Culture="English (United Kingdom)" DisableTextBoxEntry="False" 
+                                            Width="76px">
+                                                    <ButtonStyle CssClass="btn2" />
+                                                </ew:CalendarPopup>
+                                      
+                                    </td>
+                                    <td style="text-align: right; width: 6%;">
+                                        &nbsp;</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        &nbsp;</td>
+                                    <td class="style30" style="width: 17%">
+                                        &nbsp;</td>
+                                    <td style="text-align: right; width: 6%;">
+                                        &nbsp;</td>
+                                    <td class="style31" style="width: 20%">
+                                        &nbsp;</td>
+                                    <td class="style31" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%; height: 16px;">
+                                        </td>
+                                    <td style="text-align: center; width: 17%; height: 16px;" >
+                                        <strong style="text-align: left">ACTUAL VALUE</strong></td>
+                                    <td style="text-align: left; height: 16px;" colspan="2">
+                                        <strong style="text-align: center">PROVISIONAL VALUE</strong></td>
+                                    <td style="width: 20%; height: 16px;" >
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        &nbsp;</td>
+                                    <td class="style30" style="width: 17%">
+                                        &nbsp;</td>
+                                    <td style="text-align: right; width: 6%;">
+                                        &nbsp;</td>
+                                    <td class="style31" style="width: 20%">
+                                        &nbsp;</td>
+                                    <td class="style31" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Custom Duty:</td>
+                                    <td class="style44" style="width: 17%">
+                                        <asp:TextBox ID="txt_duty" runat="server" Width="175px" 
+                                            ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_duty_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_duty" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator5" runat="server" 
+                                            ControlToValidate="txt_duty" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left" class="style36">
+                                        <asp:TextBox ID="txt_duty_pro" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_duty_pro_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_duty_pro" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator6" runat="server" ControlToValidate="txt_duty_pro" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style37" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Regulatory Duty(R/D):</td>
+                                    <td class="style43" style="width: 17%">
+                                        <asp:TextBox ID="txt_regular_duty" runat="server" Width="175px" 
+                                          ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_regular_duty_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_regular_duty" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator7" runat="server" 
+                                            ControlToValidate="txt_regular_duty" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:TextBox ID="txt_regular_duty_provisional" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_regular_duty_provisional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_regular_duty_provisional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator8" runat="server" ControlToValidate="txt_regular_duty_provisional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Supplementary Duty(S/D):</td>
+                                    <td class="style44" style="width: 17%">
+                                        <asp:TextBox ID="txt_supplimentary_duty" runat="server" Width="175px" 
+                                          ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_supplimentary_duty_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_supplimentary_duty" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator9" runat="server" 
+                                            ControlToValidate="txt_supplimentary_duty" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left" class="style36" colspan="2">
+                                        <asp:TextBox ID="txt_supplimentary_duty_provisional" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_supplimentary_duty_provisional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_supplimentary_duty_provisional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator10" runat="server" ControlToValidate="txt_supplimentary_duty_provisional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style37" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Value Added Tax (VAT):</td>
+                                    <td class="style43" style="width: 17%">
+                                        <asp:TextBox ID="txt_vat" runat="server" Width="175px" 
+                                          ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_vat_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_vat" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator11" runat="server" 
+                                            ControlToValidate="txt_vat" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:TextBox ID="txt_vat_provitional" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_vat_provitional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_vat_provitional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator12" runat="server" ControlToValidate="txt_duty_pro" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Advance Income Tax(AIT):</td>
+                                    <td class="style43" style="width: 17%">
+                                        <asp:TextBox ID="txt_ait" runat="server" Width="175px" 
+                                           ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_ait_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_ait" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator13" runat="server" 
+                                            ControlToValidate="txt_ait" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:TextBox ID="txt_ait_provitional" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_ait_provitional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_ait_provitional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator14" runat="server" ControlToValidate="txt_ait_provitional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Advanced Trade VAT(ATV):</td>
+                                    <td class="style44" style="width: 17%">
+                                        <asp:TextBox ID="txt_atv" runat="server" Width="175px" 
+                                           ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_atv_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_atv" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator15" runat="server" 
+                                            ControlToValidate="txt_atv" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left" class="style36" colspan="2">
+                                        <asp:TextBox ID="txt_atv_provitional" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_atv_provitional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_atv_provitional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator16" runat="server" ControlToValidate="txt_atv_provitional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style37" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Pre-Shipment Inspection(PSI):</td>
+                                    <td class="style44" style="width: 17%">
+                                        <asp:TextBox ID="txt_PSI" runat="server" Width="175px" 
+                                           ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_PSI_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_PSI" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator17" runat="server" 
+                                            ControlToValidate="txt_PSI" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left" class="style36" colspan="2">
+                                        <asp:TextBox ID="txt_PSI_pro" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_PSI_pro_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_PSI_pro" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator18" runat="server" ControlToValidate="txt_PSI_pro" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style37" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Document Processing Fee(DF) VAT : </td>
+                                    <td class="style43" style="width: 17%">
+                                        <asp:TextBox ID="txt_df_vat" runat="server" Width="175px" 
+                                           ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_df_vat_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_df_vat" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator19" runat="server" 
+                                            ControlToValidate="txt_df_vat" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:TextBox ID="txt_df_vat_provitional" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_df_vat_provitional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_df_vat_provitional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator20" runat="server" ControlToValidate="txt_df_vat_provitional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Port Dues : </td>
+                                    <td class="style43" style="width: 17%">
+                                        <asp:TextBox ID="txt_port_dues" runat="server" Width="175px" 
+                                          ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_port_dues_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_port_dues" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator21" runat="server" 
+                                            ControlToValidate="txt_port_dues" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:TextBox ID="txt_port_dues_provitional" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_port_dues_provitional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_port_dues_provitional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator22" runat="server" ControlToValidate="txt_port_dues_provitional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Stevedoring Service Provider Name: </td>
+                                    <td class="style43" colspan="3">
+                                        <asp:TextBox ID="txt_stevedoring" runat="server" Width="472px"></asp:TextBox>
+                                    &nbsp;</td>
+                                    <td class="style43">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Stevedoring Charge:</td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+                                        <asp:TextBox ID="txt_stevedoring_charge" runat="server" Width="175px" 
+                                           ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_stevedoring_charge_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_stevedoring_charge" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator25" runat="server" 
+                                            ControlToValidate="txt_stevedoring_charge" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:TextBox ID="txt_stevedoring_charge_provitional" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_stevedoring_charge_provitional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_stevedoring_charge_provitional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator26" runat="server" ControlToValidate="txt_stevedoring_charge_provitional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Berth Operator Charge(BOC):</td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+                                        <asp:TextBox ID="txt_boc" runat="server" Width="175px"
+                                           ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_boc_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_boc" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator27" runat="server" 
+                                            ControlToValidate="txt_boc" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:TextBox ID="txt_boc_provitional" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_boc_provitional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_boc_provitional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator28" runat="server" ControlToValidate="txt_boc_provitional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Shipping Agent Name:</td>
+                                    <td colspan="3" valign="middle">
+                                        <asp:TextBox ID="txt_shipping_agent_name" runat="server" Width="472px"></asp:TextBox>
+                                    </td>
+                                    <td valign="middle">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Shipping Agent Charge:</td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+                                        <asp:TextBox ID="txt_shipping_charge" runat="server" Width="175px" 
+                                          ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_shipping_charge_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_shipping_charge" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator29" runat="server" 
+                                            ControlToValidate="txt_shipping_charge" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:TextBox ID="txt_shipping_charge_provitional" runat="server" Width="175px"></asp:TextBox>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator30" runat="server" ControlToValidate="txt_shipping_charge_provitional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Freight Forwarder Name:</td>
+                                    <td class="style43" valign="middle" colspan="3">
+                                        <asp:TextBox ID="txt_freight_name" runat="server" Width="472px" 
+                                           ></asp:TextBox>
+                                        &nbsp;</td>
+                                    <td class="style43" valign="middle">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Freight Forwarder NOC Charge:</td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+                                        <asp:TextBox ID="txt_freight_NOC_charge" runat="server" Width="175px" 
+                                           ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_freight_NOC_charge_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_freight_NOC_charge" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator31" runat="server" 
+                                            ControlToValidate="txt_freight_NOC_charge" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:TextBox ID="txt_freight_NOC_charge_provitional" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_freight_NOC_charge_provitional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_freight_NOC_charge_provitional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator32" runat="server" ControlToValidate="txt_freight_NOC_charge_provitional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Surveyor chage</td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+                                        <asp:TextBox ID="txt_surveyor_charge" runat="server" Width="175px" 
+                                           ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_surveyor_charge_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_surveyor_charge" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator33" runat="server" 
+                                            ControlToValidate="txt_surveyor_charge" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:TextBox ID="txt_surveyor_charge_provitional" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_surveyor_charge_provitional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_surveyor_charge_provitional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator34" runat="server" ControlToValidate="txt_surveyor_charge_provitional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        C&amp;F Agent Fee (Rate) : </td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+                                        <asp:TextBox ID="txt_rate" runat="server" Width="175px" AutoPostBack="True" OnTextChanged="txt_rate_TextChanged" 
+                                          ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_rate_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_rate" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator35" runat="server" 
+                                            ControlToValidate="txt_rate" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:TextBox ID="txt_rate_provitional" runat="server" AutoPostBack="True" OnTextChanged="txt_rate_provitional_TextChanged" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_rate_provitional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_rate_provitional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator36" runat="server" ControlToValidate="txt_rate_provitional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Total C&amp;F Fee : </td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+                                        <asp:label ID="lbl_total_fee" runat="server" Width="175px" 
+                                           ></asp:label>
+                                        
+                                   
+                                        &nbsp;&nbsp;&nbsp;&nbsp; TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:Label ID="lbl_total_fee_provitional" runat="server" Width="175px"></asp:Label>
+                                        &nbsp;&nbsp;&nbsp;&nbsp; TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Carrying Rate : </td>
+                                    <td class="style44" valign="middle" style="width: 17%">
+                                        <asp:TextBox ID="txt_carrying_rate" runat="server" Width="175px" AutoPostBack="True" OnTextChanged="txt_carrying_rate_TextChanged" 
+                                           ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_carrying_rate_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_carrying_rate" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator39" runat="server" 
+                                            ControlToValidate="txt_carrying_rate" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left" class="style36" colspan="2">
+                                        <asp:TextBox ID="txt_carrying_rate_provitional" runat="server" AutoPostBack="True" OnTextChanged="txt_carrying_rate_provitional_TextChanged" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_carrying_rate_provitional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_carrying_rate_provitional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator40" runat="server" ControlToValidate="txt_carrying_rate_provitional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style37" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Total Carrying Cost : </td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+                                        <asp:label ID="lbl_total_carrying_cost" runat="server" Width="175px" 
+                                           ></asp:label>
+                                      
+                                   
+                                        &nbsp;&nbsp;&nbsp;&nbsp; TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:Label ID="lbl_total_carrying_cost_provitional" runat="server" Width="175px"></asp:Label>
+                                        &nbsp;&nbsp;&nbsp;&nbsp; TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Others Cost : </td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+                                        <asp:TextBox ID="txt_others_cost" runat="server" Width="175px" 
+                                            ></asp:TextBox>
+                                        <cc1:filteredtextboxextender ID="txt_others_cost_FilteredTextBoxExtender" 
+                                            runat="server" Enabled="True" TargetControlID="txt_others_cost" 
+                                            FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                        </cc1:filteredtextboxextender>
+                                    &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator43" runat="server" 
+                                            ControlToValidate="txt_others_cost" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td style="text-align: left; " colspan="2">
+                                        <asp:TextBox ID="txt_others_cost_provitional" runat="server" Width="175px"></asp:TextBox>
+                                        <cc1:FilteredTextBoxExtender ID="txt_others_cost_provitional_FilteredTextBoxExtender" runat="server" Enabled="True" FilterMode="ValidChars" FilterType="Custom, Numbers" TargetControlID="txt_others_cost_provitional" ValidChars=".">
+                                        </cc1:FilteredTextBoxExtender>
+                                        &nbsp;<asp:RequiredFieldValidator ID="RequiredFieldValidator44" runat="server" ControlToValidate="txt_others_cost_provitional" ErrorMessage="*"></asp:RequiredFieldValidator>
+                                        TK</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Reason for others cost:</td>
+                                    <td colspan="3" valign="middle">
+                                        <asp:TextBox ID="txt_reason_for" runat="server" Width="472px"></asp:TextBox>
+                                    &nbsp;
+                                    </td>
+                                    <td valign="middle">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">&nbsp;</td>
+                                    <td colspan="3" valign="middle">&nbsp;</td>
+                                    <td valign="middle">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        &nbsp;</td>
+                                    <td class="style43" valign="middle" style="text-align: left;" colspan="3">
+
+                                        <asp:Button ID="btn_calculate" runat="server" OnClick="btn_calculate_Click" Text="Calculate" Width="100px" />
+                                      
+                                    </td>
+                                    <td class="style32" style="width: 20%">
+
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">&nbsp;</td>
+                                    <td class="style43" colspan="3" style="text-align: left;" valign="middle">&nbsp;</td>
+                                    <td class="style32" style="width: 20%">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">Total Cost:</td>
+                                    <td class="style43" style="width: 17%" valign="middle">
+                                        <asp:Label ID="lbl_total_cost" runat="server" style="font-weight: bold" Width="179px"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left; width: 6%;">Total Cost:</td>
+                                    <td class="style32" style="width: 20%">
+                                        <asp:Label ID="lbl_total_cost_provitional" runat="server" style="font-weight: bold" Width="179px"></asp:Label>
+                                    </td>
+                                    <td class="style32" style="width: 20%">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        (-)VAT:</td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+
+                                        <asp:Label ID="lbl_vat" runat="server" style="font-weight: bold" 
+                                            Width="179px"></asp:Label>
+                                      
+                                    </td>
+                                    <td style="text-align: left; width: 6%;">
+                                        (-)VAT:</td>
+                                    <td class="style32" style="width: 20%">
+
+                                        <asp:Label ID="lbl_vat_provitional" runat="server" style="font-weight: bold" 
+                                            Width="179px"></asp:Label>
+                                      
+                                    </td>
+                                    <td class="style32" style="width: 20%">
+
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%; height: 17px;">
+                                        (-)AIT:</td>
+                                    <td class="style43" valign="middle" style="width: 17%; height: 17px;">
+
+                                        <asp:Label ID="lbl_ait" runat="server" style="font-weight: bold" 
+                                            Width="179px"></asp:Label>
+                                      
+                                    </td>
+                                    <td style="text-align: left; width: 6%; height: 17px;">
+                                        (-)AIT:</td>
+                                    <td class="style32" style="width: 20%; height: 17px;">
+
+                                        <asp:Label ID="lbl_ait_provitional" runat="server" style="font-weight: bold" 
+                                            Width="179px"></asp:Label>
+                                      
+                                    </td>
+                                    <td class="style32" style="width: 20%; height: 17px;">
+
+                                        </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        (-)ATV:</td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+
+                                        <asp:Label ID="lbl_atv" runat="server" style="font-weight: bold" 
+                                            Width="179px"></asp:Label>
+                                      
+                                    </td>
+                                    <td style="text-align: left; width: 6%;">
+                                        (-)ATV:</td>
+                                    <td class="style32" style="width: 20%">
+
+                                        <asp:Label ID="lbl_atv_provitional" runat="server" style="font-weight: bold" 
+                                            Width="179px"></asp:Label>
+                                    </td>
+                                    <td class="style32" style="width: 20%">
+
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        NET Cost:</td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+
+                                        <asp:Label ID="lbl_net_cost" runat="server" style="font-weight: bold" 
+                                            Width="179px"></asp:Label>
+                                      
+                                    </td>
+                                    <td style="text-align: left; width: 6%;">
+                                        NET Cost:</td>
+                                    <td class="style32" style="width: 20%">
+
+                                        <asp:Label ID="lbl_net_cost_provitional" runat="server" style="font-weight: bold" 
+                                            Width="179px"></asp:Label>
+                                      
+                                    </td>
+                                    <td class="style32" style="width: 20%">
+
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Rate/Qty:</td>
+                                    <td class="style43" valign="middle" style="width: 17%">
+
+                                        <asp:Label ID="lbl_rate" runat="server" style="font-weight: bold" 
+                                            Width="179px"></asp:Label>
+                                      
+                                    </td>
+                                    <td style="text-align: left; width: 6%;">
+                                        Rate/Qty:</td>
+                                    <td class="style32" style="width: 20%">
+
+                                        <asp:Label ID="lbl_rate_provitional" runat="server" style="font-weight: bold" 
+                                            Width="179px"></asp:Label>
+                                      
+                                    </td>
+                                    <td class="style32" style="width: 20%">
+
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        Comments:</td>
+                                    <td valign="middle" colspan="3">
+                                        <asp:TextBox ID="txt_comments" runat="server" Width="472px" 
+                                            TextMode="MultiLine"></asp:TextBox>
+                                    </td>
+                                    <td valign="middle">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        &nbsp;</td>
+                                    <td class="style43" style="width: 17%">
+                                        &nbsp;</td>
+                                    <td style="text-align: right; width: 6%;">
+                                        &nbsp;</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        &nbsp;</td>
+                                    <td class="style43" style="width: 17%; color: #CC3300;">
+                                        &nbsp;</td>
+                                    <td style="text-align: right; width: 6%;">
+                                        &nbsp;</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                    <td class="style32" style="width: 20%">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; width: 17%;">
+                                        &nbsp;</td>
+                                    <td colspan="3">
+                                        <asp:Button ID="btn_save" runat="server" Text="Save" Width="100px" 
+                                            onclick="btn_save_Click" />
+&nbsp;
+&nbsp;
+                                        <asp:Button ID="btn_save_forward" runat="server" Text="Save &amp; Approve (Provisional)" 
+                                            Width="197px" onclick="btn_save_forward_Click" />
+                                    &nbsp;&nbsp;
+                                    &nbsp;<asp:Button ID="btn_complete" runat="server" Text="Save &amp; Approve (Actual)" 
+                                            Width="192px" onclick="btn_complete_Click"  />
+
+                                        &nbsp;</td>
+                                    <td>
+                                        &nbsp;</td>
+                                </tr>
+       </table>     
+            </td>
+        </tr>
+
+    </table>
+     </ContentTemplate>
+         <Triggers>
+             <asp:AsyncPostBackTrigger ControlID="ddlpolist" EventName="SelectedIndexChanged" />
+             <asp:PostBackTrigger ControlID="btn_save" />
+             <asp:PostBackTrigger ControlID="btn_save_forward" />
+             <asp:PostBackTrigger ControlID="btn_complete" />
+
+           
+             <asp:AsyncPostBackTrigger ControlID="txt_invoice_value" EventName="TextChanged" />
+             <asp:AsyncPostBackTrigger ControlID="txt_rate" EventName="TextChanged" />
+             <asp:AsyncPostBackTrigger ControlID="txt_carrying_rate" EventName="TextChanged" />      
+             <asp:AsyncPostBackTrigger ControlID="txt_rate_provitional" EventName="TextChanged" />
+             <asp:AsyncPostBackTrigger ControlID="txt_carrying_rate_provitional" EventName="TextChanged" />
+           
+         </Triggers>
+         </asp:UpdatePanel>
+</asp:Content>
+

@@ -1,0 +1,228 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_fpi_rm_loan_info.aspx.cs" Inherits="frm_fpi_rm_loan_info" Title=""   %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+
+<%@ Register assembly="eWorld.UI.Compatibility" namespace="eWorld.UI.Compatibility" tagprefix="ew1" %>
+
+
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+    <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+                
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+
+            <asp:UpdatePanel ID="pnl1" runat="server">
+<ContentTemplate>
+                
+                <table style="width:100%;">
+                    <tr>
+                        <td class="heading" colspan="4" style="text-align: center; color: #FFFFFF; ">
+                            Raw Material Loan Recovered/Received/Loan to Loan Information Entry</td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: center; " colspan="4">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="style26" colspan="4" style="text-align: center; ">
+                            <asp:Label ID="Label1" runat="server" style="color: #FF3300; font-weight: 700" Text="Label" Visible="False"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">Loan Ref No:</td>
+                        <td class="style1" colspan="3">
+                            <asp:TextBox ID="txtloanrefno" runat="server" Width="350px" ReadOnly="True"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtloanrefno_AutoCompleteExtender" runat="server" BehaviorID="AutoCompleteEx_01" CompletionInterval="100" CompletionListCssClass="autocomplete_completionListElement" CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" DelimiterCharacters="," EnableCaching="false" Enabled="True" MinimumPrefixLength="1" ServiceMethod="GetPartyAdrList" ServicePath="~/modules/commercial/services/autocomplete.asmx" ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtloanrefno">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">Date of Loan:</td>
+                        <td class="style1" style="width: 15%">
+                            <ew1:CalendarPopup ID="dtloandate" runat="server" CssClass="txtbox" Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="76px" AutoPostBack="True" OnDateChanged="dtloandate_DateChanged">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew1:CalendarPopup>
+                        </td>
+                        <td style="text-align: right; width: 183px;">&nbsp;</td>
+                        <td class="style16" style="width: 36%">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Loan type:</td>
+                        <td class="style1" style="width: 15%">
+                            <asp:DropDownList ID="ddlloantype" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlloantype_SelectedIndexChanged" Width="175px">
+                                <asp:ListItem Selected="True"></asp:ListItem>
+                                <asp:ListItem Value="Loan Recovered">Loan Recovered</asp:ListItem>
+                                <asp:ListItem Value="Loan Received">Loan Received</asp:ListItem>
+                                <asp:ListItem Value="Loan to Loan">Loan to Loan</asp:ListItem>
+                            </asp:DropDownList>
+                        </td>
+                        <td style="text-align: left; width: 183px;">
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator6" runat="server" ControlToValidate="ddlloantype" ErrorMessage="*"></asp:RequiredFieldValidator>
+                        </td>
+                        <td class="style19" style="width: 36%">
+                            &nbsp;</td>
+                    </tr>
+
+                    <tr >
+                        
+                        <td class="style26" style="text-align: right; width: 32%; height: 18px;">
+                            
+                            <asp:Label ID="lblpartygivenloan" runat="server" Text="Name of Party(Loan Given):"></asp:Label>
+                        </td>
+                        <td class="style3" colspan="3" style="height: 18px">
+                            <asp:DropDownList ID="ddlpartyloangiven" runat="server" Width="350px">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Name of Item:</td>
+                        <td class="style3" colspan="3">
+                            <asp:DropDownList ID="ddlitem" runat="server" Width="350px">
+                            </asp:DropDownList>
+                            <asp:RequiredFieldValidator ID="itemname" runat="server" ControlToValidate="ddlitem" ErrorMessage="*"></asp:RequiredFieldValidator>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Name of Party(Loan Recovered/Loan Received):</td>
+                        <td class="style3" colspan="3">
+                            <asp:DropDownList ID="ddlpartyloanreceived" runat="server" Width="350px">
+                            </asp:DropDownList>
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator5" runat="server" ControlToValidate="ddlpartyloanreceived" ErrorMessage="*"></asp:RequiredFieldValidator>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Surveyed QTY:</td>
+                        <td class="style3" style="height: 20px; " colspan="3">
+                            <asp:TextBox ID="txtsurveyedqty" runat="server" Width="175px" OnTextChanged="txtsurveyedqty_TextChanged" AutoPostBack="True"></asp:TextBox>
+                            <ajaxToolkit:FilteredTextBoxExtender ID="txtsurveyedqty_FilteredTextBoxExtender" runat="server" Enabled="True" TargetControlID="txtsurveyedqty" FilterMode="ValidChars" FilterType="Custom,numbers" ValidChars=".">
+                            </ajaxToolkit:FilteredTextBoxExtender>
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator3" runat="server" ControlToValidate="txtsurveyedqty" ErrorMessage="*"></asp:RequiredFieldValidator>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%; height: 20px;">MRR Rate(/MT):</td>
+                        <td class="style3" colspan="3" style="height: 20px">
+                            <asp:TextBox ID="txtmprprice" runat="server" Width="175px" OnTextChanged="txtmprprice_TextChanged" AutoPostBack="True"></asp:TextBox>
+                            <ajaxToolkit:FilteredTextBoxExtender ID="txtmprprice_FilteredTextBoxExtender" runat="server" Enabled="True" TargetControlID="txtmprprice" FilterMode="ValidChars" FilterType="Custom,numbers" ValidChars=".">
+                            </ajaxToolkit:FilteredTextBoxExtender>
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator4" runat="server" ControlToValidate="txtmprprice" ErrorMessage="*"></asp:RequiredFieldValidator>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">Amount:</td>
+                        <td class="style3" colspan="3" style="height: 20px">
+                            <asp:Label ID="lblamount" runat="server" style="font-size: x-small; font-weight: 700"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">LC No:</td>
+                        <td class="style3" colspan="3" style="height: 20px">
+                            <asp:TextBox ID="txtlcno" runat="server" Width="350px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Mother Vessel Name:</td>
+                        <td class="style20" colspan="3">
+                            <asp:DropDownList ID="ddlmothervessel" runat="server" Width="350px">
+                            </asp:DropDownList>
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" ControlToValidate="ddlmothervessel" ErrorMessage="*"></asp:RequiredFieldValidator>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%; height: 21px;">Lighter vessel Name:</td>
+                        <td class="style20" colspan="3" style="height: 21px">
+                            <asp:DropDownList ID="ddllightervessel" runat="server" Width="350px">
+                            </asp:DropDownList>
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" ControlToValidate="ddllightervessel" ErrorMessage="*"></asp:RequiredFieldValidator>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Surveyer Name:</td>
+                        <td class="style3" colspan="3">
+                            <asp:TextBox ID="txtsurveyername" runat="server" Width="350px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">Surveyed Ref&nbsp; No:</td>
+                        <td class="style3" colspan="3">
+                            <asp:TextBox ID="txtsurveyedrefno" runat="server" Width="350px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Surveyed Date:</td>
+                        <td class="style1" style="width: 15%">
+                            <ew1:CalendarPopup ID="dtsurveyeddate" runat="server" CssClass="txtbox" Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="76px">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew1:CalendarPopup>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            &nbsp;</td>
+                        <td class="style16" style="width: 36%">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">Remarks:</td>
+                        <td class="style1" colspan="2">
+                            <asp:TextBox ID="txtremarks" runat="server" Width="350px"></asp:TextBox>
+                        </td>
+                        <td class="style16" style="width: 36%">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">&nbsp;</td>
+                        <td class="style1" style="width: 15%">&nbsp;</td>
+                        <td style="text-align: right; width: 183px;">&nbsp;</td>
+                        <td class="style16" style="width: 36%">&nbsp;</td>
+                    </tr>
+                </table>
+
+                 </ContentTemplate>
+   <Triggers>
+   <asp:AsyncPostBackTrigger ControlID="ddlloantype" EventName="SelectedIndexChanged" />
+<asp:AsyncPostBackTrigger ControlID="txtsurveyedqty" EventName="TextChanged" />
+       <asp:AsyncPostBackTrigger ControlID="txtmprprice" EventName="TextChanged" />
+   </Triggers>
+</asp:UpdatePanel>
+            </td>
+        </tr>
+        <tr>
+            <td style="height: 28px; text-align: center;">
+               
+                PI Document(PDF) :
+                             <asp:FileUpload ID="updoc" runat="server" Width="350px" style="margin-left: 0px" />
+               
+            </td>
+        </tr>
+        <tr>
+            <td style="height: 28px; text-align: center;">
+               
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height: 28px; text-align: center;">
+               
+                            <asp:Button ID="btnsave" runat="server" 
+                                Text="Save" Width="100px" OnClick="btnsave_Click"  />
+               
+            </td>
+        </tr>
+        <tr>
+            <td style="height: 28px; text-align: left;">
+               
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height: 92px">
+            </td>
+        </tr>
+    </table>
+  
+</asp:Content>
+

@@ -1,0 +1,74 @@
+using System;
+using System.IO;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDTO;
+using LibraryDAL;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+
+
+public partial class frm_pdf_viewer : System.Web.UI.Page
+{
+   
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+               
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+        
+        if (!Page.IsPostBack)
+        {
+            string doc_id;
+            try
+            {
+                doc_id = Request.QueryString["docid"].ToString();
+            }
+            catch 
+            {
+                doc_id = "";
+            }
+            generate_file(doc_id);
+        }
+        else
+        {
+
+        }
+          
+    }
+
+   
+
+    private void generate_file(string docid)
+    {
+        tbl_file_detailTableAdapter fp = new tbl_file_detailTableAdapter();
+        SCBL2DataSet.tbl_file_detailDataTable dt = new SCBL2DataSet.tbl_file_detailDataTable();
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter  usr=new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter ();
+        string uid = current.UserId.ToString();
+       
+        dt = fp.GetDataByID(docid);
+
+        if (dt.Rows.Count == 0) { tbldet.Visible = false; lblmsg.Visible = true; Showdoc.Visible = false; return; }
+
+        lbltitle.Text = dt[0].file_header.ToString();
+        lblfilename.Text = dt[0].org_file_name.ToString();
+        lbluploadby.Text = usr.GetUserByCode(dt[0].upload_by.ToString())[0].UserName.ToString();
+        lbldatetime.Text = dt[0].upload_datetime.ToString();           
+
+        Showdoc.FilePath = "/CMLCOM/Upload/" + docid + ".pdf";
+       
+
+    }
+
+   
+    
+}
+

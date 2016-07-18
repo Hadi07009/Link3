@@ -1,0 +1,795 @@
+using System;
+using System.IO;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDTO;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBL3DataSetTableAdapters;
+using LibraryDAL.FpiDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+
+public partial class frm_fpi_survey_loan_mrr : System.Web.UI.Page
+{
+   
+    protected void Page_Load(object sender, EventArgs e)
+    {
+      //  Label1.Visible = false;
+        clsStatic.MsgConfirmBox(btn_complete, "Are you sure to Complete MRR ? ");
+        clsStatic.CheckUserAuthentication();
+
+        if (!Page.IsPostBack)
+        {
+            load_pending();
+
+          
+        }
+    }
+
+   
+
+    private void load_info(string selval, int con_no)
+    {
+        tbl_fpi_custom_clearingTableAdapter tacustom = new tbl_fpi_custom_clearingTableAdapter();
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcustom = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+
+        tbl_fpi_consignment_infoTableAdapter cons = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtcon = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+
+        tbl_fpi_cargo_landing_hdrTableAdapter cargo = new tbl_fpi_cargo_landing_hdrTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_hdrDataTable dtcargo_hdr = new FpiDataSet.tbl_fpi_cargo_landing_hdrDataTable();
+
+
+        dtcon = cons.GetDataByRefCon(selval, con_no);
+
+        ctl_fpi_mpr_item_view1.load_all(dtcon[0].mpr_ref_no, dtcon[0].item_code);
+        ctl_fpi_pi_entry_view1.load_details(dtcon[0].ref_no);
+        ctl_fpi_lc_entry_view1.load_data(dtcon[0].ref_no);
+        ctl_fpi_import_consignment_view1.load_data(dtcon[0].ref_no, dtcon[0].consign_no);
+        ctl_fpi_custom_clearing_view1.load_all(dtcon[0].ref_no, dtcon[0].consign_no);
+
+        ctl_fpi_ctg_entry_view1.load_all(dtcon[0].ref_no, dtcon[0].consign_no);
+        ctl_fpi_download1.load_all(dtcon[0].ref_no);
+
+       dtcargo_hdr = cargo.GetDataByRefCon(selval, con_no);
+
+       dtcustom = tacustom.GetDataByRefCon(selval, con_no);
+
+       if (dtcustom[0].ctg_status == "COM") btn_complete.Visible = true; else btn_complete.Visible = false;
+
+
+       if (dtcargo_hdr.Rows.Count == 0)
+       {
+
+           if (dtcon.Rows.Count == 0)
+           {
+               tblmaster.Visible = false;
+               return;
+           }
+           
+       }
+       
+       GridDataBind();
+   
+        
+    }
+
+
+    private void load_pending()
+    {
+        getPendingCustomTableAdapter custom = new getPendingCustomTableAdapter();
+        FpiDataSet.getPendingCustomDataTable dtcustom = new FpiDataSet.getPendingCustomDataTable();
+        InMa_Itm_DetTableAdapter idet = new InMa_Itm_DetTableAdapter();
+        ListItem lst;
+
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcust;
+        tbl_fpi_custom_clearingTableAdapter cust = new tbl_fpi_custom_clearingTableAdapter();
+        string lc_no = "";
+
+
+        int cnt = 0;
+        dtcustom = custom.GetDataBySurStatus("RUN");
+
+        if (dtcustom.Rows.Count == 0)
+        {
+            Response.Redirect("./frm_com_inbox.aspx");
+        }
+
+      
+
+        ddlpolist.Items.Clear();
+        ddlpolist.Items.Add("");
+
+        foreach (LibraryDAL.FpiDataSet.getPendingCustomRow  dr in dtcustom.Rows)
+        {
+            lst = new ListItem();
+
+            dtcust = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+            dtcust = cust.GetDataByRefCon(dr.ref_no.ToString(), 1);
+            if (dtcust.Rows.Count == 0) lc_no = ""; else lc_no = dtcust[0].lc_number;
+
+
+            lst.Value = dr.ref_no.ToString() + ":" + dr.consign_number.ToString();
+            lst.Text = dr.ref_no.ToString() + ":" + dr.consign_number.ToString() + ":" + dr.item_cod.ToString() + ":" + idet.GetItemByCode(dr.item_cod)[0].Itm_Det_desc + ":" + lc_no;
+
+            if (dr.sur_pending > 0)
+            {
+                lst.Attributes.Add("style", "color:red");
+                cnt++;
+            }
+
+            ddlpolist.Items.Add(lst);
+        }
+
+        lblpcount.Text = cnt.ToString();
+        ddlchange();
+
+    }
+  
+  
+    protected void ddlpolist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        ddlchange();
+    }
+
+    private void ddlchange()
+    {
+        tbl_fpi_consignment_infoTableAdapter cons = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtcon = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+         if (ddlpolist.SelectedItem.Text.Split(':').Length < 3)
+         {
+             tblmaster.Visible = false;
+             return;
+         }
+         string selval = ddlpolist.SelectedItem.Text.Split(':')[0];
+         int con_no = Convert.ToInt32(ddlpolist.SelectedItem.Text.Split(':')[1]);
+         dtcon = cons.GetDataByRefCon(selval, con_no);
+        if (dtcon.Rows.Count == 0)
+        {
+            tblmaster.Visible = false;
+            return;
+        }
+        else
+        {                
+            tblmaster.Visible = true;
+            load_info(selval, con_no);
+        }
+         
+    }
+      
+
+   
+
+    private void GridDataBind()
+    {
+
+      string refno=  ddlpolist.SelectedItem.Text.Split(':')[0];
+      int  con_number = Convert.ToInt32 (ddlpolist.SelectedItem.Text.Split(':')[1]);
+      AccCoaGroupCodeSetupTableAdapter party = new AccCoaGroupCodeSetupTableAdapter();
+      AccDataSet.AccCoaGroupCodeSetupDataTable dtparty = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+
+        tbl_fpi_custom_clearingTableAdapter cus = new tbl_fpi_custom_clearingTableAdapter();
+        tbl_fpi_cargo_landing_detTableAdapter cargo_det = new tbl_fpi_cargo_landing_detTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_detDataTable dtcargo_det = new FpiDataSet.tbl_fpi_cargo_landing_detDataTable();
+        ListItem lst;
+        decimal tot = 0, seqty;
+       dtcargo_det = cargo_det.GetDataByRefCon(refno, con_number);
+       gdItem.DataSource = dtcargo_det;
+       gdItem.DataBind();
+
+       dtparty = party.GetDataByForLoanParty("T05", 1);
+
+       for (int i = 0; i < dtcargo_det.Rows.Count; i++)
+       {
+           Label lbl = (Label)gdItem.Rows[i].FindControl("lblsl");
+           Button btn = (Button)gdItem.Rows[i].FindControl("btn_create_mrr");
+           DropDownList ddltype = (DropDownList)gdItem.Rows[i].FindControl("ddlRmUsageType");
+           DropDownList ddldet = (DropDownList)gdItem.Rows[i].FindControl("ddlRmUsageDet");
+           TextBox txtrate = (TextBox)gdItem.Rows[i].FindControl("txt_mrrrate");
+           TextBox txt_sur_qty = (TextBox)gdItem.Rows[i].FindControl("txt_sur_qty");
+           eWorld.UI.CalendarPopup dtsurveydate = (eWorld.UI.CalendarPopup)gdItem.Rows[i].FindControl("dtsurveydate");
+
+
+           if (dtcargo_det[i].survay_quantity == 0) 
+           {
+               btn.Visible = true;
+
+               ddltype.Items.Clear();
+               ddltype.Items.Add("");
+               ddltype.Items.Add("Self Use");
+               ddltype.Items.Add("Loan Given");
+               ddltype.Items.Add("Loan Refund");               
+               ddltype.Enabled = true;
+
+               ddldet.Items.Clear();
+               ddldet.Items.Add("");
+
+               foreach (AccDataSet.AccCoaGroupCodeSetupRow dr in dtparty.Rows)
+               {
+                   lst = new ListItem();
+                   lst.Value = dr.Ccg_Code;
+                   lst.Text = dr.Ccg_Name;
+                   ddldet.Items.Add(lst);
+               }
+
+               ddltype.Enabled = true;              
+               dtsurveydate.SelectedDate = DateTime.Now;
+               dtsurveydate.Enabled = false;
+           }
+           else
+           {
+               btn.Visible = false;
+
+               ddltype.Items.Clear();
+               ddltype.Items.Add(dtcargo_det[i].rm_uses_type);               
+               ddltype.Enabled = false;
+
+               ddldet.Items.Clear();
+               ddldet.Items.Add(dtcargo_det[i].mr_uses_party_detail);
+               ddldet.Enabled = false;
+
+               txtrate.Text = dtcargo_det[i].mrr_rate.ToString();
+               txtrate.Enabled = false;
+
+               txt_sur_qty.Text = dtcargo_det[i].survay_quantity.ToString();
+               txt_sur_qty.Enabled = false;
+                              
+               dtsurveydate.SelectedDate = dtcargo_det[i].Issurvey_dateNull() ? DateTime.Now : dtcargo_det[i].survey_date;
+               dtsurveydate.Enabled = false;
+           }
+
+           lbl.Text  = (i + 1).ToString();           
+
+       }
+    }
+       
+
+    private string get_mat_mrr_ref(string mrrtype, DateTime curdate)
+    {
+        string ref_no = "";
+        InSu_Trn_SetTableAdapter set = new InSu_Trn_SetTableAdapter();
+        ErpDataSet.InSu_Trn_SetDataTable dtset = new ErpDataSet.InSu_Trn_SetDataTable();
+
+        dtset = set.GetDataByType_Code("RC", mrrtype);
+
+        string set_ref = dtset[0].Trn_Set_Iq_Next_No;
+
+        double max_ref = Convert.ToDouble(set_ref);
+        ref_no = dtset[0].Trn_Set_Tr_Pfix + string.Format("{0:00}", Convert.ToInt32(curdate.Year.ToString().Substring(2, 2))) + string.Format("{0:00}", curdate.Month) + "-" + string.Format("{0:00000}", max_ref);
+        return ref_no;
+    }
+
+    private bool create_mrr(string ref_no, int con_no, int seq_no, DateTime sur_date, decimal mrr_qty, string loan_type)
+    {
+        AccCoaGroupCodeSetupTableAdapter ccg = new AccCoaGroupCodeSetupTableAdapter();
+        AccDataSet.AccCoaGroupCodeSetupDataTable dtccg = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        tbl_fpi_cargo_landing_detTableAdapter cargo = new tbl_fpi_cargo_landing_detTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_detDataTable dtcargo = new FpiDataSet.tbl_fpi_cargo_landing_detDataTable();
+
+        InTr_Trn_HdrTableAdapter scfhdr = new InTr_Trn_HdrTableAdapter();
+        InTr_Trn_DetTableAdapter scfdet = new InTr_Trn_DetTableAdapter();
+        InTr_Trn_CalTableAdapter scfcal = new InTr_Trn_CalTableAdapter();
+        InTr_Trn_ExtTableAdapter scfext = new InTr_Trn_ExtTableAdapter();
+        InSu_Trn_SetTableAdapter scfset = new InSu_Trn_SetTableAdapter();
+        InMa_Stk_ValTableAdapter scfstkval = new InMa_Stk_ValTableAdapter();
+        InMa_Stk_CtlTableAdapter scfstkctl = new InMa_Stk_CtlTableAdapter();
+        InMa_Itm_StkTableAdapter scfitmstk = new InMa_Itm_StkTableAdapter();
+        AccTransactionHeaderTableAdapter scfwh = new AccTransactionHeaderTableAdapter();
+        AccTransactionDetailsTableAdapter scfwd = new AccTransactionDetailsTableAdapter();
+        AccTransactionAnalysisTableAdapter scfanal = new AccTransactionAnalysisTableAdapter();
+
+        InMa_Itm_DetTableAdapter itmdet = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitmdet = new ErpDataSet.InMa_Itm_DetDataTable();
+        PuMa_Par_AdrTableAdapter adr = new PuMa_Par_AdrTableAdapter();
+        ErpDataSet.PuMa_Par_AdrDataTable dtadr = new ErpDataSet.PuMa_Par_AdrDataTable();
+        tbl_fpi_approval_dataTableAdapter fpi = new tbl_fpi_approval_dataTableAdapter();
+        FpiDataSet.tbl_fpi_approval_dataDataTable dtfpi = new FpiDataSet.tbl_fpi_approval_dataDataTable();
+        tbl_fpi_custom_clearingTableAdapter cus = new tbl_fpi_custom_clearingTableAdapter();
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcus = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+        tbl_fpi_consignment_infoTableAdapter consign = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtconsign = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+        tbl_fpi_lc_infoTableAdapter lc = new tbl_fpi_lc_infoTableAdapter();
+        FpiDataSet.tbl_fpi_lc_infoDataTable dtlc = new FpiDataSet.tbl_fpi_lc_infoDataTable();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstkctl = new ErpDataSet.InMa_Stk_CtlDataTable();
+        ErpDataSet.InMa_Itm_StkDataTable dtitmstk = new ErpDataSet.InMa_Itm_StkDataTable();
+        budgTableAdapter budg = new budgTableAdapter();
+        AccDataSet.budgDataTable dtbudg = new AccDataSet.budgDataTable();
+
+        PuTr_IN_Hdr_ScblTableAdapter in_hdr = new PuTr_IN_Hdr_ScblTableAdapter();
+
+
+        dtcus = cus.GetDataByRefCon(ref_no, con_no);
+
+        if (dtcus.Rows.Count == 0) { return false; }
+        if (dtcus[0].sur_status != "RUN") { return false; }
+        dtitmdet = itmdet.GetItemByCode(dtcus[0].mpr_itm_code);
+        dtfpi = fpi.GetDataByRef(ref_no);
+        dtadr = adr.GetDataByAdrCode(dtfpi[0].supp_id);
+        dtconsign = consign.GetDataByRefCon(ref_no, con_no);
+        dtlc = lc.GetDataByRef(ref_no);
+
+        DateTime mpr_date = in_hdr.GetDataByRef(dtfpi[0].mpr_ref_no)[0].IN_Hdr_St_DATE;
+        bool flg = true;
+        decimal mrr_rate, mrr_amnt;
+        string dcode = "", narrstr, analgrp;
+        string anal = dtcus[0].lc_number;
+        string anal2, analgrp2;
+        dtcargo = cargo.GetDataByRefConSeq(ref_no, con_no, seq_no);
+        if (dtcargo.Rows.Count == 0) return false;        
+        if (dtcargo[0].mrr_quantity != 0) return false;
+        
+        mrr_rate = dtcus[0].rate_per_quantity_pro;
+        mrr_amnt = mrr_rate * mrr_qty;
+        if ((mrr_rate == 0) || (mrr_qty == 0)) return false;
+
+
+        dtccg = ccg.GetDataByCcgCode(anal);
+        if (dtccg.Rows.Count == 0) { return false; }
+        analgrp = dtccg[0].Ccg_Cost_Id;
+        dcode = itm.GetItemByCode(dtcus[0].mpr_itm_code)[0].T_C2;
+
+        string fate_ref = clsAccounts.GetReferenceNumber("AJV", DateTime.Now);
+        string period = DateTime.Now.Year.ToString() + "/" + string.Format("{0:00}", DateTime.Now.Month);
+        string oprcode = current.UserId.ToString();
+        double trn_jrn_code = Convert.ToDouble(scfwh.GetMaxJrnCode()) + 1;
+        string last_num = scfset.GetDataByType_Code("RC", "CMMRR")[0].Trn_Set_Iq_Next_No.ToString();
+        string next_num = string.Format("{0:00000}", Convert.ToInt32(last_num) + 1);
+        string mrr_ref = get_mat_mrr_ref("CMMRR", DateTime.Now);
+        decimal avrate, stdrate, avval, totqty, totfreeqty, totd, totc, sdtval, latval, gqty, gamnt, grate;
+
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(cargo.Connection);
+
+        try
+        {           
+            cargo.AttachTransaction(myTrn);
+            scfhdr.AttachTransaction(myTrn);
+            scfdet.AttachTransaction(myTrn);
+            scfcal.AttachTransaction(myTrn);
+            scfext.AttachTransaction(myTrn);
+            scfset.AttachTransaction(myTrn);
+            scfstkval.AttachTransaction(myTrn);
+            scfstkctl.AttachTransaction(myTrn);
+            scfitmstk.AttachTransaction(myTrn);
+            scfwh.AttachTransaction(myTrn);
+            scfwd.AttachTransaction(myTrn);
+            scfanal.AttachTransaction(myTrn);
+
+            //mrr
+
+            scfhdr.InsertTrnHdr("RC", "CMMRR", mrr_ref, dtadr[0].Par_Adr_Acc_Code, dtadr[0].par_adr_code, dtadr[0].Par_Adr_Acc_Code, Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", "", "", dtadr[0].par_adr_name, "", "", "", "", "", mrr_amnt, "P", period, oprcode, "", "", "", ref_no, "", "", "", "", "", 0, 0, Convert.ToDateTime(DateTime.Now.ToShortDateString()), null, "", "");
+            scfdet.InsertTrnDet("RC", "CMMRR", mrr_ref, 1, "", 0, dtitmdet[0].Itm_Det_Icode, dtitmdet[0].Itm_Det_desc, dtitmdet[0].Itm_Det_PUSA_unit, "CMGEN", "", dtcus[0].mpr_ref_no, 0, "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), Convert.ToDateTime(DateTime.Now.ToShortDateString()), (double)mrr_qty, 0, mrr_rate, mrr_amnt, mrr_amnt, mrr_rate, mrr_amnt, "", "", "", 0, 0);
+            scfcal.InsertTrnCal("RC", "CMMRR", mrr_ref, 1, "QTY", mrr_qty, null, null, null, null);
+            scfext.InsertTrnExt("RC", "CMMRR", mrr_ref, dtcus[0].lc_number, dtlc[0].bank_name, dtlc[0].bank_branch_name, "", "", "", "", dtconsign[0].Vessel_name, dtconsign[0].arrival_date, ref_no, dtconsign[0].arrival_date, "", "", "", 0, dtcus[0].lc_date, dtfpi[0].mpr_ref_no, Convert.ToDateTime(mpr_date.ToShortDateString()), "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()));
+
+            gqty = Convert.ToDecimal(scfstkctl.GetTotQty(dtitmdet[0].Itm_Det_Icode));
+
+            if (gqty == 0)
+            {
+                gamnt = 0;
+            }
+            else
+            {
+                gamnt = Convert.ToDecimal(scfstkctl.GetTotValue(dtitmdet[0].Itm_Det_Icode));
+            }
+            grate = (gamnt + mrr_amnt) / (gqty + mrr_qty);
+            stdrate = 1;
+            dtstkctl = scfstkctl.GetDataByItemStore(dtitmdet[0].Itm_Det_Icode, "CMGEN");
+            //dtitmstk = scfitmstk.GetDataByItm(dtitmdet[0].Itm_Det_Icode);
+            if (dtstkctl.Rows.Count == 0)
+            {
+                totqty = 0;
+                totfreeqty = 0;
+                avval = 0;
+                avrate = mrr_rate;
+                scfstkctl.InsertStkCtl("CMGEN", dtitmdet[0].Itm_Det_Icode, null, (double)mrr_qty, (double)mrr_qty, 0, 0, 0, 0, 0, 0, 0, mrr_amnt, 0, 0, 0, DateTime.Now, DateTime.Now, "", "", "", 0);
+
+            }
+            else
+            {
+                totqty = (decimal)dtstkctl[0].Stk_Ctl_Cur_Stk;
+                totfreeqty = (decimal)dtstkctl[0].Stk_Ctl_Free_Stk;
+                avval = dtstkctl[0].Stk_Ctl_Ave_Val;
+                avrate = (dtstkctl[0].Stk_Ctl_Ave_Val + mrr_amnt) / (decimal)(dtstkctl[0].Stk_Ctl_Cur_Stk + (double)mrr_qty);
+
+                dtitmstk = scfitmstk.GetDataByItm(dtitmdet[0].Itm_Det_Icode);
+
+                sdtval = ((decimal)dtitmstk[0].Itm_Stk_Cur + mrr_qty) * dtitmstk[0].Itm_Stk_STD_Rat;
+                latval = ((decimal)dtitmstk[0].Itm_Stk_Cur + mrr_qty) * mrr_rate;
+                scfstkctl.UpdateForMrrRec((double)mrr_qty, (double)mrr_qty, mrr_amnt, Convert.ToDateTime(DateTime.Now.ToShortDateString()), sdtval, latval, "CMGEN", dtitmdet[0].Itm_Det_Icode);
+            }
+
+
+
+            if (scfitmstk.UpdateItmStkMrrRec((double)mrr_qty, mrr_rate, grate, dtitmdet[0].Itm_Det_Icode) == 0)
+            {
+                scfitmstk.InsertItmStk(dtitmdet[0].Itm_Det_Icode, (double)mrr_qty, "A", 0, 0, 1, avrate, avrate, "", "", "", 0);
+            }
+            scfstkval.InsertStkVal("RC", "CMMRR", mrr_ref, Convert.ToDateTime(DateTime.Now.ToShortDateString()), dtitmdet[0].Itm_Det_Icode, dtitmdet[0].Itm_Det_desc, "CMGEN", mrr_rate, avrate, stdrate, (double)mrr_qty, "", null, null, null);
+            scfset.UpdateNextNumMrr(last_num, next_num, "RC", "CMMRR");
+
+            // ajv
+            narrstr = "MRR NO: " + mrr_ref + "//FPI REF: " + ref_no + "//Consign no: " + con_no.ToString() + "//LC No: " + anal + "// Qty " + mrr_qty.ToString()+" @ "+ mrr_rate.ToString();
+            dtbudg = new AccDataSet.budgDataTable();
+            dtbudg = budg.GetDataByCoaCode(dcode);
+            if (dtbudg.Rows.Count == 0) { flg = false; goto end_of_trn; }
+            scfwd.InsertDetail(fate_ref, dcode, trn_jrn_code, 1, narrstr, "D", mrr_amnt, "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), dtbudg[0].Gl_Coa_Name, dtbudg[0].Gl_Coa_Type, "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), 0, "", ref_no, mrr_ref, "", 1, 0, "", "", "", "", 0, "");
+            scfanal.InsertAna(fate_ref, dcode, 1, 1, anal, "", "", "", "", analgrp, "", "", "", "");
+
+            dtbudg = new AccDataSet.budgDataTable();
+            dtbudg = budg.GetDataByCoaCode("07.002.001.0002");
+            if (dtbudg.Rows.Count == 0) { flg = false; goto end_of_trn; }
+            scfwd.InsertDetail(fate_ref, "07.002.001.0002", trn_jrn_code, 2, narrstr, "C", mrr_amnt, "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), dtbudg[0].Gl_Coa_Name, dtbudg[0].Gl_Coa_Type, "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), 0, "", ref_no, mrr_ref, "", 1, 0, "", "", "", "", 0, "");
+
+
+            anal2 = dtadr[0].par_adr_code;
+            dtccg = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+            dtccg = ccg.GetDataByCcgCode(anal2);
+            if (dtccg.Rows.Count == 0) { return false; }
+            analgrp2 = dtccg[0].Ccg_Cost_Id;
+            scfanal.InsertAna(fate_ref, "07.002.001.0002", 2, 1, anal, anal2, "", "", "", analgrp, analgrp2, "", "", "");
+
+            scfwh.InsertHeader(fate_ref, trn_jrn_code, "AJV", "J", period, DateTime.Now, Convert.ToDateTime(DateTime.Now.ToShortDateString()), "BDT", 1, oprcode, oprcode, Convert.ToDateTime(DateTime.Now), "L", "", "", "");
+
+            cargo.UpdateForMrr(mrr_qty, sur_date, loan_type, "", "", avrate, mrr_qty, mrr_ref, Convert.ToDateTime(DateTime.Now.ToShortDateString()), fate_ref, ref_no, con_no, seq_no);
+            
+
+            totc = Convert.ToDecimal(scfwd.GetTotAmountByRef("D", fate_ref));
+            totd = Convert.ToDecimal(scfwd.GetTotAmountByRef("C", fate_ref));
+
+            if ((totc == 0) || (totc != totd)) { flg = false; goto end_of_trn; }
+
+        end_of_trn:
+            if (flg)
+            {
+                myTrn.Commit();
+                //myTrn.Rollback();
+            }
+            else
+            {
+                myTrn.Rollback();
+            }
+        }
+        catch (Exception ex)
+        {
+            flg = false;
+            myTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(cargo.Connection, myTrn);
+        }
+        
+       
+        return flg;
+    }
+
+   
+    protected void gdItem_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            Button btn = (Button)e.Row.FindControl("btn_create_mrr");
+            btn.CommandArgument = e.Row.Cells[1].Text;
+            clsStatic.MsgConfirmBox(btn, "Are you sure to Save ? ");
+        }
+    }
+    
+
+    protected void btn_complete_Click(object sender, EventArgs e)
+    {
+        string ref_no = ddlpolist.SelectedItem.Text.Split(':')[0];
+        int con_no = Convert.ToInt32(ddlpolist.SelectedItem.Text.Split(':')[1]);
+        tbl_fpi_cargo_landing_detTableAdapter cargo = new tbl_fpi_cargo_landing_detTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_detDataTable dtcargo = new FpiDataSet.tbl_fpi_cargo_landing_detDataTable();
+
+        tbl_fpi_consignment_infoTableAdapter con = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtcon = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+
+        dtcargo = cargo.GetDataByRefCon(ref_no, con_no);
+        dtcon = con.GetDataByRefCon(ref_no, con_no);
+
+
+        decimal bl_qty = dtcon[0].bill_of_lading_quantity, mrr_qty = 0, given_qty = 0, refund_qty = 0, short_ex_qty = 0, act_qty = 0;
+
+        foreach (FpiDataSet.tbl_fpi_cargo_landing_detRow dr in dtcargo.Rows)
+        {
+            if (dr.survay_quantity == 0) return;
+
+            act_qty += dr.survay_quantity;
+
+            switch (dr.rm_uses_type)
+            {
+                case "Self Use":
+                    mrr_qty += dr.survay_quantity;
+                    break;
+
+                case "Loan Given":
+                    given_qty += dr.survay_quantity;
+                    break;
+
+                case "Loan Refund":
+                    refund_qty += dr.survay_quantity;
+                    break;
+                   
+                default:
+                    mrr_qty += dr.survay_quantity;
+                    break;
+            }
+        }
+
+        short_ex_qty = act_qty - bl_qty;
+
+        lblblqty.Text = bl_qty.ToString("N2");
+        lblmrrqty.Text = mrr_qty.ToString("N2");
+        lblloangivenqty.Text = given_qty.ToString("N2");
+        lblloanrefundqty.Text = refund_qty.ToString("N2");        
+        lblactqty.Text = act_qty.ToString("N2");
+        if (short_ex_qty < 0)
+        {
+            lblshortaccessqty.Text = "(" + (-1 * short_ex_qty).ToString("N2") + ")";
+        }
+        else
+        {
+            lblshortaccessqty.Text = short_ex_qty.ToString("N2");
+        }
+
+
+        ModalPopupExtender5.Show();
+
+       
+    }
+    protected void ddlRmUsageType_OnSelectedIndexChanged(object sender, EventArgs e)
+    {
+        DropDownList ddl = (DropDownList)sender;
+        GridViewRow row = (GridViewRow)ddl.Parent.Parent;
+        int i = row.RowIndex;
+        DropDownList ddldet = (DropDownList)gdItem.Rows[i].FindControl("ddlRmUsageDet");
+        TextBox txtrate = (TextBox)gdItem.Rows[i].FindControl("txt_mrrrate");
+        TextBox txt_sur_qty = (TextBox)gdItem.Rows[i].FindControl("txt_sur_qty");
+        eWorld.UI.CalendarPopup dtsurveydate = (eWorld.UI.CalendarPopup)gdItem.Rows[i].FindControl("dtsurveydate");
+
+        if (ddl.Text == "")
+        {
+            txt_sur_qty.Text = "";
+            txt_sur_qty.Enabled = false;
+            dtsurveydate.Enabled = false;
+        }
+        else
+        {
+            txt_sur_qty.Text = "";
+            txt_sur_qty.Enabled = true;
+            dtsurveydate.Enabled = true;
+        }
+
+        if ((ddl.Text == "Self Use")||(ddl.Text == ""))
+        {
+            ddldet.Text = "";
+            ddldet.Enabled = false;
+            txtrate.Text = "";
+            txtrate.Enabled = false;
+        }
+        else
+        {
+            ddldet.Text = "";
+            ddldet.Enabled = true;
+            txtrate.Text = "";
+            txtrate.Enabled = true;
+        }
+    }
+
+    private bool loan_process(string ref_no, int con_no, int seq_no, string loan_type, DateTime sur_date, decimal sur_qty, string pcode, string pdet, decimal rate)
+    {
+        
+        tbl_fpi_loan_detailsTableAdapter loan = new tbl_fpi_loan_detailsTableAdapter();
+        FpiDataSet.tbl_fpi_loan_detailsDataTable dtloan = new FpiDataSet.tbl_fpi_loan_detailsDataTable();
+
+        AccCoaGroupCodeSetupTableAdapter ccg = new AccCoaGroupCodeSetupTableAdapter();
+        AccDataSet.AccCoaGroupCodeSetupDataTable dtccg = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        tbl_fpi_cargo_landing_detTableAdapter cargo = new tbl_fpi_cargo_landing_detTableAdapter();
+        FpiDataSet.tbl_fpi_cargo_landing_detDataTable dtcargo = new FpiDataSet.tbl_fpi_cargo_landing_detDataTable();
+        tbl_fpi_custom_clearingTableAdapter cus = new tbl_fpi_custom_clearingTableAdapter();
+        FpiDataSet.tbl_fpi_custom_clearingDataTable dtcus = new FpiDataSet.tbl_fpi_custom_clearingDataTable();
+        tbl_fpi_consignment_infoTableAdapter consign = new tbl_fpi_consignment_infoTableAdapter();
+        FpiDataSet.tbl_fpi_consignment_infoDataTable dtconsign = new FpiDataSet.tbl_fpi_consignment_infoDataTable();
+        //tbl_fpi_lc_infoTableAdapter lc = new tbl_fpi_lc_infoTableAdapter();
+        //FpiDataSet.tbl_fpi_lc_infoDataTable dtlc = new FpiDataSet.tbl_fpi_lc_infoDataTable();
+
+        AccTransactionHeaderTableAdapter scfwh = new AccTransactionHeaderTableAdapter();
+        AccTransactionDetailsTableAdapter scfwd = new AccTransactionDetailsTableAdapter();
+        AccTransactionAnalysisTableAdapter scfanal = new AccTransactionAnalysisTableAdapter();
+
+        InMa_Itm_DetTableAdapter itmdet = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitmdet = new ErpDataSet.InMa_Itm_DetDataTable();
+        budgTableAdapter budg = new budgTableAdapter();
+        AccDataSet.budgDataTable dtbudg = new AccDataSet.budgDataTable();
+
+        tbl_fpi_anal_mapTableAdapter map = new tbl_fpi_anal_mapTableAdapter();
+        FpiDataSet.tbl_fpi_anal_mapDataTable dtmap = new FpiDataSet.tbl_fpi_anal_mapDataTable();
+
+
+
+        bool flg = true;
+
+        
+
+        dtcargo = cargo.GetDataByRefConSeq(ref_no, con_no, seq_no);
+        if (dtcargo.Rows.Count == 0) return false;
+
+        dtcus = cus.GetDataByRefCon(ref_no, con_no);
+        if (dtcus.Rows.Count == 0) { return false; }
+        if (dtcus[0].mrr_status != "RUN") { return false; }
+        dtitmdet = itmdet.GetItemByCode(dtcus[0].mpr_itm_code);       
+        dtconsign = consign.GetDataByRefCon(ref_no, con_no);
+        //dtlc = lc.GetDataByRef(ref_no);
+        string fate_ref = clsAccounts.GetReferenceNumber("AJV", sur_date);
+        string period = sur_date.Year.ToString() + "/" + string.Format("{0:00}", sur_date.Month);
+        string oprcode = current.UserId.ToString();
+        double trn_jrn_code = Convert.ToDouble(scfwh.GetMaxJrnCode()) + 1;
+        decimal totd, totc;
+        string narrstr;
+        string loan_ref_no = "RMLN" + sur_date.Year.ToString().Substring(2, 2) + string.Format("{0:00}", sur_date.Month) + "-" + string.Format("{0:000000}", Convert.ToInt32(loan.GetMaxRef()) + 1);
+        string dcode = "07.003.001.0001", ccode = "07.002.001.0002";
+        string anal1 = dtcus[0].lc_number, analgrp1;
+        dtmap = map.GetDataByMapCode(dtcus[0].mpr_itm_code);
+        if (dtmap.Rows.Count == 0) { return false; }
+        string anal2 = dtmap[0].anal_code, analgrp2;
+        
+        //dtmap = new FpiDataSet.tbl_fpi_anal_mapDataTable();
+       // dtmap = map.GetDataByMapCode(pcode);
+        //if (dtmap.Rows.Count == 0) { return false; }
+        string anal3 = pcode, analgrp3;
+
+         SqlTransaction myTrn = HelperTA.OpenTransaction(cargo.Connection);
+
+        try
+        {
+            loan.AttachTransaction(myTrn);            
+            cargo.AttachTransaction(myTrn);            
+            scfwh.AttachTransaction(myTrn);
+            scfwd.AttachTransaction(myTrn);
+            scfanal.AttachTransaction(myTrn);
+
+            loan.InsertLoanInfo(loan_ref_no, loan_type, "P", DateTime.Now, oprcode, sur_date, "SSCML", "Shun Shing Cement Mills Ltd.", pcode, pdet, dtitmdet[0].Itm_Det_Icode, dtitmdet[0].Itm_Det_desc, dtitmdet[0].Itm_Det_PUSA_unit, sur_qty, rate, (sur_qty * rate), dtconsign[0].Vessel_name, dtcargo[0].transport_name, "", "", sur_date, anal1, "", fate_ref, ref_no, con_no, seq_no, "", "");
+
+            narrstr = loan_type + " to " + pcode + ":" + pdet + "//FPI REF: " + ref_no + "//Consign no: " + con_no.ToString() + "//LC No: " + anal1 + "// Qty " + sur_qty.ToString() + " @ " + rate.ToString();
+            
+            dtbudg = new AccDataSet.budgDataTable();
+            dtbudg = budg.GetDataByCoaCode(dcode);
+            if (dtbudg.Rows.Count == 0) { flg = false; goto end_of_trn; }
+            
+            dtccg = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+            dtccg = ccg.GetDataByCcgCode(anal1);
+            if (dtccg.Rows.Count == 0) { flg = false; goto end_of_trn; }
+            analgrp1 = dtccg[0].Ccg_Cost_Id;
+
+            dtccg = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+            dtccg = ccg.GetDataByCcgCode(anal2);
+            if (dtccg.Rows.Count == 0) { flg = false; goto end_of_trn; }
+            analgrp2 = dtccg[0].Ccg_Cost_Id;
+
+            dtccg = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+            dtccg = ccg.GetDataByCcgCode(anal3);
+            if (dtccg.Rows.Count == 0) { flg = false; goto end_of_trn; }
+            analgrp3 = dtccg[0].Ccg_Cost_Id;
+            
+            scfwd.InsertDetail(fate_ref, dcode, trn_jrn_code, 1, narrstr, "D", (sur_qty * rate), "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), dtbudg[0].Gl_Coa_Name, dtbudg[0].Gl_Coa_Type, "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), 0, "", ref_no, loan_ref_no, "", 1, 0, "", "", "", "", 0, "");
+            scfanal.InsertAna(fate_ref, dcode, 1, 1, anal3, anal2, "", "", "", analgrp3, analgrp2, "", "", "");
+
+            dtbudg = new AccDataSet.budgDataTable();
+            dtbudg = budg.GetDataByCoaCode(ccode);
+            if (dtbudg.Rows.Count == 0) { flg = false; goto end_of_trn; }
+            scfwd.InsertDetail(fate_ref, ccode, trn_jrn_code, 2, narrstr, "C", (sur_qty * rate), "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), "", "", "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), dtbudg[0].Gl_Coa_Name, dtbudg[0].Gl_Coa_Type, "", Convert.ToDateTime(DateTime.Now.ToShortDateString()), 0, "", ref_no, loan_ref_no, "", 1, 0, "", "", "", "", 0, "");
+            scfanal.InsertAna(fate_ref, ccode, 2, 1, anal1, anal2, "", "", "", analgrp1, analgrp2, "", "", "");
+
+            scfwh.InsertHeader(fate_ref, trn_jrn_code, "AJV", "J", period, DateTime.Now, sur_date, "BDT", 1, oprcode, oprcode, Convert.ToDateTime(DateTime.Now), "L", "", "", "");
+
+
+            cargo.UpdateForMrr(sur_qty, sur_date, loan_type, pcode, pdet, rate, 0, loan_ref_no, sur_date, fate_ref, ref_no, con_no, seq_no);
+            
+
+
+            totc = Convert.ToDecimal(scfwd.GetTotAmountByRef("D", fate_ref));
+            totd = Convert.ToDecimal(scfwd.GetTotAmountByRef("C", fate_ref));
+
+            if ((totc == 0) || (totc != totd)) { flg = false; goto end_of_trn; }
+
+        end_of_trn:
+            if (flg)
+            {
+                myTrn.Commit();
+                 //myTrn.Rollback();
+            }
+            else
+            {
+                myTrn.Rollback();
+            }
+        }
+        catch (Exception ex)
+        {
+            flg = false;
+            myTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(cargo.Connection, myTrn);
+        }
+
+        
+        
+
+        return flg;
+    }
+
+    protected void btn_create_mrr_Click(object sender, EventArgs e)
+    {
+        Button btn = (Button)sender;
+        int seq_no = Convert.ToInt32(btn.CommandArgument);
+        string ref_no = ddlpolist.SelectedItem.Text.Split(':')[0];
+        int con_no = Convert.ToInt32(ddlpolist.SelectedItem.Text.Split(':')[1]);
+        bool flg = false;
+        GridViewRow row = (GridViewRow)btn.Parent.Parent;
+        int i = row.RowIndex;
+        DropDownList ddltype = (DropDownList)gdItem.Rows[i].FindControl("ddlRmUsageType");
+        DropDownList ddldet = (DropDownList)gdItem.Rows[i].FindControl("ddlRmUsageDet");
+        TextBox txtrate = (TextBox)gdItem.Rows[i].FindControl("txt_mrrrate");
+        TextBox txt_sur_qty = (TextBox)gdItem.Rows[i].FindControl("txt_sur_qty");
+        eWorld.UI.CalendarPopup dtsurveydate = (eWorld.UI.CalendarPopup)gdItem.Rows[i].FindControl("dtsurveydate");
+
+        switch (ddltype.Text)
+        {
+            case "Self Use":
+                flg = create_mrr(ref_no, con_no, seq_no, Convert.ToDateTime(dtsurveydate.SelectedDate.ToShortDateString()), Convert.ToDecimal(txt_sur_qty.Text), ddltype.Text);
+                break;
+
+            case "Loan Given":
+            case "Loan Refund":
+
+                if (ddldet.SelectedValue == "") return;
+                if (txtrate.Text == "") return;
+                if (Convert.ToDecimal(txtrate.Text) <= 0) return;
+                if (txt_sur_qty.Text == "") return;
+                if (Convert.ToDecimal(txt_sur_qty.Text) <= 0) return;
+
+                flg = loan_process(ref_no, con_no, seq_no, ddltype.Text, Convert.ToDateTime(dtsurveydate.SelectedDate.ToShortDateString()), Convert.ToDecimal(txt_sur_qty.Text), ddldet.SelectedValue.ToString(), ddldet.SelectedItem.Text, Convert.ToDecimal(txtrate.Text));
+                break;
+
+            default:
+                flg = false;
+                break;
+        }
+
+
+       
+        if (flg)
+        {
+            ddlchange();
+        }
+
+    }
+    protected void btnok_Click(object sender, EventArgs e)
+    {
+        string ref_no = ddlpolist.SelectedItem.Text.Split(':')[0];
+        int con_no = Convert.ToInt32(ddlpolist.SelectedItem.Text.Split(':')[1]);
+        tbl_fpi_custom_clearingTableAdapter cus = new tbl_fpi_custom_clearingTableAdapter();
+        cus.UpdateSurStatusMrrStatus("COM", "COM", ref_no, con_no);
+        Response.Redirect(Request.Url.AbsoluteUri);
+    }
+}
+
+
+
+
+

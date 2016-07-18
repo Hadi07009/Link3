@@ -1,0 +1,599 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using FreeTextBoxControls;
+
+
+public partial class frm_po_canceling_app : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+        clsStatic.MsgConfirmBox(btnApprove, "Are you sure to Approve this PO");
+        clsStatic.MsgConfirmBox(btnreject, "Are you sure to Reject this PO");        
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor ="FFFFFFF";
+
+        if (!Page.IsPostBack)
+        {
+            tblpodet.Visible = false;
+            load_pending();
+            lblComm.Visible = false;
+        }
+        else
+        {
+            generate_comments(lblref.Text);
+        }
+          
+    }
+
+    private string get_my_app()
+    {
+        User_Role_DefinitionTableAdapter urole = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable udt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        string my_app = "";
+        udt = urole.GetRoleByUser(current.UserId.ToString(),"CANCEL");
+
+        if (udt.Rows.Count > 0) my_app = udt[0].role_as.ToString();
+
+        return my_app;
+    }
+
+    private void load_pending()
+    {
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Hdr_ScblDataTable dthdr = new SCBLDataSet.PuTr_PO_Hdr_ScblDataTable();
+        ListItem lst;
+
+        string my_app = get_my_app();
+        if (my_app == "") return;
+        dthdr = hdr.GetPendingForPoApp("CANCELING", my_app);
+        if (dthdr.Rows.Count == 0)
+        {
+            Response.Redirect("./frm_com_inbox.aspx");
+        }
+
+        lblpcount.Text = dthdr.Rows.Count.ToString();
+
+        ddlpolist.Items.Clear();
+        //ddlpolist.Items.Add("");
+        txtcomments.Text = "";
+        foreach (SCBLDataSet.PuTr_PO_Hdr_ScblRow dr in dthdr.Rows)
+        {
+            lst = new ListItem();
+
+            lst.Value = dr.PO_Hdr_Ref.ToString();
+            lst.Text = dr.PO_Hdr_Ref.ToString() + ":" + dr.PO_Hdr_Code.ToString() + ":" + dr.PO_Hdr_Value.ToString("N2")+ " TK :" + dr.PO_Hdr_Com1.ToString();
+            ddlpolist.Items.Add(lst);
+        }
+        call_ddl_ch();
+
+    }
+
+    private bool copy_for_app(string poref)
+    {
+        bool flg = true;
+        PuTr_PO_Hdr_ReviseTableAdapter clhdr = new PuTr_PO_Hdr_ReviseTableAdapter();
+        PuTr_PO_Det_ReviseTableAdapter cldet = new PuTr_PO_Det_ReviseTableAdapter();
+
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        PuTr_PO_Det_ScblTableAdapter det = new PuTr_PO_Det_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Hdr_ScblRow drhdr = null;
+        SCBLDataSet.PuTr_PO_Det_ScblDataTable dtdet = new SCBLDataSet.PuTr_PO_Det_ScblDataTable();
+
+        try
+        {
+
+            clhdr.DeleteByRef(poref);
+            cldet.DeleteByRef(poref);
+            drhdr = hdr.GetHdrDataByRef(poref)[0];
+            dtdet = det.GetDetByRef(poref);            
+
+            foreach (SCBLDataSet.PuTr_PO_Det_ScblRow dr in dtdet.Rows)
+            {
+                cldet.InsertDetData(dr.PO_Det_Type, dr.PO_Det_Code, dr.PO_Det_Ref, dr.PO_Det_Quo_Ref, dr.PO_Det_Lno,
+                                    dr.PO_Det_Icode, dr.PO_Det_Itm_Desc, dr.PO_Det_Itm_Uom, dr.PO_Det_Lin_Qty,
+                                    dr.PO_Det_Lin_Qty, 0, 0, dr.PO_Det_Lin_Rat, dr.PO_Det_Lin_Rat, dr.PO_Det_Lin_Amt, dr.PO_Det_Lin_Amt,
+                                    dr.PO_Det_Specification, dr.PO_Det_Brand, dr.PO_Det_Origin, dr.PO_Det_Packing, 0);
+            }
+
+            clhdr.InsertHdrData(drhdr.PO_Hdr_Type, drhdr.PO_Hdr_Code, drhdr.PO_Hdr_Ref, drhdr.PO_Hdr_Status,
+                                drhdr.PO_Hdr_Pending, drhdr.PO_Hdr_Template, drhdr.PO_Hdr_Pcode, drhdr.PO_Hdr_Dcode,
+                                drhdr.PO_Hdr_Com1, drhdr.PO_Hdr_DATE, drhdr.PO_Hdr_Value, drhdr.PO_Hdr_Pcode,
+                                drhdr.PO_Hdr_Dcode, drhdr.PO_Hdr_Com1, 0, "");
+
+
+        }
+        catch
+        {
+            flg = false;
+        }
+
+        return flg;
+    }
+  
+    private void Generate_Items(string poref)
+    {
+        //copy data for approval 
+        PuTr_PO_Hdr_ReviseTableAdapter revhdr = new PuTr_PO_Hdr_ReviseTableAdapter();
+        if (revhdr.GetDataByRef(poref).Rows.Count == 0) 
+        {
+           bool flg= copy_for_app(poref);
+           if (!flg) {  tblpodet.Visible = flg; return; }    
+        }
+
+       PuTr_PO_Det_ReviseTableAdapter revdet = new PuTr_PO_Det_ReviseTableAdapter();
+        PuTr_PO_Hdr_ScblTableAdapter pohdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Det_ReviseDataTable dtrevdet = new SCBLDataSet.PuTr_PO_Det_ReviseDataTable();
+        SCBLDataSet.PuTr_PO_Hdr_ScblRow drhdr = null;
+
+        string app_flow;
+        string my_app = get_my_app();
+
+        int seqno = 0;      
+
+       
+        Label lblsl;
+        Label lblicode;
+        Label lblidet;
+        Label lblrate;
+        Label lblqty;
+        Label lbluom;
+        CheckBox chkmpr;
+
+
+        drhdr = pohdr.GetHdrDataByRef(poref)[0];
+        dtrevdet = revdet.GetDataByRef(poref);
+
+        app_flow = drhdr.PO_Hdr_Template.ToString();
+
+        lblref.Text = drhdr.PO_Hdr_Ref.ToString();
+        lblreqtype.Text = drhdr.PO_Hdr_Code.ToString();
+        lblparty.Text = drhdr.PO_Hdr_Com1.ToString();
+        lblamount.Text = drhdr.PO_Hdr_Value.ToString("N2");
+
+        gdItem.DataSource = dtrevdet;
+        gdItem.DataBind();
+
+        foreach (SCBLDataSet.PuTr_PO_Det_ReviseRow dr in dtrevdet.Rows)
+        {
+
+            lblsl = new Label();
+            lblicode=new Label();
+            lblidet=new Label();
+            lblrate = new Label();
+            lblqty=new Label();
+            lbluom = new Label();
+            chkmpr = new CheckBox();
+
+            lblsl = (Label)gdItem.Rows[seqno].FindControl("Label1");
+            lblicode = (Label)gdItem.Rows[seqno].FindControl("Label2");
+            lblidet = (Label)gdItem.Rows[seqno].FindControl("Label3");
+            lbluom = (Label)gdItem.Rows[seqno].FindControl("Label4");
+            lblrate = (Label)gdItem.Rows[seqno].FindControl("Label5");
+            lblqty = (Label)gdItem.Rows[seqno].FindControl("Label6");
+            chkmpr = (CheckBox)gdItem.Rows[seqno].FindControl("CheckBox1");
+                                              
+            lblsl.Text = dr.PO_Det_Lno.ToString();
+            lblicode.Text = dr.PO_Det_Icode.ToString();
+            lblidet.Text = dr.PO_Det_Itm_Desc.ToString();
+            lblrate.Text = dr.PO_Det_Lin_Rat.ToString("N2");
+            lblqty.Text = dr.PO_Det_Lin_Qty.ToString("N2");
+            lbluom.Text = dr.PO_Det_Itm_Uom.ToString();
+            
+            if (dr.PO_Det_AutoMpr==1) chkmpr.Checked = true; else chkmpr.Checked = false;
+            
+                         
+            seqno++;
+        }
+
+        generate_comments(poref);
+        set_permission(app_flow, my_app);
+
+    }
+
+    private void set_permission(string flow_id, string app_code)
+    {
+        tbl_app_ruleTableAdapter app = new tbl_app_ruleTableAdapter();
+        SCBLDataSet.tbl_app_ruleDataTable dt = new SCBLDataSet.tbl_app_ruleDataTable();
+        App_Type_DetTableAdapter apptype = new App_Type_DetTableAdapter();
+
+
+        dt = app.GetDataByTypeApp(flow_id, app_code);
+        string tmpstr;
+
+        ListItem lst;
+        ddlforto.Items.Clear();
+        ddlforto.Items.Add("");
+
+        if (dt.Rows.Count != 0)
+        {
+            if (dt[0].app_per == 1) { btnApprove.Visible = true; }
+            else { btnApprove.Visible = false; }
+
+            if (dt[0].rej_per == 1) { btnreject.Visible = true; }
+            else { btnreject.Visible = false; }
+
+
+
+            tmpstr = dt[0].for_1.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_2.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_3.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_4.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_5.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+        }
+        else
+        {
+            btnApprove.Visible = false;
+            btnreject.Visible = false;
+            btnForward.Visible = false;
+        }
+
+    }
+    
+    private void generate_comments(string ref_no)
+    {
+        tbl_CommentsTableAdapter com = new tbl_CommentsTableAdapter();
+        SCBLDataSet.tbl_CommentsDataTable dt = new SCBLDataSet.tbl_CommentsDataTable();
+
+        dt = com.GetCommentsByRef(ref_no);
+        phcomments.Controls.Clear();
+        foreach (SCBLDataSet.tbl_CommentsRow dr in dt.Rows)
+        {
+            ClientSide_modules_commercial_usercontrols_ctl_comments ctl = (ClientSide_modules_commercial_usercontrols_ctl_comments)LoadControl("./usercontrols/ctl_comments.ascx");
+            Label lblname = (Label)ctl.FindControl("lblname");
+            Label lbldate = (Label)ctl.FindControl("lbldate");
+            HtmlTableCell celcomm = (HtmlTableCell)ctl.FindControl("celcomm");
+            Image imgimage = (Image)ctl.FindControl("imgimage");
+
+            imgimage.ImageUrl = "~/handler/hndImage.ashx?id=" + dr.app_id;
+
+            ctl.ID = "ctl_" + phcomments.Controls.Count.ToString();
+
+            lblname.Text = dr.app_name.ToString() + " (" + dr.app_designation.ToString() + ")";
+            lbldate.Text = dr.app_date.ToString();
+            celcomm.InnerText = dr.gen_comments.ToString();
+
+            if (dr.cur_status == "CANCELING")
+                phcomments.Controls.Add(ctl);
+        }
+    }
+
+
+    private void call_ddl_ch()
+    {
+        string selval = ddlpolist.SelectedValue.ToString();
+
+        if (selval == "") { tblpodet.Visible = false; return; }
+
+        tblpodet.Visible = true;
+
+        Generate_Items(selval);
+    }
+  
+
+    protected void ddlpolist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        call_ddl_ch();
+       
+
+    }
+
+    private bool check_pending_validity(string poref)
+    {
+        bool flg = true;
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        
+        string my_app = get_my_app();
+        if (hdr.CheckPendingValidity(poref, "CANCELING", my_app).Rows.Count == 0) flg = false;
+        return flg;
+    }
+     
+  
+
+    private bool update_status(string po_ref, string pending_for)
+    {
+        bool flg = true;
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        PuTr_PO_Det_ReviseTableAdapter revdet = new PuTr_PO_Det_ReviseTableAdapter();
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr=new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+
+        string uid = current.UserId.ToString();
+        string uname = current.UserName.ToString();
+        string desig = "";
+        string role_as = "";
+        Label lbllno;
+        CheckBox chkmpr;
+        int autompr = 0;
+
+        desig = usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+        role_as = get_my_app();
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(hdr.Connection);
+
+        try
+        {
+            hdr.AttachTransaction(myTrn);
+            revdet.AttachTransaction(myTrn);
+            comm.AttachTransaction(myTrn);
+
+             foreach (GridViewRow gr in gdItem.Rows)
+             {
+                 lbllno = new Label();
+                 chkmpr = new CheckBox();
+                 lbllno = (Label)gr.FindControl("Label1");
+                 chkmpr = (CheckBox) gr.FindControl("CheckBox1");
+
+
+                 if (chkmpr.Checked) autompr = 1;
+                 else autompr = 0;
+
+                 revdet.UpdateAutoMpr(autompr, po_ref, (short) Convert.ToInt32(lbllno.Text));
+             }
+
+            hdr.UpdatePoStatus("CANCELING", pending_for, po_ref);
+            
+            comm.InsertComments(po_ref, 1, DateTime.Now, uid, uname, desig, 1, role_as, "CANCELING", txtcomments.Text, "", pending_for);
+
+            myTrn.Commit();
+        }
+        catch
+        {
+            myTrn.Rollback();
+            flg = false;
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(hdr.Connection, myTrn);
+        }
+
+
+
+        return flg;
+    }
+
+    protected void btnForward_Click(object sender, EventArgs e)
+    {
+        if (txtcomments.Text == "") { lblComm.Text = "Pls type your comments "; lblComm.Visible = true; return; }
+        if (ddlforto.Text == "") { lblComm.Text = "Pls select forward to "; lblComm.Visible = true; return; }        
+        if (check_pending_validity(lblref.Text) == false) Response.Redirect(Request.Url.AbsoluteUri);
+        //if (check_entry_data() == false) { lblComm.Text = "Data Entry Error "; lblComm.Visible = true; return; }
+
+        string poref = lblref.Text;
+        string status = "CANCELING";
+        string sr_no = "";
+        string pending_for = ddlforto.SelectedValue.ToString();
+
+        //if (update_closing_flow_data(poref, status, pending_for, sr_no) == false) 
+        //{
+        //    lblComm.Text = "Data Updating Error "; lblComm.Visible = true; return; 
+        //}
+
+        if (update_status(poref, pending_for) == true)
+        {
+            string sid, sname, msub, mbody;
+            clsEmailReceiver[] rec_det = new clsEmailReceiver[20];
+            int remailcnt = 0;
+            dsLinkoffice.tblUserInfoRow  udr;
+            LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+            User_Role_DefinitionTableAdapter roleta = new User_Role_DefinitionTableAdapter();
+            SCBLDataSet.User_Role_DefinitionDataTable roledt = new SCBLDataSet.User_Role_DefinitionDataTable();
+
+            udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+
+            msub = "A PO canceling request pending for you [" + lblref.Text + "]";
+            mbody = "\n\n " + "A purchase order canceling request pending for you [" + lblref.Text + "]";
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cml/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+            roledt = roleta.GetDataByRole(pending_for);
+
+            foreach (SCBLDataSet.User_Role_DefinitionRow rdr in roledt.Rows)
+            {
+                rec_det[remailcnt] = new clsEmailReceiver();
+                rec_det[remailcnt].Rname = rdr.user_name;
+                rec_det[remailcnt].Rid = usrdal.GetUserByCode(rdr.user_id)[0].UserEmail;
+                remailcnt++;
+            }
+            clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+            Response.Redirect(Request.Url.AbsoluteUri);
+        }
+        else { lblComm.Text = "ERROR"; lblComm.Visible = true;}
+
+
+       
+    }
+
+    
+
+    protected void btnApprove_Click(object sender, EventArgs e)
+    {
+        if (check_pending_validity(lblref.Text) == false) Response.Redirect(Request.Url.AbsoluteUri);
+              
+       
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();      
+        PuTr_PO_Det_ScblTableAdapter det=new PuTr_PO_Det_ScblTableAdapter(); 
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr=new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();        
+        PuTr_IN_Det_ScblTableAdapter indet = new PuTr_IN_Det_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Det_ScblDataTable dtpodet = new SCBLDataSet.PuTr_PO_Det_ScblDataTable();
+
+        PuTr_PO_Det_ReviseTableAdapter revdet = new PuTr_PO_Det_ReviseTableAdapter();
+        
+
+        string uid=current.UserId.ToString();
+        string uname=current.UserName.ToString();
+        string desig="";
+        string role_as="";
+        string mpr_ref;
+
+        desig=usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+        role_as=get_my_app();      
+
+      
+        string pending_for = "";
+        string poref = lblref.Text;
+        Label lbllno, lblicode,lblqty;
+        CheckBox chkmpr;
+        int autompr = 0;
+
+        dtpodet = det.GetDetByRef(poref);
+
+      
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(hdr.Connection);
+       
+        try
+        {
+
+            indet.AttachTransaction(myTrn);          
+            hdr.AttachTransaction(myTrn);
+            revdet.AttachTransaction(myTrn);  
+            comm.AttachTransaction(myTrn);     
+      
+            
+
+
+            hdr.UpdatePoStatus("CANCELED", "", poref);           
+            
+            //update MPR data;
+            foreach (GridViewRow gr in gdItem.Rows)
+            {
+                lbllno = new Label();
+                lblicode = new Label();
+                lblqty = new Label();
+                chkmpr = new CheckBox();
+                lbllno = (Label)gr.FindControl("Label1");
+                lblicode = (Label)gr.FindControl("Label2");
+                lblqty = (Label)gr.FindControl("Label6");
+
+                chkmpr = (CheckBox)gr.FindControl("CheckBox1");
+                if (chkmpr.Checked) autompr = 1;
+                else autompr = 0;
+
+                mpr_ref = det.GetDetByRefItem(poref, lblicode.Text)[0].PO_Det_Pr_Ref;
+
+                revdet.UpdateAutoMpr(autompr, poref, (short)Convert.ToInt32(lbllno.Text));                
+
+                if (autompr == 1)
+                {
+                    //scbl /bal e barbe/ org te kombe / status rou hobe  
+                    indet.UpdateForPoCancel("ROU", mpr_ref, lblicode.Text);
+                }
+            }
+
+            
+            //comments
+            comm.InsertComments(poref, 1, DateTime.Now, uid, uname, desig, 1, role_as, "CANCELED", txtcomments.Text, "", pending_for);
+            
+            myTrn.Commit();            
+        }
+        catch
+        {
+            myTrn.Rollback();            
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(hdr.Connection, myTrn);            
+        }
+
+        Response.Redirect(Request.Url.AbsoluteUri);
+
+
+    }
+
+    
+
+    protected void btnreject_Click(object sender, EventArgs e)
+    {
+        if (check_pending_validity(lblref.Text) == false) Response.Redirect(Request.Url.AbsoluteUri);
+
+        string uid = current.UserId.ToString();
+        string uname = current.UserName.ToString();
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+        string desig = usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+
+        string selpo = ddlpolist.SelectedValue.ToString();
+
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(hdr.Connection);
+
+        try
+        {
+            hdr.AttachTransaction(myTrn);
+            comm.AttachTransaction(myTrn);
+
+            hdr.UpdateRevRej("APP", "", "","P", selpo);
+            comm.InsertComments(selpo, 1, DateTime.Now, uid, uname, desig, 1, "", "CANCELING", txtcomments.Text + "(REJECTED)", "", "");
+                        
+            myTrn.Commit();
+            
+        }
+        catch
+        {
+            myTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(hdr.Connection, myTrn);
+        }
+        Response.Redirect(Request.Url.AbsoluteUri);
+    }
+}
+

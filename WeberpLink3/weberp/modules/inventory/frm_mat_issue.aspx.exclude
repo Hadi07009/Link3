@@ -1,0 +1,324 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_mat_issue.aspx.cs" Inherits="frm_mat_issue" Title=""   EnableEventValidation="false" %>
+<%@ Register Assembly="eWorld.UI, Version=2.0.6.2393, Culture=neutral, PublicKeyToken=24d65337282035f2"
+    Namespace="eWorld.UI" TagPrefix="ew" %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px" colspan="2">
+            </td>
+            <td style="height: 22px; text-align: right;">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="4" style="text-align: center">
+                MATERIAL ISSUE SCREEN</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 24px; text-align: right">
+                <asp:Label ID="lblplant" runat="server" Text="Label" Width="300px"></asp:Label>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 25px; text-align: center">
+                SR LIST:
+                <asp:DropDownList ID="ddlsrlist" runat="server" Width="550px" 
+                    AutoPostBack="True" 
+                    onselectedindexchanged="ddlsrlist_SelectedIndexChanged" CssClass="txtbox">
+                </asp:DropDownList>
+                 
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="2" style="height: 25px; text-align: center">
+                &nbsp;</td>
+            <td class="tbl" colspan="2" style="height: 25px; text-align: left">
+                ISSUE DATE :&nbsp;
+                <ew:CalendarPopup ID="cldmrrdate" runat="server" 
+                    Culture="English (United Kingdom)" DisableTextBoxEntry="False" 
+                    Width="87px" Enabled="False">
+                    <ButtonStyle CssClass="btn2" />
+                </ew:CalendarPopup>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 34px; text-align: left">
+                
+                <asp:UpdatePanel ID="updgrid" runat="server">
+                    <ContentTemplate>
+                <table id="tbldet" runat="server"  style="width:100%;">
+                    <tr>
+                        <td style="width: 31px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 79px">
+                            SR Date</td>
+                        <td style="text-align: left; width: 19px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:Label ID="lbldate" runat="server" Font-Bold="True"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 31px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 79px">
+                            From Dept</td>
+                        <td style="text-align: left; width: 19px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:Label ID="lblfromdept" runat="server" Font-Bold="True"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 31px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 79px">
+                            To&nbsp; Dept</td>
+                        <td style="text-align: left; width: 19px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:Label ID="lbltodept" runat="server" Font-Bold="True"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 31px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 79px">
+                            Reason</td>
+                        <td style="text-align: left; width: 19px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtreason" runat="server"  CssClass="txtbox" Width="295px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 31px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 79px">
+                            Loc of Use</td>
+                        <td style="text-align: left; width: 19px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtlocofuse" runat="server" CssClass="txtbox" Width="293px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 31px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 79px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 19px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 31px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 79px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 19px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            <asp:GridView ID="gdItem" runat="server" AutoGenerateColumns="False" 
+                                BackColor="White" BorderColor="#41519A" BorderStyle="Solid" BorderWidth="1px" 
+                                CellPadding="4" ForeColor="#333333" GridLines="Vertical" 
+                                OnRowDataBound="gdItem_RowDataBound" PageSize="100" SkinID="GridView" 
+                                style="border-color: #e6e6fa; border-width: 1px; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='white', startcolorstr='#D6DCF9', gradienttype='0'); text-align: left;" 
+                                Width="98%">
+                                <EmptyDataRowStyle HorizontalAlign="Left" />
+                                <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" 
+                                    HorizontalAlign="Left" />
+                                <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                                <SelectedRowStyle Font-Bold="True" />
+                                <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" 
+                                    HorizontalAlign="Left" />
+                                <EditRowStyle BackColor="#2461BF" HorizontalAlign="Left" />
+                                <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" 
+                                    Font-Underline="False" HorizontalAlign="Left" />
+                                <RowStyle Font-Size="8pt" />
+                                <Columns>
+                                    <asp:TemplateField HeaderText="Sel">
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox1" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Ref">
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label1" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Icode">
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label2" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Idet">
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label3" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Uom">
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label4" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Store">
+                                        <ItemTemplate>
+                                            <asp:DropDownList ID="DropDownList1" Width="90px" CssClass="txtbox" runat="server" />
+                                         </ItemTemplate>
+                                    </asp:TemplateField>
+                                     <asp:TemplateField HeaderText="Cur Stk">
+                                        <ItemTemplate>
+                                            <asp:Label ID="Labelcstk" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:TemplateField HeaderText="SR Qnty">
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label6" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Avl Qnty">
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label7" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Issue Qty">
+                                        <ItemTemplate>
+                                            <ajaxToolkit:FilteredTextBoxExtender ID="FilteredTextBoxExtender3" 
+                                                runat="server" FilterType="Custom, Numbers" TargetControlID="TextBox1" 
+                                                ValidChars=".">
+                                            </ajaxToolkit:FilteredTextBoxExtender>
+                                            <asp:TextBox ID="TextBox1" runat="server" CssClass="txtbox" Width="100px" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Dbt Code">
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label9" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Dbt Anal">
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label10" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="lno" Visible="false">
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label8" runat="server" Visible="false" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                            </asp:GridView>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 31px; height: 30px;">
+                        </td>
+                        <td style="text-align: left; width: 79px; height: 30px;">
+                        </td>
+                        <td style="text-align: left; width: 19px; height: 30px;">
+                        </td>
+                        <td style="text-align: left; height: 30px;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 31px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 79px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 19px">
+                            &nbsp;</td>
+                        <td style="text-align: center">
+                            <asp:Button ID="btnProceed" runat="server" CssClass="btn2" 
+                                onclick="btnProceed_Click" Text="Proceed" Visible="False" Width="117px" />
+                        </td>
+                    </tr>
+                </table>
+                    </ContentTemplate>
+                <Triggers>
+                    <asp:PostBackTrigger ControlID="btnProceed" />
+                    <asp:AsyncPostBackTrigger ControlID="ddlsrlist" EventName="SelectedIndexChanged" />
+                </Triggers>
+                
+             </asp:UpdatePanel>     
+                
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 22px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 22px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 8px; text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 8px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 8px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="height: 8px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="4" style="text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td colspan="2">
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+    
+                
+<script type="text/javascript">
+
+
+         function ColorRow(CheckBoxObj) {
+             if (CheckBoxObj.checked == true) {
+                 CheckBoxObj.parentElement.parentElement.style.backgroundColor = '#88AAFF';
+             }
+             else {
+                 CheckBoxObj.parentElement.parentElement.style.backgroundColor = '#F8E5A1';
+             }
+
+         }
+
+         function ShowHideField(DecisionControl, ToggleControl1, ToggleControl2) {
+
+             if (DecisionControl.checked == true) {
+                 ToggleControl1.style.visibility = 'visible';
+                 ToggleControl2.style.visibility = 'visible';
+
+             }
+             else {
+                 ToggleControl1.style.visibility = 'hidden';
+                 ToggleControl2.style.visibility = 'hidden';
+
+             }
+
+         }
+                          
+        
+    </script>
+
+</asp:Content>
+

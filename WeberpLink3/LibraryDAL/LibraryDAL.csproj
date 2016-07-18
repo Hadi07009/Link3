@@ -1,0 +1,566 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C386BFF1-C557-4A4F-8077-D04BDED3448B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>LibraryDAL</RootNamespace>
+    <AssemblyName>LibraryDAL</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <PublishUrl>http://localhost/LibraryDAL/</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Link3FrameWork">
+      <HintPath>..\RTD\Bin\Link3FrameWork.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AccDataSet.cs">
+      <DependentUpon>AccDataSet.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="AccDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AccDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="AccDataSet2.cs">
+      <DependentUpon>AccDataSet2.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="AccDataSet2.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AccDataSet2.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="clsAccounts.cs" />
+    <Compile Include="clsDbHelper.cs" />
+    <Compile Include="clsSystem.cs" />
+    <Compile Include="dsFixedAsset\dsFas.cs">
+      <DependentUpon>dsFas.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="dsFixedAsset\dsFas.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dsFas.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="dsInventory\dsInventoryJV.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dsInventoryJV.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="dsInventory\dsInventoryMaster.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dsInventoryMaster.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="dsInventory\dsInventoryTransaction.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dsInventoryTransaction.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="dsLinkoffice.cs">
+      <DependentUpon>dsLinkoffice.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="dsLinkoffice.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dsLinkoffice.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="dsMas.cs">
+      <DependentUpon>dsMas.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="dsMas.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dsMas.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="dsMovement.cs">
+      <DependentUpon>dsMovement.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="dsMovement.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dsMovement.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="dsRtd.cs">
+      <DependentUpon>dsRtd.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="dsRtd.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dsRtd.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="dsScf.cs">
+      <DependentUpon>dsScf.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="dsScf.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dsScf.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="dsTransport.cs">
+      <DependentUpon>dsTransport.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="dsTransport.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dsTransport.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="dsTrip.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dsTrip.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="ErpDataSet.cs">
+      <DependentUpon>ErpDataSet.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ErpDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ErpDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="FpiDataSet.cs">
+      <DependentUpon>FpiDataSet.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FpiDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>FpiDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="PasswordEncryptDAL.cs" />
+    <Compile Include="ProdDataSet.cs">
+      <DependentUpon>ProdDataSet.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ProdDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProdDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="ProdReportDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProdReportDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="SCBL2DataSet.cs">
+      <DependentUpon>SCBL2DataSet.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SCBL2DataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SCBL2DataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="SCBL3DataSet.cs">
+      <DependentUpon>SCBL3DataSet.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SCBL3DataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SCBL3DataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="SCBLDataSet.cs">
+      <DependentUpon>SCBLDataSet.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SCBLDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SCBLDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="SCBLIN.cs">
+      <DependentUpon>SCBLIN.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SCBLIN.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SCBLIN.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="SCBLQry.cs">
+      <DependentUpon>SCBLQry.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SCBLQry.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SCBLQry.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="ScmDataSet.cs">
+      <DependentUpon>ScmDataSet.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ScmDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ScmDataSet.xsd</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AccDataSet.xsc">
+      <DependentUpon>AccDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="AccDataSet.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>AccDataSet.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="AccDataSet.xss">
+      <DependentUpon>AccDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="AccDataSet2.xsc">
+      <DependentUpon>AccDataSet2.xsd</DependentUpon>
+    </None>
+    <None Include="AccDataSet2.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>AccDataSet2.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="AccDataSet2.xss">
+      <DependentUpon>AccDataSet2.xsd</DependentUpon>
+    </None>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="dsFixedAsset\dsFas.xsc">
+      <DependentUpon>dsFas.xsd</DependentUpon>
+    </None>
+    <None Include="dsFixedAsset\dsFas.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dsFas.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="dsFixedAsset\dsFas.xss">
+      <DependentUpon>dsFas.xsd</DependentUpon>
+    </None>
+    <None Include="dsInventory\dsInventoryJV.xsc">
+      <DependentUpon>dsInventoryJV.xsd</DependentUpon>
+    </None>
+    <None Include="dsInventory\dsInventoryJV.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dsInventoryJV.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="dsInventory\dsInventoryJV.xss">
+      <DependentUpon>dsInventoryJV.xsd</DependentUpon>
+    </None>
+    <None Include="dsInventory\dsInventoryMaster.xsc">
+      <DependentUpon>dsInventoryMaster.xsd</DependentUpon>
+    </None>
+    <None Include="dsInventory\dsInventoryMaster.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dsInventoryMaster.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="dsInventory\dsInventoryMaster.xss">
+      <DependentUpon>dsInventoryMaster.xsd</DependentUpon>
+    </None>
+    <None Include="dsInventory\dsInventoryTransaction.xsc">
+      <DependentUpon>dsInventoryTransaction.xsd</DependentUpon>
+    </None>
+    <None Include="dsInventory\dsInventoryTransaction.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dsInventoryTransaction.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="dsInventory\dsInventoryTransaction.xss">
+      <DependentUpon>dsInventoryTransaction.xsd</DependentUpon>
+    </None>
+    <None Include="dsLinkoffice.xsc">
+      <DependentUpon>dsLinkoffice.xsd</DependentUpon>
+    </None>
+    <None Include="dsLinkoffice.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dsLinkoffice.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="dsLinkoffice.xss">
+      <DependentUpon>dsLinkoffice.xsd</DependentUpon>
+    </None>
+    <None Include="dsMas.xsc">
+      <DependentUpon>dsMas.xsd</DependentUpon>
+    </None>
+    <None Include="dsMas.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dsMas.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="dsMas.xss">
+      <DependentUpon>dsMas.xsd</DependentUpon>
+    </None>
+    <None Include="dsMovement.xsc">
+      <DependentUpon>dsMovement.xsd</DependentUpon>
+    </None>
+    <None Include="dsMovement.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dsMovement.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="dsMovement.xss">
+      <DependentUpon>dsMovement.xsd</DependentUpon>
+    </None>
+    <None Include="dsRtd.xsc">
+      <DependentUpon>dsRtd.xsd</DependentUpon>
+    </None>
+    <None Include="dsRtd.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dsRtd.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="dsRtd.xss">
+      <DependentUpon>dsRtd.xsd</DependentUpon>
+    </None>
+    <None Include="dsScf.xsc">
+      <DependentUpon>dsScf.xsd</DependentUpon>
+    </None>
+    <None Include="dsScf.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dsScf.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="dsScf.xss">
+      <DependentUpon>dsScf.xsd</DependentUpon>
+    </None>
+    <None Include="dsTransport.xsc">
+      <DependentUpon>dsTransport.xsd</DependentUpon>
+    </None>
+    <None Include="dsTransport.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dsTransport.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="dsTransport.xss">
+      <DependentUpon>dsTransport.xsd</DependentUpon>
+    </None>
+    <None Include="dsTrip.xsc">
+      <DependentUpon>dsTrip.xsd</DependentUpon>
+    </None>
+    <None Include="dsTrip.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dsTrip.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="dsTrip.xss">
+      <DependentUpon>dsTrip.xsd</DependentUpon>
+    </None>
+    <None Include="ErpDataSet.xsc">
+      <DependentUpon>ErpDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="ErpDataSet.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>ErpDataSet.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="ErpDataSet.xss">
+      <DependentUpon>ErpDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="FpiDataSet.xsc">
+      <DependentUpon>FpiDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="FpiDataSet.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>FpiDataSet.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="FpiDataSet.xss">
+      <DependentUpon>FpiDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="ProdDataSet.xsc">
+      <DependentUpon>ProdDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="ProdDataSet.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>ProdDataSet.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="ProdDataSet.xss">
+      <DependentUpon>ProdDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="ProdReportDataSet.xsc">
+      <DependentUpon>ProdReportDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="ProdReportDataSet.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>ProdReportDataSet.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="ProdReportDataSet.xss">
+      <DependentUpon>ProdReportDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="SCBL2DataSet.xsc">
+      <DependentUpon>SCBL2DataSet.xsd</DependentUpon>
+    </None>
+    <None Include="SCBL2DataSet.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>SCBL2DataSet.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="SCBL2DataSet.xss">
+      <DependentUpon>SCBL2DataSet.xsd</DependentUpon>
+    </None>
+    <None Include="SCBL3DataSet.xsc">
+      <DependentUpon>SCBL3DataSet.xsd</DependentUpon>
+    </None>
+    <None Include="SCBL3DataSet.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>SCBL3DataSet.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="SCBL3DataSet.xss">
+      <DependentUpon>SCBL3DataSet.xsd</DependentUpon>
+    </None>
+    <None Include="SCBLDataSet.xsc">
+      <DependentUpon>SCBLDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="SCBLDataSet.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>SCBLDataSet.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="SCBLDataSet.xss">
+      <DependentUpon>SCBLDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="SCBLIN.xsc">
+      <DependentUpon>SCBLIN.xsd</DependentUpon>
+    </None>
+    <None Include="SCBLIN.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>SCBLIN.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="SCBLIN.xss">
+      <DependentUpon>SCBLIN.xsd</DependentUpon>
+    </None>
+    <None Include="SCBLQry.xsc">
+      <DependentUpon>SCBLQry.xsd</DependentUpon>
+    </None>
+    <None Include="SCBLQry.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>SCBLQry.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="SCBLQry.xss">
+      <DependentUpon>SCBLQry.xsd</DependentUpon>
+    </None>
+    <None Include="ScmDataSet.xsc">
+      <DependentUpon>ScmDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="ScmDataSet.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>ScmDataSet.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="ScmDataSet.xss">
+      <DependentUpon>ScmDataSet.xsd</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

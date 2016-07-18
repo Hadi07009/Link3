@@ -1,0 +1,408 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using AjaxControlToolkit;
+
+public partial class frm_po_close_ini : System.Web.UI.Page
+{
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.MsgConfirmBox(btnsend, "Are you sure to send to cancel this PO ?");
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor ="FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            tbl_po_det.Visible = false;
+            load_po();
+        }
+        else
+        {
+        }        
+    }
+
+    private string[] get_plant(string apptype)
+    {
+        User_Role_DefinitionTableAdapter urole = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable udt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        string[] plant_list;
+        udt = urole.GetDataByUserCodeRole(current.UserId.ToString(), apptype);
+
+        if (udt.Rows.Count > 0)
+            plant_list = udt[0].plant_list.Split(',');
+        else
+            return null;
+
+        return plant_list;
+    }
+
+    private void load_po()
+    {
+        PuTr_PO_Hdr_ScblTableAdapter acc = new PuTr_PO_Hdr_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Hdr_ScblDataTable dt = new SCBLDataSet.PuTr_PO_Hdr_ScblDataTable();
+
+        ListItem lst;
+
+        ddlpolist.Items.Clear();
+        ddlpolist.Items.Add("");
+
+        string plnts = "Plants: ";
+        int i, len, cnt, indx;
+        string[] plant_list = get_plant("POCLI");
+
+        if (plant_list == null)
+        {
+            lblplant.Text = "";
+            return;
+        }
+
+        len = plant_list.Length;
+
+        for (i = 0; i < len; i++)
+        {
+            if (plant_list[i].ToString() != "")
+                plnts = plnts + plant_list[i].ToString() + ", ";
+        }
+
+        lblplant.Text = plnts;
+
+        dt = acc.GetDataByStatus("APP");
+
+        cnt = dt.Rows.Count;
+        for (indx = cnt; indx > 0; indx--)
+        {
+
+            for (i = 0; i < len; i++)
+            {
+                if (dt[indx - 1].PO_Hdr_Code.Substring(0, 2) == plant_list[i])
+                    goto nextcheck1;
+            }
+            dt.RemovePuTr_PO_Hdr_ScblRow(dt[indx - 1]);
+
+        nextcheck1: ;
+        }
+          
+
+       
+
+        foreach (SCBLDataSet.PuTr_PO_Hdr_ScblRow dr in dt.Rows)
+        {
+            lst = new ListItem();            
+            lst.Value = dr.PO_Hdr_Ref.ToString();
+            lst.Text = dr.PO_Hdr_Ref.ToString() + ":" + dr.PO_Hdr_Code.ToString() + ": " + dr.PO_Hdr_Com1.ToString();
+            ddlpolist.Items.Add(lst);
+        }
+
+
+    }
+
+    private void generate_detail_data(string po_ref)
+    {
+        tbl_tac_logTableAdapter log = new tbl_tac_logTableAdapter();
+        SCBLDataSet.tbl_tac_logDataTable dtlog = new SCBLDataSet.tbl_tac_logDataTable();
+
+        quotation_detTableAdapter quo = new quotation_detTableAdapter();
+        SCBLDataSet.quotation_detRow drq;
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        PuTr_PO_Det_ScblTableAdapter det = new PuTr_PO_Det_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Det_ScblDataTable dtdet = new SCBLDataSet.PuTr_PO_Det_ScblDataTable();
+        SCBLDataSet.PuTr_PO_Hdr_ScblRow hdr_dr;
+        int cnt = 0;
+        int gcnt, scnt, pcnt;
+        string tac_ref, genstr, spestr, paystr;
+
+        hdr_dr = hdr.GetHdrDataByRef(po_ref)[0];
+
+        lblref.Text = hdr_dr.PO_Hdr_Ref.ToString();
+        lblreqtype.Text = hdr_dr.PO_Hdr_Code.ToString();
+
+        if(hdr_dr.PO_Hdr_Ref.ToString().Substring(0, 1)=="L")
+            lblpurtype.Text = "LPO";
+        else
+            if (hdr_dr.PO_Hdr_Ref.ToString().Substring(0, 1) == "S")
+                lblpurtype.Text = "SPO";
+        else
+            lblpurtype.Text = "FPO";
+
+        lblparty.Text = hdr_dr.PO_Hdr_Pcode.ToString() + ": " + hdr_dr.PO_Hdr_Com1.ToString();
+        lblamount.Text = hdr_dr.PO_Hdr_Value.ToString("N2");
+        lblinward.Text = NumerictowordClass.FNumber(hdr_dr.PO_Hdr_Value.ToString("N2"));
+
+        // add detail data;
+
+        celdetail.Controls.Clear();
+        dtdet = det.GetDetByRef(hdr_dr.PO_Hdr_Ref);
+
+        foreach (SCBLDataSet.PuTr_PO_Det_ScblRow det_dr in dtdet.Rows)
+        {
+            cnt++;
+
+            ClientSide_modules_commercial_usercontrols_ctl_po_item_view ctldet = (ClientSide_modules_commercial_usercontrols_ctl_po_item_view)LoadControl("./usercontrols/ctl_po_item_view.ascx");
+
+            Label lblsl = (Label)ctldet.FindControl("lblsl");
+            Label lblproduct = (Label)ctldet.FindControl("lblproduct");
+            Label lblrate = (Label)ctldet.FindControl("lblrate");
+            Label lblqty = (Label)ctldet.FindControl("lblqty");
+            Label lbliamount = (Label)ctldet.FindControl("lbliamount");
+            Label lbliinward = (Label)ctldet.FindControl("lbliinward");
+            
+            HtmlTableCell celspe = (HtmlTableCell)ctldet.FindControl("celspe");
+            HtmlTableCell celbrand = (HtmlTableCell)ctldet.FindControl("celbrand");
+            HtmlTableCell celorigin = (HtmlTableCell)ctldet.FindControl("celorigin");
+            HtmlTableCell celpacking = (HtmlTableCell)ctldet.FindControl("celpacking");
+
+
+            ctldet.ID = "celdetail_" + celdetail.Controls.Count.ToString();
+
+            lblsl.Text = cnt.ToString() + ".";
+            lblproduct.Text = det_dr.PO_Det_Icode.ToString() + ": " + det_dr.PO_Det_Itm_Desc.ToString();
+            lblrate.Text = det_dr.PO_Det_Lin_Rat.ToString("N2");
+            lblqty.Text = det_dr.PO_Det_Lin_Qty.ToString("N2");
+            lbliamount.Text = det_dr.PO_Det_Lin_Amt.ToString("N2");
+            lbliinward.Text = NumerictowordClass.FNumber(det_dr.PO_Det_Lin_Amt.ToString("N2"));
+
+            if (lblpurtype.Text == "LPO")
+            {
+                if (quo.GetDataByRefParty(det_dr.PO_Det_Quo_Ref, hdr_dr.PO_Hdr_Dcode.ToString()).Count != 0)
+                {
+                    drq = quo.GetDataByRefParty(det_dr.PO_Det_Quo_Ref, hdr_dr.PO_Hdr_Dcode.ToString())[0];
+                    celspe.InnerText = drq.specification;
+                    celbrand.InnerText = drq.product_brand;
+                    celorigin.InnerText = drq.origin;
+                    celpacking.InnerText = drq.packing;
+                }
+            }
+            celdetail.Controls.Add(ctldet);
+        }
+
+        genstr = "";
+        spestr = "";
+        paystr = "";
+        gcnt = 0;
+        scnt = 0;
+        pcnt = 0;
+        tac_ref = hdr_dr.PO_Hdr_Ref.ToString();
+
+        dtlog = log.GetDataByRef(tac_ref);
+
+        foreach (SCBLDataSet.tbl_tac_logRow drlog in dtlog.Rows)
+        {
+            switch (drlog.tac_type)
+            {
+                case "gen":
+                    {
+                        gcnt++;
+                        genstr = genstr + gcnt.ToString() + ". " + drlog.content_det.ToString() + "<br />";
+                        break;
+                    }
+
+                case "spe":
+                    {
+                        scnt++;
+                        spestr = spestr + scnt.ToString() + ". " + drlog.content_det.ToString() + "<br />";
+                        break;
+                    }
+
+                case "pay":
+                    {
+                        pcnt++;
+                        paystr = paystr + pcnt.ToString() + ". " + drlog.content_det.ToString() + "<br />";
+                        break;
+                    }
+
+            }
+        }
+        celgent.InnerHtml = genstr;
+        celspet.InnerHtml = spestr;
+        celpayt.InnerHtml = paystr;
+
+    }
+    
+
+    protected void ddlpolist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        string selpo = ddlpolist.SelectedValue.ToString();
+        if (selpo == "")
+        {
+            tbl_po_det.Visible = false;
+        }
+        else
+        {
+            tbl_po_det.Visible = true;
+            generate_detail_data(selpo);
+        }
+
+    }
+
+    private string get_flow_tepmate(string req_type, string cash_type, decimal totval)
+    {
+        App_Flow_DefinitionTableAdapter app = new App_Flow_DefinitionTableAdapter();
+        SCBLDataSet.App_Flow_DefinitionDataTable dt = new SCBLDataSet.App_Flow_DefinitionDataTable();
+
+        string tem_id = "";
+        dt = app.GetTemplate("CLOSE", req_type, cash_type, totval);
+
+        if (dt.Rows.Count > 0)
+            tem_id = dt[0].flow_id.ToString();
+
+
+        return tem_id;
+    }
+    
+    private string get_pend_for(string selval)
+    {
+        string pend_for = "";
+        tbl_app_ruleTableAdapter tbl = new tbl_app_ruleTableAdapter();
+        try
+        {
+            pend_for = tbl.GetDataByTypeSeq(selval, 1)[0].app_id.ToString();
+        }
+        catch
+        {
+            pend_for = "";
+        }
+        return pend_for;
+    }
+
+
+    private bool check_rev_validity(string po_ref)
+    {
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        PuTr_PO_Det_ScblTableAdapter det = new PuTr_PO_Det_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Det_ScblDataTable dtdet = new SCBLDataSet.PuTr_PO_Det_ScblDataTable();
+        bool flg = false;
+
+        dtdet = det.GetDetByRef(po_ref);
+
+        foreach (SCBLDataSet.PuTr_PO_Det_ScblRow dr in dtdet.Rows)
+        {
+            if (dr.PO_Det_Org_QTY != 0) flg = false;
+        }
+
+        if (hdr.GetHdrDataByRef(po_ref)[0].PO_Hdr_Status.ToString() == "APP") flg = true;
+
+
+        return flg;
+    }
+    
+    
+    protected void btnsend_Click(object sender, EventArgs e)
+    {
+        bool flg = false;
+        string selpo = ddlpolist.SelectedValue.ToString();
+        //if (check_rev_validity(selpo) == false)
+        //{
+        //    Response.Write("Not Valid for PO Cancel");
+        //    return;
+        //}
+
+        string[] tmp = ddlpolist.SelectedItem.Text.Split(':');
+        
+        string uid = current.UserId.ToString();
+        string uname = current.UserName.ToString();
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+        string desig = usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+       
+        string req_type = tmp[1].ToString(); 
+        string pur_type =tmp[0].ToString().Substring(0,1);
+
+        switch (pur_type)
+        {
+            case "L":
+                pur_type = "LPO";
+                break;
+
+            case "S":
+                pur_type = "SPO";
+                break;
+
+            case "F":
+                pur_type = "FPO";
+                break;
+
+        }
+
+        decimal totval= Convert.ToDecimal(lblamount.Text);
+
+        string tem_id = get_flow_tepmate(req_type, pur_type, totval);
+        string next_app_id = get_pend_for(tem_id);
+
+        if ((tem_id == "") || (next_app_id == "")) return;
+
+        //POCLI:po closing initiation
+        string role_as = "POCLI";
+
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();        
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(hdr.Connection);
+
+        try
+        {
+            hdr.AttachTransaction(myTrn);            
+            comm.AttachTransaction(myTrn);
+
+            hdr.UpdateFromIni(tem_id, "CLOSING", next_app_id, uid.Substring(0, 3), totval, "P", selpo);
+            comm.InsertComments(selpo, 1, DateTime.Now, uid, uname, desig, 1, role_as, "CLOSING", txtcomments.Text, "", next_app_id);
+            
+            //myTrn.Rollback();
+            myTrn.Commit();
+            flg = true;
+        }
+        catch
+        {
+            myTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(hdr.Connection, myTrn);
+        }
+
+        if (flg)
+        {
+
+            string sid, sname, msub, mbody;
+            clsEmailReceiver[] rec_det = new clsEmailReceiver[20];
+            int remailcnt = 0;
+            dsLinkoffice.tblUserInfoRow  udr;           
+            LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+            User_Role_DefinitionTableAdapter roleta = new User_Role_DefinitionTableAdapter();
+            SCBLDataSet.User_Role_DefinitionDataTable roledt = new SCBLDataSet.User_Role_DefinitionDataTable();
+
+            udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+
+            msub = "A PO close request submitted and pending for you [" + lblref.Text + "]";
+            mbody = "\n\n " + "A purchase order close request submitted and pending for you [" + lblref.Text + "]";
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cml/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+            roledt = roleta.GetDataByRole(next_app_id);
+
+            foreach (SCBLDataSet.User_Role_DefinitionRow rdr in roledt.Rows)
+            {
+                rec_det[remailcnt] = new clsEmailReceiver();
+                rec_det[remailcnt].Rname = rdr.user_name;
+                rec_det[remailcnt].Rid = usrdal.GetUserByCode(rdr.user_id)[0].UserEmail;
+                remailcnt++;
+            }
+            clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+
+        }
+
+        Response.Redirect(Request.Url.AbsoluteUri);
+
+    }
+}

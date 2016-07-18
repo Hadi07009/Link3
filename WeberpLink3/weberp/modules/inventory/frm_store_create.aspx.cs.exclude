@@ -1,0 +1,134 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using LibraryDAL;
+using LibraryDAL.ErpDataSetTableAdapters;
+
+public partial class frm_store_create : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        //current.UserId = "MON";
+        //current.UserName = "Monjurul";
+
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btnupdate, "Are you sure to add / Update ?");
+        
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            clear_all();
+            load_loc_data();
+            load_all_data();
+        }
+
+    }
+
+    private void load_all_data()
+    {
+        InMa_Str_LocTableAdapter loc = new InMa_Str_LocTableAdapter();
+        ErpDataSet.InMa_Str_LocDataTable dt = new ErpDataSet.InMa_Str_LocDataTable();
+
+
+        dt = loc.GetAllStore();
+
+        gdstorer.DataSource = dt;
+        gdstorer.DataBind();
+
+ 
+    }
+
+    private void load_loc_data()
+    {
+        ListItem lst;
+
+        
+        ddlloc.Items.Add("");
+
+        lst = new ListItem();
+        lst.Value = "HEAD";
+        lst.Text = "HEAD OFFICE";
+        ddlloc.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Value = "FACT";
+        lst.Text = "FACTORY OFFICE";
+        ddlloc.Items.Add(lst);
+
+    }
+
+    private void clear_all()
+    {
+
+        txtcode.Text = "";
+        txtname.Text = "";
+        ddlloc.SelectedIndex = 0;
+    }
+
+ 
+    
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        InMa_Str_LocTableAdapter loc = new InMa_Str_LocTableAdapter();
+
+        if ((txtcode.Text.Length != 5) || (txtname.Text.Length < 5) || (ddlloc.Text == "")) return;
+
+      
+        if (loc.GetDataByCode(txtcode.Text).Count == 0)
+        {
+            loc.InsertStore(txtcode.Text, txtname.Text.ToUpper(), ddlloc.SelectedValue.ToString(), "N", "G", "Y", DateTime.Now, DateTime.Now, "", "", "", 0);
+            lblupdate.Text = "ADDED SUCCESSFULLY";
+            lblupdate.Visible = true;
+            
+        }
+        else
+        {
+            loc.UpdateStore(txtname.Text.ToUpper(), ddlloc.SelectedValue.ToString(), txtcode.Text);
+            lblupdate.Text = "UPDATED SUCCESSFULLY";
+            lblupdate.Visible = true;
+
+
+        }
+
+        load_all_data();
+         clear_all();
+    }
+    protected void gdstorer_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onmouseover"] = "this.style.cursor='pointer';this.style.textDecoration='underline';this.style.color='blue';";
+            e.Row.Attributes["onmouseout"] = "this.style.textDecoration='none';this.style.color='black';";
+            e.Row.Attributes["onclick"] = ClientScript.GetPostBackClientHyperlink(this.gdstorer, "Select$" + e.Row.RowIndex);
+        }
+
+
+    }
+    protected void gdstorer_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        lblupdate.Visible = false;
+        if (gdstorer.SelectedIndex > -1)
+        {
+
+
+            txtcode.Text = gdstorer.Rows[gdstorer.SelectedIndex].Cells[0].Text;
+            txtname.Text = gdstorer.Rows[gdstorer.SelectedIndex].Cells[1].Text;
+            try
+            {
+                ddlloc.SelectedValue = gdstorer.Rows[gdstorer.SelectedIndex].Cells[2].Text;
+            }
+            catch
+            {
+                ddlloc.SelectedIndex = 0;
+            }
+        }
+    }
+}
+

@@ -1,0 +1,944 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using FreeTextBoxControls;
+
+
+public partial class frm_po_revising_app : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+        clsStatic.MsgConfirmBox(btnApprove, "Are you sure to Approve this PO");
+        clsStatic.MsgConfirmBox(btnreject, "Are you sure to Reject this PO");        
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor ="FFFFFFF";
+
+        if (!Page.IsPostBack)
+        {
+            tblpodet.Visible = false;
+            load_pending();
+            lblComm.Visible = false;
+        }
+        else
+        {
+            generate_comments(lblref.Text);
+        }
+          
+    }
+
+    private string get_my_app()
+    {
+        User_Role_DefinitionTableAdapter urole = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable udt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        string my_app = "";
+        udt = urole.GetRoleByUser(current.UserId.ToString(),"REVISE");
+
+        if (udt.Rows.Count > 0) my_app = udt[0].role_as.ToString();
+
+        return my_app;
+    }
+
+    private void load_pending()
+    {
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Hdr_ScblDataTable dthdr = new SCBLDataSet.PuTr_PO_Hdr_ScblDataTable();
+        ListItem lst;
+
+        string my_app = get_my_app();
+        if (my_app == "") return;
+        dthdr = hdr.GetPendingForPoApp("REVISING", my_app);
+
+        if (dthdr.Rows.Count == 0)
+        {
+            Response.Redirect("./frm_com_inbox.aspx");
+        }
+
+        lblpcount.Text = dthdr.Rows.Count.ToString();
+
+        ddlpolist.Items.Clear();
+        //ddlpolist.Items.Add("");
+
+        foreach (SCBLDataSet.PuTr_PO_Hdr_ScblRow dr in dthdr.Rows)
+        {
+            lst = new ListItem();
+
+            lst.Value = dr.PO_Hdr_Ref.ToString();
+            lst.Text = dr.PO_Hdr_Ref.ToString() + ":" + dr.PO_Hdr_Code.ToString() + ":" + dr.PO_Hdr_Value.ToString("N2")+ " TK :" + dr.PO_Hdr_Com1.ToString();
+            ddlpolist.Items.Add(lst);
+        }
+        txtcomments.Text = "";
+        call_ddl_ch();
+    }
+
+    private bool copy_for_app(string poref)
+    {
+        bool flg = true;
+        PuTr_PO_Hdr_ReviseTableAdapter clhdr = new PuTr_PO_Hdr_ReviseTableAdapter();
+        PuTr_PO_Det_ReviseTableAdapter cldet = new PuTr_PO_Det_ReviseTableAdapter();
+
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        PuTr_PO_Det_ScblTableAdapter det = new PuTr_PO_Det_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Hdr_ScblRow drhdr = null;
+        SCBLDataSet.PuTr_PO_Det_ScblDataTable dtdet = new SCBLDataSet.PuTr_PO_Det_ScblDataTable();
+
+        try
+        {
+
+            clhdr.DeleteByRef(poref);
+            cldet.DeleteByRef(poref);
+            drhdr = hdr.GetHdrDataByRef(poref)[0];
+            dtdet = det.GetDetByRef(poref);            
+
+            foreach (SCBLDataSet.PuTr_PO_Det_ScblRow dr in dtdet.Rows)
+            {
+                cldet.InsertDetData(dr.PO_Det_Type, dr.PO_Det_Code, dr.PO_Det_Ref, dr.PO_Det_Quo_Ref, dr.PO_Det_Lno,
+                                    dr.PO_Det_Icode, dr.PO_Det_Itm_Desc, dr.PO_Det_Itm_Uom, dr.PO_Det_Lin_Qty,
+                                    dr.PO_Det_Lin_Qty, 0, 0, dr.PO_Det_Lin_Rat, dr.PO_Det_Lin_Rat, dr.PO_Det_Lin_Amt, dr.PO_Det_Lin_Amt,
+                                    dr.PO_Det_Specification, dr.PO_Det_Brand, dr.PO_Det_Origin, dr.PO_Det_Packing, 0);
+            }
+
+            clhdr.InsertHdrData(drhdr.PO_Hdr_Type, drhdr.PO_Hdr_Code, drhdr.PO_Hdr_Ref, drhdr.PO_Hdr_Status, drhdr.PO_Hdr_Pending, drhdr.PO_Hdr_Template, drhdr.PO_Hdr_Pcode, drhdr.PO_Hdr_Dcode, drhdr.PO_Hdr_Com1, drhdr.PO_Hdr_DATE, drhdr.PO_Hdr_Value, drhdr.PO_Hdr_Pcode, drhdr.PO_Hdr_Dcode, drhdr.PO_Hdr_Com1, 0, "");
+
+
+        }
+        catch
+        {
+            flg = false;
+        }
+
+        return flg;
+    }
+  
+    private void Generate_Items(string poref)
+    {
+        //copy data for approval 
+        PuTr_PO_Hdr_ReviseTableAdapter hdr = new PuTr_PO_Hdr_ReviseTableAdapter();
+        SCBLDataSet.PuTr_PO_Hdr_ReviseDataTable dthdr = new SCBLDataSet.PuTr_PO_Hdr_ReviseDataTable();
+
+        PuTr_PO_Det_ReviseTableAdapter det = new PuTr_PO_Det_ReviseTableAdapter();
+        SCBLDataSet.PuTr_PO_Det_ReviseDataTable dtdet = new SCBLDataSet.PuTr_PO_Det_ReviseDataTable();
+
+        if (hdr.GetDataByRef(poref).Rows.Count == 0) 
+        {
+           bool flg= copy_for_app(poref);
+           if (!flg) {  tblpodet.Visible = flg; return; }    
+        }
+
+        PuTr_PO_Hdr_ScblTableAdapter clhdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        PuTr_PO_Det_ScblTableAdapter cldet = new PuTr_PO_Det_ScblTableAdapter();
+        PuTr_PO_Hdr_ScblTableAdapter pohdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        SCBLDataSet.PuTr_PO_Det_ScblDataTable dtcldet = new SCBLDataSet.PuTr_PO_Det_ScblDataTable();
+        SCBLDataSet.PuTr_PO_Hdr_ScblRow drclhdr = null;
+
+        string app_flow;
+        string my_app = get_my_app();
+
+        int seqno = 0;      
+
+       
+        Label lblsl;
+        Label lblicode;
+        Label lblidet;
+        Label lblrate;
+        Label lblqty;
+        Label lbluom;
+        Label lno;
+
+        TextBox txtnqty;        
+        TextBox txtnrate;
+        TextBox txtspe;
+        TextBox txtbrand;
+        TextBox txtorigin;
+        TextBox txtpacking;
+
+        CheckBox chkmpr;
+
+        drclhdr = clhdr.GetHdrDataByRef(poref)[0];
+        dtcldet = cldet.GetDetByRef(poref);
+
+        app_flow = drclhdr.PO_Hdr_Template.ToString();
+
+        lblref.Text = drclhdr.PO_Hdr_Ref.ToString();
+        lblreqtype.Text = drclhdr.PO_Hdr_Code.ToString();
+        lblparty.Text = drclhdr.PO_Hdr_Pcode.ToString() + ":" + drclhdr.PO_Hdr_Dcode.ToString() + ":" + drclhdr.PO_Hdr_Com1.ToString();
+        lblamount.Text = drclhdr.PO_Hdr_Value.ToString("N2");
+
+        dthdr = hdr.GetDataByRef(lblref.Text);
+        dtdet = det.GetDataByRef(lblref.Text);
+
+        lblpartynew.Text = dthdr[0].PO_Hdr_Pcode_Close + ":" + dthdr[0].PO_Hdr_Acode_Close + ":" + dthdr[0].PO_Hdr_Partydet_Close;
+        lblamountnew.Text = dthdr[0].PO_Hdr_Value_Close.ToString("N2");
+
+
+        bool edtper = set_permission(app_flow, my_app);
+        if (edtper) btnchangeparty.Visible = true; else btnchangeparty.Visible = false;
+
+        if (lblref.Text.Substring(0,3)=="LPO")
+        {
+            txtparty.Visible = true;
+            txtemployee.Visible = false;
+        }
+        else
+        {
+            txtparty.Visible = false;
+            txtemployee.Visible = true;
+        }
+
+        gdItem.DataSource = dtcldet;
+        gdItem.DataBind();
+
+        foreach (SCBLDataSet.PuTr_PO_Det_ReviseRow dr in dtdet.Rows)
+        {
+
+            lblsl = new Label();
+            lblicode=new Label();
+            lblidet=new Label();
+            lblrate = new Label();
+            lblqty=new Label();
+            lbluom = new Label();
+            lno = new Label();
+
+            txtnqty = new TextBox();
+            txtnrate = new TextBox();
+            txtspe = new TextBox();
+            txtbrand = new TextBox();
+            txtorigin = new TextBox();
+            txtpacking = new TextBox();
+
+            chkmpr = new CheckBox();
+
+            lblsl = (Label)gdItem.Rows[seqno].FindControl("Label1");
+            lblicode = (Label)gdItem.Rows[seqno].FindControl("Label2");
+            lblidet = (Label)gdItem.Rows[seqno].FindControl("Label3");
+            lbluom = (Label)gdItem.Rows[seqno].FindControl("Label4");
+            lblrate = (Label)gdItem.Rows[seqno].FindControl("Label5");
+            lblqty = (Label)gdItem.Rows[seqno].FindControl("Label6");
+            lno = (Label)gdItem.Rows[seqno].FindControl("Label7");
+
+            txtnqty = (TextBox)gdItem.Rows[seqno].FindControl("TextBox1");
+            txtnrate = (TextBox)gdItem.Rows[seqno].FindControl("TextBox2");
+            txtspe = (TextBox)gdItem.Rows[seqno].FindControl("TextBox3");
+            txtbrand = (TextBox)gdItem.Rows[seqno].FindControl("TextBox4");
+            txtorigin = (TextBox)gdItem.Rows[seqno].FindControl("TextBox5");
+            txtpacking = (TextBox)gdItem.Rows[seqno].FindControl("TextBox6");
+
+            chkmpr = (CheckBox)gdItem.Rows[seqno].FindControl("CheckBox1");
+
+                       
+            lblsl.Text = dr.PO_Det_Lno.ToString();
+            lblicode.Text = dr.PO_Det_Icode.ToString();
+            lblidet.Text = dr.PO_Det_Itm_Desc.ToString();
+            lblrate.Text = dr.PO_Det_Lin_Rat.ToString("N2");
+            lblqty.Text = dr.PO_Det_Lin_Qty.ToString("N2");
+            lbluom.Text = dr.PO_Det_Itm_Uom.ToString();
+            lno.Text = dr.PO_Det_Lno.ToString();
+
+            txtnqty.Text = dr.PO_Det_Lin_Qty_Close.ToString("N2");
+            txtnrate.Text = dr.PO_Det_Lin_Rat_Close.ToString("N2");
+            txtspe.Text = dr.PO_Det_Specification.ToString();
+            txtbrand.Text = dr.PO_Det_Brand.ToString();
+            txtorigin.Text = dr.PO_Det_Origin.ToString();
+            txtpacking.Text = dr.PO_Det_Packing.ToString();
+
+            if (dr.PO_Det_AutoMpr==1) chkmpr.Checked = true;else chkmpr.Checked = false;
+
+
+            if (edtper == true) 
+            {
+                txtnqty.ReadOnly = false;
+                txtnrate.ReadOnly = false;
+                txtspe.ReadOnly = false;
+                txtbrand.ReadOnly = false;
+                txtorigin.ReadOnly = false;
+                txtpacking.ReadOnly = false;
+                chkmpr.Enabled = true;
+            }
+            else
+            {
+                txtnqty.ReadOnly = true;
+                txtnrate.ReadOnly = true;
+                txtspe.ReadOnly = true;
+                txtbrand.ReadOnly = true;
+                txtorigin.ReadOnly = true;
+                txtpacking.ReadOnly = true;
+                chkmpr.Enabled = false;
+            }
+
+            seqno++;
+        }
+
+
+        //generate po data
+
+        DataTable podt = new DataTable();
+        SCBLDataSet.PuTr_PO_Det_ScblDataTable dtoldpo = new SCBLDataSet.PuTr_PO_Det_ScblDataTable();
+
+        podt.Columns.Add("Sl", typeof(string));
+        podt.Columns.Add("Icode", typeof(string));
+        podt.Columns.Add("Idet", typeof(string));
+        podt.Columns.Add("Uom", typeof(string));
+        podt.Columns.Add("Qty", typeof(string));
+        podt.Columns.Add("Rate", typeof(string));
+        podt.Columns.Add("Amount", typeof(string));
+        podt.Columns.Add("Specif", typeof(string));
+        podt.Columns.Add("Brand", typeof(string));
+        podt.Columns.Add("Origin", typeof(string));
+        podt.Columns.Add("Packing", typeof(string));
+
+        dtoldpo = cldet.GetDetByRef(poref);
+
+        foreach (SCBLDataSet.PuTr_PO_Det_ScblRow drrev in dtoldpo.Rows)
+        {
+            podt.Rows.Add(drrev.PO_Det_Lno, drrev.PO_Det_Icode, drrev.PO_Det_Itm_Desc, drrev.PO_Det_Itm_Uom, drrev.PO_Det_Lin_Qty.ToString("N2"), drrev.PO_Det_Lin_Rat.ToString("N2"), drrev.PO_Det_Lin_Amt.ToString("N2"), drrev.PO_Det_Specification, drrev.PO_Det_Brand, drrev.PO_Det_Origin, drrev.PO_Det_Packing);
+        }
+
+        gdpodet.DataSource = podt;
+        gdpodet.DataBind();
+
+        generate_comments(poref);
+        
+
+    }
+
+    private bool set_permission(string flow_id, string app_code)
+    {
+        tbl_app_ruleTableAdapter app = new tbl_app_ruleTableAdapter();
+        SCBLDataSet.tbl_app_ruleDataTable dt = new SCBLDataSet.tbl_app_ruleDataTable();
+        App_Type_DetTableAdapter apptype = new App_Type_DetTableAdapter();
+
+        bool edtper = false;
+
+        dt = app.GetDataByTypeApp(flow_id, app_code);
+        string tmpstr;
+
+        ListItem lst;
+        ddlforto.Items.Clear();
+        ddlforto.Items.Add("");
+
+        if (dt.Rows.Count != 0)
+        {
+            if (dt[0].app_per == 1) { btnApprove.Visible = true; }
+            else { btnApprove.Visible = false; }
+
+            if (dt[0].rej_per == 1) { btnreject.Visible = true; }
+            else { btnreject.Visible = false; }
+
+            if (dt[0].edit_per == 1) { edtper = true; }
+
+
+            tmpstr = dt[0].for_1.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_2.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_3.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_4.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+
+            tmpstr = dt[0].for_5.ToString();
+            if (tmpstr != "")
+            {
+                lst = new ListItem();
+                lst.Value = tmpstr;
+                lst.Text = tmpstr + ": " + apptype.GetDataByAppName(tmpstr)[0].app_desc.ToString();
+                ddlforto.Items.Add(lst);
+            }
+        }
+        else
+        {
+            btnApprove.Visible = false;
+            btnreject.Visible = false;
+            btnForward.Visible = false;
+        }
+
+
+        return edtper;
+    }
+    
+    private void generate_comments(string ref_no)
+    {
+        tbl_CommentsTableAdapter com = new tbl_CommentsTableAdapter();
+        SCBLDataSet.tbl_CommentsDataTable dt = new SCBLDataSet.tbl_CommentsDataTable();
+
+        dt = com.GetCommentsByRef(ref_no);
+        phcomments.Controls.Clear();
+        foreach (SCBLDataSet.tbl_CommentsRow dr in dt.Rows)
+        {
+            ClientSide_modules_commercial_usercontrols_ctl_comments ctl = (ClientSide_modules_commercial_usercontrols_ctl_comments)LoadControl("./usercontrols/ctl_comments.ascx");
+            Label lblname = (Label)ctl.FindControl("lblname");
+            Label lbldate = (Label)ctl.FindControl("lbldate");
+            HtmlTableCell celcomm = (HtmlTableCell)ctl.FindControl("celcomm");
+            Image imgimage = (Image)ctl.FindControl("imgimage");
+
+            imgimage.ImageUrl = "~/handler/hndImage.ashx?id=" + dr.app_id;
+
+            ctl.ID = "ctl_" + phcomments.Controls.Count.ToString();
+
+            lblname.Text = dr.app_name.ToString() + " (" + dr.app_designation.ToString() + ")";
+            lbldate.Text = dr.app_date.ToString();
+            celcomm.InnerText = dr.gen_comments.ToString();
+
+            if(dr.cur_status=="REVISING")
+                phcomments.Controls.Add(ctl);
+        }
+    }
+
+
+    private void call_ddl_ch()
+    {
+        string selval = ddlpolist.SelectedValue.ToString();
+
+        if (selval == "") { tblpodet.Visible = false; return; }
+
+        tblpodet.Visible = true;
+
+        Generate_Items(selval);
+
+    }
+
+    protected void ddlpolist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+        call_ddl_ch();
+
+    }
+
+    private bool check_pending_validity(string poref)
+    {
+        bool flg = true;
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        
+        string my_app = get_my_app();
+        if (hdr.CheckPendingValidity(poref, "REVISING", my_app).Rows.Count == 0) flg = false;
+        return flg;
+    }
+    
+    private bool check_entry_data()
+    {
+          bool flg = true;
+        string[] tmp = lblpartynew.Text.Split(':');
+
+        if (tmp.Length < 3) flg = false;
+
+      
+        decimal newqty,newrate;
+                
+        TextBox txtnqty;        
+        TextBox txtnrate;
+
+        try
+        {
+            foreach (GridViewRow gr in gdItem.Rows)
+            {
+              
+                txtnqty = new TextBox();
+                txtnrate = new TextBox();
+                              
+                txtnqty = (TextBox)gr.FindControl("TextBox1");
+                txtnrate = (TextBox)gr.FindControl("TextBox2");
+
+               
+                if (txtnqty.Text != "") newqty = Convert.ToDecimal(txtnqty.Text);
+                else newqty = 0;
+
+                if (txtnrate.Text != "") newrate = Convert.ToDecimal(txtnrate.Text);
+                else newrate = 0;
+
+                if (txtnqty.Text =="") flg = false;
+                if (txtnrate.Text == "") flg = false;
+
+                
+            }
+
+        }
+        catch
+        {
+            flg = false;
+        }
+
+        return flg;
+    }
+
+
+
+    private bool  update_status(string po_ref, string pending_for)
+    {
+        bool flg = false;
+
+        if (check_pending_validity(lblref.Text) == false) Response.Redirect(Request.Url.AbsoluteUri);
+        if (check_entry_data() == false) { lblComm.Text = "Data Entry Error "; lblComm.Visible = true; return false; }
+
+        PuTr_PO_Hdr_ScblTableAdapter pohdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        PuTr_PO_Hdr_ReviseTableAdapter hdr = new PuTr_PO_Hdr_ReviseTableAdapter();
+        PuTr_PO_Det_ReviseTableAdapter det = new PuTr_PO_Det_ReviseTableAdapter();
+       
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+
+       
+        string uid = current.UserId.ToString();
+        string uname = current.UserName.ToString();
+        string desig = "";
+        string role_as = "";
+        desig = usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+        role_as = get_my_app();
+        decimal subtot, prate, newqty, newrate, oldqty, chqty;
+        decimal totval = 0;
+        int autompr = 0;
+         string[] tmp = lblpartynew.Text.Split(':');
+
+        string cur_session;
+        int curyear = DateTime.Now.Year;
+        if (DateTime.Now.Month > 6) cur_session = curyear.ToString() + "/" + (curyear + 1).ToString();
+        else cur_session = (curyear - 1).ToString() + "/" + curyear.ToString();
+
+        string status;
+        
+        string poref = lblref.Text;
+        Label lblicode;
+        Label lblidesc;
+        Label lblrate;
+        Label lbluom;
+        Label lblqty;
+        Label lno;
+        TextBox txtnqty;
+        TextBox txtnrate;
+        TextBox txtspe;
+        TextBox txtbrand;
+        TextBox txtorigin;
+        TextBox txtpacking;
+        CheckBox chkmpr;
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(hdr.Connection);
+
+        try
+        {
+            pohdr.AttachTransaction(myTrn);
+            hdr.AttachTransaction(myTrn);
+            det.AttachTransaction(myTrn);
+            comm.AttachTransaction(myTrn);
+          
+            foreach (GridViewRow gr in gdItem.Rows)
+            {
+                lblicode = new Label();
+                lblidesc = new Label();
+                lblrate = new Label();
+                lbluom = new Label();
+                lblqty = new Label();
+                lno = new Label();
+                txtnqty = new TextBox();
+                txtnrate = new TextBox();
+                txtspe = new TextBox();
+                txtbrand = new TextBox();
+                txtorigin = new TextBox();
+                txtpacking = new TextBox();
+                chkmpr = new CheckBox();
+
+                lblicode = (Label)gr.FindControl("Label2");
+                lblidesc = (Label)gr.FindControl("Label3");
+                lbluom = (Label)gr.FindControl("Label4");
+                lblrate = (Label)gr.FindControl("Label5");
+                lblqty = (Label)gr.FindControl("Label6");
+                lno = (Label)gr.FindControl("Label7");
+
+                txtnqty = (TextBox)gr.FindControl("TextBox1");
+                txtnrate = (TextBox)gr.FindControl("TextBox2");
+                txtspe = (TextBox)gr.FindControl("TextBox3");
+                txtbrand = (TextBox)gr.FindControl("TextBox4");
+                txtorigin = (TextBox)gr.FindControl("TextBox5");
+                txtpacking = (TextBox)gr.FindControl("TextBox6");
+                chkmpr = (CheckBox)gr.FindControl("CheckBox1");
+
+
+                prate = Convert.ToDecimal(lblrate.Text);
+                oldqty = Convert.ToDecimal(lblqty.Text);
+                if (chkmpr.Checked) autompr = 1; else autompr = 0;
+
+
+                if (txtnqty.Text != "") newqty = Convert.ToDecimal(txtnqty.Text);
+                else newqty = 0;
+
+
+                if (txtnrate.Text != "") newrate = Convert.ToDecimal(txtnrate.Text);
+                else newrate = 0;
+
+                subtot = newrate * newqty;
+                totval += subtot;
+
+                det.UpdateDetailData((double)newqty, 0, 0, newrate, subtot, txtspe.Text, txtbrand.Text, txtorigin.Text,
+                                     txtpacking.Text, autompr, poref, (short) Convert.ToInt32(lno.Text));
+                
+
+            }
+            status = "REVISING";
+            hdr.UpdateHdrData(status, pending_for, tmp[0], tmp[1], tmp[2], totval, poref);
+
+            // update po header data     
+            pohdr.UpdateForward(status, pending_for, poref);
+            
+            //comments
+            comm.InsertComments(poref, 1, DateTime.Now, uid, uname, desig, 1, role_as, status, txtcomments.Text, "", pending_for);
+
+            myTrn.Commit();
+            flg = true;
+        }
+        catch
+        {
+            myTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(hdr.Connection, myTrn);
+           
+        }
+
+        return flg;
+    }
+
+
+
+
+   
+    protected void btnForward_Click(object sender, EventArgs e)
+    {
+        if (txtcomments.Text == "") { lblComm.Text = "Pls type your comments "; lblComm.Visible = true; return; }
+        if (ddlforto.Text == "") { lblComm.Text = "Pls select forward to "; lblComm.Visible = true; return; }        
+        if (check_pending_validity(lblref.Text) == false) Response.Redirect(Request.Url.AbsoluteUri);
+        if (check_entry_data() == false) { lblComm.Text = "Data Entry Error "; lblComm.Visible = true; return; }
+
+        string poref = lblref.Text;
+        string status = "REVISING";
+        string sr_no = "";
+        string pending_for = ddlforto.SelectedValue.ToString();
+
+       
+        if (update_status(poref, pending_for) == true)
+        {
+            string sid, sname, msub, mbody;
+            clsEmailReceiver[] rec_det = new clsEmailReceiver[20];
+            int remailcnt = 0;
+            dsLinkoffice.tblUserInfoRow  udr;
+            LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+            User_Role_DefinitionTableAdapter roleta = new User_Role_DefinitionTableAdapter();
+            SCBLDataSet.User_Role_DefinitionDataTable roledt = new SCBLDataSet.User_Role_DefinitionDataTable();
+
+            udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+
+            msub = "A PO revise request pending for you [" + lblref.Text + "]";
+            mbody = "\n\n " + "A purchase order revise request pending for you [" + lblref.Text + "]";
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cml/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+            roledt = roleta.GetDataByRole(pending_for);
+
+            foreach (SCBLDataSet.User_Role_DefinitionRow rdr in roledt.Rows)
+            {
+                rec_det[remailcnt] = new clsEmailReceiver();
+                rec_det[remailcnt].Rname = rdr.user_name;
+                rec_det[remailcnt].Rid = usrdal.GetUserByCode(rdr.user_id)[0].UserEmail;
+                remailcnt++;
+            }
+            clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+            Response.Redirect(Request.Url.AbsoluteUri);
+        }
+        else { lblComm.Text = "ERROR"; lblComm.Visible = true;}
+               
+    }
+
+    
+  
+
+    protected void btnApprove_Click(object sender, EventArgs e)
+    {
+        
+        if (check_pending_validity(lblref.Text) == false) Response.Redirect(Request.Url.AbsoluteUri);
+        if (check_entry_data() == false) { lblComm.Text = "Data Entry Error "; lblComm.Visible = true; return; }
+
+        PuTr_PO_Hdr_ScblTableAdapter pohdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        PuTr_PO_Det_ScblTableAdapter podet = new PuTr_PO_Det_ScblTableAdapter();
+        PuTr_IN_Det_ScblTableAdapter poindet = new PuTr_IN_Det_ScblTableAdapter();
+        quotation_detTableAdapter quo = new quotation_detTableAdapter();
+        PuTr_PO_Hdr_ReviseTableAdapter hdr = new PuTr_PO_Hdr_ReviseTableAdapter();
+        PuTr_PO_Det_ReviseTableAdapter det = new PuTr_PO_Det_ReviseTableAdapter();
+       
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+
+       
+        string uid = current.UserId.ToString();
+        string uname = current.UserName.ToString();
+        string mpr_ref, desig = "";
+        string role_as = "";
+        desig = usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+        role_as = get_my_app();
+        decimal subtot, prate, newqty, newrate, oldqty, chqty;
+        decimal totval = 0;
+        int autompr = 0, lnonew = 0;
+        string[] tmp = lblpartynew.Text.Split(':');
+
+        string cur_session;
+        int curyear = DateTime.Now.Year;
+        if (DateTime.Now.Month > 6) cur_session = curyear.ToString() + "/" + (curyear + 1).ToString();
+        else cur_session = (curyear - 1).ToString() + "/" + curyear.ToString();
+
+        string status, hpcflg;
+        
+        string poref = lblref.Text;
+        Label lblicode;
+        Label lblidesc;
+        Label lblrate;
+        Label lbluom;
+        Label lblqty;
+        Label lno;
+        TextBox txtnqty;
+        TextBox txtnrate;
+        TextBox txtspe;
+        TextBox txtbrand;
+        TextBox txtorigin;
+        TextBox txtpacking;
+        CheckBox chkmpr;
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(hdr.Connection);
+
+        try
+        {
+            pohdr.AttachTransaction(myTrn);
+            podet.AttachTransaction(myTrn);
+            poindet.AttachTransaction(myTrn);
+            quo.AttachTransaction(myTrn);
+
+            hdr.AttachTransaction(myTrn);
+            det.AttachTransaction(myTrn);
+            comm.AttachTransaction(myTrn);
+
+            foreach (GridViewRow gr in gdItem.Rows)
+            {
+                lblicode = new Label();
+                lblidesc = new Label();
+                lblrate = new Label();
+                lbluom = new Label();
+                lblqty = new Label();
+                lno = new Label();
+                txtnqty = new TextBox();
+                txtnrate = new TextBox();
+                txtspe = new TextBox();
+                txtbrand = new TextBox();
+                txtorigin = new TextBox();
+                txtpacking = new TextBox();
+                chkmpr = new CheckBox();
+
+                lblicode = (Label)gr.FindControl("Label2");
+                lblidesc = (Label)gr.FindControl("Label3");
+                lbluom = (Label)gr.FindControl("Label4");
+                lblrate = (Label)gr.FindControl("Label5");
+                lblqty = (Label)gr.FindControl("Label6");
+                lno = (Label)gr.FindControl("Label7");
+
+                txtnqty = (TextBox)gr.FindControl("TextBox1");
+                txtnrate = (TextBox)gr.FindControl("TextBox2");
+                txtspe = (TextBox)gr.FindControl("TextBox3");
+                txtbrand = (TextBox)gr.FindControl("TextBox4");
+                txtorigin = (TextBox)gr.FindControl("TextBox5");
+                txtpacking = (TextBox)gr.FindControl("TextBox6");
+                chkmpr = (CheckBox)gr.FindControl("CheckBox1");
+
+
+                prate = Convert.ToDecimal(lblrate.Text);
+                oldqty = Convert.ToDecimal(lblqty.Text);
+                if (chkmpr.Checked) autompr = 1; else autompr = 0;
+
+
+                if (txtnqty.Text != "") newqty = Convert.ToDecimal(txtnqty.Text);
+                else newqty = 0;
+
+
+                if (txtnrate.Text != "") newrate = Convert.ToDecimal(txtnrate.Text);
+                else newrate = 0;
+                
+                chqty = oldqty - newqty;
+
+                subtot = newrate * newqty;
+                totval += subtot;
+
+                det.UpdateDetailData((double)newqty, 0, 0, newrate, subtot, txtspe.Text, txtbrand.Text, txtorigin.Text,
+                                     txtpacking.Text, autompr, poref, (short) Convert.ToInt32(lno.Text));
+
+
+                mpr_ref = podet.GetDetByRefItem(poref, lblicode.Text)[0].PO_Det_Pr_Ref;
+
+                if (autompr==1)
+                {
+                    poindet.UpdateForPORevise2((double)chqty, mpr_ref, lblicode.Text);
+                }
+                else
+                {
+                    poindet.UpdateForPORevise((double)chqty, mpr_ref, lblicode.Text);
+
+                }
+
+                
+                if(subtot==0)
+                {
+                    podet.DeleteDetByRefItemLine(poref, lblicode.Text, (short)Convert.ToInt32(lno.Text));
+                }
+                else
+                {
+                    lnonew = lnonew + 1;
+                    podet.UpdateDetData((short)lnonew, (double)newqty, (double)newqty, newrate, subtot, subtot,txtspe.Text,txtbrand.Text,txtorigin.Text,txtpacking.Text, poref, lblicode.Text, (short)Convert.ToInt32(lno.Text));
+                }
+
+                                              
+
+            }
+            if (totval == 0) { status = "CANCELED";
+                hpcflg = "R";
+            }
+            else { status = "APP"; hpcflg = "P"; }
+
+            hdr.UpdateHdrData(status, "", tmp[0], tmp[1], tmp[2], totval, poref);
+            // update po header data     
+            pohdr.UpdateForRevApp(status, "", tmp[0], tmp[1], tmp[0], tmp[2], totval, hpcflg, poref);           
+
+            //comments
+            comm.InsertComments(poref, 1, DateTime.Now, uid, uname, desig, 1, role_as, status, txtcomments.Text, "", "");
+
+            myTrn.Commit();            
+
+        }
+        catch
+        {
+            myTrn.Rollback();           
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(hdr.Connection, myTrn);            
+        }
+         
+        
+        Response.Redirect(Request.Url.AbsoluteUri);
+
+      
+    
+
+
+    }
+
+    
+
+    protected void btnreject_Click(object sender, EventArgs e)
+    {
+        if (check_pending_validity(lblref.Text) == false) Response.Redirect(Request.Url.AbsoluteUri);
+
+        string uid = current.UserId.ToString();
+        string uname = current.UserName.ToString();
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usr = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+        string desig = usr.GetUserByCode(uid)[0].UserDesignation.ToString();
+
+        string selpo = ddlpolist.SelectedValue.ToString();
+
+        PuTr_PO_Hdr_ScblTableAdapter hdr = new PuTr_PO_Hdr_ScblTableAdapter();
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(hdr.Connection);
+
+        try
+        {
+            hdr.AttachTransaction(myTrn);
+            comm.AttachTransaction(myTrn);
+
+            hdr.UpdateRevRej("APP", "", "","P", selpo);            
+            comm.InsertComments(selpo, 1, DateTime.Now, uid, uname, desig, 1, "", "REVISING", txtcomments.Text+"(REJECTED)", "", "");
+                        
+            myTrn.Commit();
+            
+        }
+        catch
+        {
+            myTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(hdr.Connection, myTrn);
+        }
+        Response.Redirect(Request.Url.AbsoluteUri);
+    }
+    protected void btnLogOk_Click(object sender, EventArgs e)
+    {
+        PuMa_Par_AdrTableAdapter adr = new PuMa_Par_AdrTableAdapter();
+        string[] tmp;
+        if (lblref.Text.Substring(0, 3) == "LPO")
+        {
+            tmp = txtparty.Text.Split(':');
+        }
+        else
+        {
+            tmp = txtemployee.Text.Split(':');
+        }
+
+        
+        if (tmp.Length < 2)
+        {
+            ModalPopupExtender2.Show(); 
+            return; 
+        }
+
+        if (lblref.Text.Substring(0, 3) == "LPO")
+        {
+            string acc_code = adr.GetDataByAdrCode(tmp[0])[0].Par_Adr_Acc_Code.ToString();
+            if (acc_code.Length<10)
+            {
+                ModalPopupExtender2.Show();
+                return; 
+            }
+            lblpartynew.Text = acc_code + ":" + tmp[0] + ":" + tmp[1];
+        }
+        else
+        {
+            lblpartynew.Text = "21.001.001.0037" + ":" + tmp[0] + ":" + tmp[1];    
+        }
+        
+    }
+}
+

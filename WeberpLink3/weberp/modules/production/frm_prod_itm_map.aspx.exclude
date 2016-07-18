@@ -1,0 +1,203 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_prod_itm_map.aspx.cs" Inherits="frm_prod_itm_map" EnableEventValidation="false" %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register Assembly="eWorld.UI, Version=2.0.6.2393, Culture=neutral, PublicKeyToken=24d65337282035f2"
+    Namespace="eWorld.UI" TagPrefix="ew" %>
+
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <asp:UpdatePanel ID="updgrid" runat="server">
+<ContentTemplate>
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px; text-align: right;">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                PRODUCTION RECIPE SETUP SCREEN</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 25px; text-align: center">
+                <table style="width:100%;">
+                    <tr>
+                        <td style="width: 172px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 92px">
+                            &nbsp;</td>
+                        <td style="width: 22px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 172px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 92px">
+                            PRODUCTION</td>
+                        <td style="width: 22px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:DropDownList ID="ddlprod" runat="server" AutoPostBack="True" 
+                                CssClass="txtbox" onselectedindexchanged="ddlprod_SelectedIndexChanged" 
+                                Width="400px">
+                            </asp:DropDownList>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 172px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 92px">
+                            &nbsp;</td>
+                        <td style="width: 22px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 22px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 22px; text-align: left">
+                
+                
+                <asp:GridView ID="gdItem" runat="server" AutoGenerateColumns="False" 
+                    BackColor="White" BorderColor="#41519A" BorderStyle="Solid" BorderWidth="1px" 
+                    CellPadding="4" ForeColor="#333333" GridLines="Vertical" PageSize="100" 
+                    SkinID="GridView" 
+                    style="border-color: #e6e6fa; border-width: 1px; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='#FFCC0A', startcolorstr='#41519A', gradienttype='0'); text-align: left;" 
+                    Width="98%" OnRowDataBound="gdItem_RowDataBound">
+                    <EmptyDataRowStyle HorizontalAlign="Left" />
+                    <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" 
+                        HorizontalAlign="Left" />
+                    <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                    <SelectedRowStyle Font-Bold="True" />
+                    <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" 
+                        HorizontalAlign="Left" />
+                    <EditRowStyle BackColor="#2461BF" HorizontalAlign="Left" />
+                    <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" 
+                        Font-Underline="False" HorizontalAlign="Left" />
+                    <RowStyle Font-Size="8pt" />
+                    <Columns>
+                       
+                        <asp:BoundField DataField="itm_det_icode" HeaderStyle-HorizontalAlign="Left" 
+                            HeaderText="Item Code" />
+                        <asp:BoundField DataField="itm_det_desc" HeaderStyle-HorizontalAlign="Left" 
+                            HeaderText="Item Details" />
+                             <asp:BoundField DataField="itm_det_pusa_unit" HeaderStyle-HorizontalAlign="Left" 
+                            HeaderText="UOM" />
+                        <asp:BoundField DataField="itm_Det_Type_flag" HeaderStyle-HorizontalAlign="Left" 
+                            HeaderText="Item Type" />
+                         <asp:TemplateField HeaderText="Item Type Detail">
+                            <ItemTemplate>                                
+                                <asp:Label ID="Label1"  Width="100px" runat="server" CssClass="lbl"  />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                            
+                         <asp:TemplateField HeaderText="Issue">
+                            <ItemTemplate>                                
+                                <asp:CheckBox ID="CheckBox1" runat="server" CssClass="txtbox"  />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                         
+                          <asp:TemplateField HeaderText="Finn">
+                            <ItemTemplate>                                
+                                <asp:CheckBox ID="CheckBox2" runat="server" CssClass="txtbox"  />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+
+                        <asp:TemplateField HeaderText="Dbt Code">
+                            <ItemTemplate>                                
+                                <asp:TextBox ID="TextBox1" runat="server" Font-Size="7pt" CssClass="txtbox" Width="250px" />
+                                <ajaxToolkit:AutoCompleteExtender
+                                runat="server"                                
+                                ID="AutoCompleteExtender1" 
+                                                      
+                                TargetControlID="TextBox1"
+                                ServicePath="../commercial/services/autocomplete.asmx" 
+                                ServiceMethod="GetCoa"
+                                MinimumPrefixLength="3" 
+                                CompletionInterval="1000"
+                                EnableCaching="false"
+                                CompletionSetCount="20"                                 
+                                CompletionListCssClass ="autocomplete_completionListElement"                            
+                                CompletionListItemCssClass="autocomplete_listItem" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem"
+                                DelimiterCharacters=","
+                                ShowOnlyCurrentWordInCompletionListItem="true" > 
+                            </ajaxToolkit:AutoCompleteExtender>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                       
+                        <asp:TemplateField HeaderText="STD Ratio (%)">
+                            <ItemTemplate>                                
+                                <asp:TextBox ID="TextBox2" runat="server" Font-Size="7pt" CssClass="txtbox" Width="100px" />
+                               <ajaxToolkit:FilteredTextBoxExtender ID="FilteredTextBoxExtender2" 
+                                                runat="server" FilterType="Custom, Numbers" TargetControlID="TextBox2" 
+                                                ValidChars=".">
+                                            </ajaxToolkit:FilteredTextBoxExtender>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                    </Columns>
+                </asp:GridView>
+                
+                
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+                <asp:Label ID="lblmsg" runat="server" Font-Bold="True" ForeColor="Red" 
+                    style="text-align: center" Visible="False"></asp:Label>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+                <asp:Button ID="btnUpdate" runat="server" CssClass="btn2" Text="Update" 
+                    Width="117px" onclick="btnUpdate_Click" Visible="False" />
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="text-align: center">
+                </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+    </ContentTemplate>
+               <Triggers>
+       <asp:AsyncPostBackTrigger ControlID="btnUpdate" EventName="Click" />
+                    <asp:AsyncPostBackTrigger ControlID="ddlprod" EventName="SelectedIndexChanged" />
+               </Triggers> 
+ </asp:UpdatePanel>
+                
+
+
+</asp:Content>
+

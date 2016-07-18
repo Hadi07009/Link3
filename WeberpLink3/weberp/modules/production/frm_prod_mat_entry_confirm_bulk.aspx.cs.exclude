@@ -1,0 +1,380 @@
+using System;
+using System.Globalization;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+using LibraryDAL.ProdDataSetTableAdapters;
+using System.Net.Mail;
+using LibraryDAL.dsLinkofficeTableAdapters;
+
+public partial class frm_prod_mat_entry_confirm_bulk : System.Web.UI.Page
+{  
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+        clsStatic.MsgConfirmBox(btnconfirm, "Are you sure to entry confirm of above items ?");
+        if (!Page.IsPostBack)
+        {
+            load_all_data();
+        }
+        else
+        {
+
+        }
+    }
+
+    private void load_all_data()
+    {
+        clsMrrData[] mrrdata = (clsMrrData[])Session[clsStatic.sessionMrrDetData];
+        if (mrrdata==null) return;
+        if (mrrdata.Length == 0) return;
+
+        int i;
+        int cnt = mrrdata.Length;
+                
+        lblissudate.Text = mrrdata[0].Issuedate.ToShortDateString();
+        lblproduction.Text = mrrdata[0].Production;
+        DataTable dt = new DataTable();
+        decimal entryrat, totent = 0;
+
+
+        dt.Rows.Clear();
+        dt.Columns.Clear();
+
+        dt.Columns.Add("SL", typeof(int));       
+        dt.Columns.Add("ITEM CODE", typeof(string));
+        dt.Columns.Add("ITEM DETAIL", typeof(string));       
+        dt.Columns.Add("UOM", typeof(string));
+        dt.Columns.Add("STORE", typeof(string));        
+        dt.Columns.Add("AVL QTY", typeof(decimal));
+        dt.Columns.Add("ISSUE QTY (PLC Record)", typeof(decimal));
+        dt.Columns.Add("STD RATIO(%)", typeof(string));
+        dt.Columns.Add("ACTUAL RATIO(%)", typeof(string));
+        dt.Columns.Add("DIFFERENCE(%) (std-act)", typeof(string));
+
+        for (i = 0; i < cnt; i++)
+        {
+            if (mrrdata[i] == null) break;
+            totent += mrrdata[i].Entryqty;
+        }
+
+        for (i = 0; i < cnt; i++)
+        {
+            if(mrrdata[i]==null) break;
+            entryrat = (100 * mrrdata[i].Entryqty) / totent;
+
+            dt.Rows.Add(mrrdata[i].Seqno, mrrdata[i].Icode, mrrdata[i].Idet, mrrdata[i].Uom, mrrdata[i].Store, mrrdata[i].Availqty, mrrdata[i].Entryqty, mrrdata[i].StdRatio.ToString("N2"), entryrat.ToString("N2"),(mrrdata[i].StdRatio-entryrat).ToString("N2"));
+        }
+               
+
+     
+        gdItem.DataSource = dt;
+        gdItem.DataBind();
+
+
+        //load finish product
+
+        tbl_prod_itm_mapTableAdapter map = new tbl_prod_itm_mapTableAdapter();
+        ProdDataSet.tbl_prod_itm_mapDataTable dtmap = new ProdDataSet.tbl_prod_itm_mapDataTable();
+        InMa_Str_LocTableAdapter loc = new InMa_Str_LocTableAdapter();
+        ErpDataSet.InMa_Str_LocDataTable dtloc = new ErpDataSet.InMa_Str_LocDataTable();
+        ListItem lst;
+
+
+        dtloc = loc.GetAllStore();
+
+
+        dtmap = new ProdDataSet.tbl_prod_itm_mapDataTable();
+        dtmap = map.GetDataByProdFin(mrrdata[0].Production.Split(':')[0], 1);
+
+        gdfinnItem.DataSource = dtmap;
+        gdfinnItem.DataBind();
+
+
+        foreach (GridViewRow gr in gdfinnItem.Rows)
+        {
+            Label lblprodqty = (Label)gr.FindControl("Label1");
+            DropDownList ddl1 = (DropDownList)gr.FindControl("DropDownList1");
+
+            ddl1.Items.Clear();
+            if (dtloc.Rows.Count > 1)
+            {
+                ddl1.Items.Add("");
+            }
+
+            foreach (ErpDataSet.InMa_Str_LocRow sdr in dtloc.Rows)
+            {
+                lst = new ListItem();
+                lst.Text = sdr.Str_Loc_Id;
+                lst.Value = sdr.Str_Loc_Id;
+                ddl1.Items.Add(lst);
+            }
+            lblprodqty.Text = totent.ToString();
+           
+        }
+
+
+
+    }
+
+
+
+
+  
+    public static string GetMonthName()
+    {
+        DateTimeFormatInfo info = DateTimeFormatInfo.GetInstance(null);
+        return info.GetAbbreviatedMonthName(DateTime.Now.Month).ToUpper();
+
+    }
+
+
+   
+
+    protected void btnconfirm_Click(object sender, EventArgs e)
+    {
+        lblmsg.Visible = false;
+        clsMrrData[] mrrdata = (clsMrrData[])Session[clsStatic.sessionMrrDetData];
+        if (mrrdata == null) return;
+        if (mrrdata.Length == 0) return;
+        tbl_prod_ctl_detTableAdapter pro = new tbl_prod_ctl_detTableAdapter();
+        ProdDataSet.tbl_prod_ctl_detDataTable dtpro = new ProdDataSet.tbl_prod_ctl_detDataTable();
+        string prod_id = mrrdata[0].Production.Split(':')[0];
+        string daterefno = mrrdata[0].Issuedate.Year.ToString() + string.Format("{0:00}", mrrdata[0].Issuedate.Month) + string.Format("{0:00}", mrrdata[0].Issuedate.Day);
+        string prod_ref = "";
+        int max_prod = Convert.ToInt32(pro.GetMaxDayAllProd(daterefno));
+
+        
+        prod_ref = daterefno + "-" + (max_prod + 1).ToString();
+        
+        dtpro = pro.GetDataByProdIdStatusDate(prod_id, "I", "F", "C", Convert.ToDateTime(mrrdata[0].Issuedate.ToShortDateString()));
+        if (dtpro.Rows.Count > 0)
+        {
+            lblmsg.Text = "PORDUCTION ALREADY INITIATED FOR DATE :" + dtpro[0].prod_date.ToShortDateString(); lblmsg.Visible = true; return;
+        }
+
+
+        dtpro = new ProdDataSet.tbl_prod_ctl_detDataTable();
+        dtpro = pro.GetDataByProdIdStatus(prod_id, "I", "F", "");
+        if (dtpro.Rows.Count > 0)
+        {
+            lblmsg.Text = "EARLIER PORDUCTION NOT POSTED YET"; lblmsg.Visible = true; return;
+        }
+
+        //entry check
+
+        foreach (GridViewRow gr in gdfinnItem.Rows)
+        {
+            DropDownList ddl = (DropDownList)gr.FindControl("DropDownList1");
+            if (ddl.Text == "")
+            {
+                lblmsg.Text = "PLEASE SELECT STORE"; lblmsg.Visible = true; return;
+            }
+        }
+
+
+               
+        InTr_Trn_HdrTableAdapter trnhdr = new InTr_Trn_HdrTableAdapter();
+        InTr_Trn_DetTableAdapter trndet = new InTr_Trn_DetTableAdapter();
+        InSu_Trn_SetTableAdapter scfset = new InSu_Trn_SetTableAdapter();
+        InMa_Stk_CtlTableAdapter scfstkctl = new InMa_Stk_CtlTableAdapter();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstkctl = new ErpDataSet.InMa_Stk_CtlDataTable();
+        tbl_prod_entryTableAdapter prod = new tbl_prod_entryTableAdapter();
+        tbl_CommentsTableAdapter comm = new tbl_CommentsTableAdapter();
+
+        string period = mrrdata[0].Issuedate.Year.ToString() + "/" + string.Format("{0:00}", mrrdata[0].Issuedate.Month);
+        string oprcode = current.UserId;
+       
+
+        string trn_code = mrrdata[0].Plant + "SRQ";       
+        int i;
+        int tot = 0;
+        int cnt = mrrdata.Length;
+        string last_num = scfset.GetDataByType_Code("IS", trn_code)[0].Trn_Set_Iq_Next_No.ToString();
+        string trn_ref_no = mrrdata[0].Plant + "IN" + string.Format("{0:00}", Convert.ToInt32(DateTime.Now.Year.ToString().Substring(2, 2))) + string.Format("{0:00}", DateTime.Now.Month) + "-" + last_num;
+        string next_num = string.Format("{0:00000}", Convert.ToInt32(last_num) + 1);
+        string cstk;
+        decimal amount, rate, totamnt = 0;
+        bool trn_flg = false;
+
+        SqlTransaction myTrn = HelperTA.OpenTransaction(trndet.Connection);
+
+        try
+        {
+
+            trndet.AttachTransaction(myTrn);
+            trnhdr.AttachTransaction(myTrn);      
+            scfset.AttachTransaction(myTrn);
+            prod.AttachTransaction(myTrn);
+            comm.AttachTransaction(myTrn);
+            pro.AttachTransaction(myTrn);
+
+            for (i = 0; i < cnt; i++)
+            {
+                if (mrrdata[i] == null) break;
+                tot++;
+
+                dtstkctl = new ErpDataSet.InMa_Stk_CtlDataTable();
+                dtstkctl = scfstkctl.GetDataByItemStore(mrrdata[i].Icode, mrrdata[i].Store);
+
+
+
+                if (dtstkctl.Count > 0) { cstk = ((decimal)dtstkctl[0].Stk_Ctl_Cur_Stk - mrrdata[i].Entryqty).ToString(); } else { trn_flg = false; goto skip_trn; }
+                if (Convert.ToDecimal(cstk) < 0) { trn_flg = false; goto skip_trn; }
+
+                rate = Convert.ToDecimal(dtstkctl[0].Stk_Ctl_Ave_Val / (decimal)dtstkctl[0].Stk_Ctl_Free_Stk);
+                amount = mrrdata[i].Entryqty * rate;
+                totamnt += amount;
+
+                trndet.InsertTrnDet("IS", trn_code, trn_ref_no, (short)tot, "", 0, mrrdata[i].Icode, mrrdata[i].Idet, mrrdata[i].Uom, mrrdata[i].Store, "", "", 0, mrrdata[i].Dcode, DateTime.Now.AddYears(10), DateTime.Now, (double)mrrdata[i].Entryqty, 0, rate, amount, amount, rate, amount, mrrdata[i].Entryqty.ToString(), cstk, "0", 0, 0);
+
+            }
+
+            trnhdr.InsertTrnHdr("IS", trn_code, trn_ref_no, "", "", "", mrrdata[0].Issuedate, mrrdata[0].Locofuse, mrrdata[0].Reason, prod_ref, mrrdata[0].Production.Split(':')[0], mrrdata[0].Production.Split(':')[1], "", "", "", "", "", totamnt, "H", period, oprcode, "", "", "", "", "", "", "", "", "", 0, 0, null, null, "", txtcomm.Text);
+            scfset.UpdateNextNum(next_num, "IS", trn_code);
+
+            // production entry
+            foreach (GridViewRow gr in gdfinnItem.Rows)
+            {
+
+                Label lblprodqty = (Label)gr.FindControl("Label1");
+                DropDownList ddl = (DropDownList)gr.FindControl("DropDownList1");
+
+                prod.InsertProd(prod_ref, prod_id, mrrdata[0].Production.Split(':')[1], mrrdata[0].Issuedate, DateTime.Now, 1, "R", gr.Cells[0].Text.Trim(), gr.Cells[1].Text.Trim(), gr.Cells[4].Text.Trim(), ddl.SelectedValue.ToString(), Convert.ToDecimal(lblprodqty.Text), 0, 0, "SAVE", "", "", "", "", 0);
+            }
+
+            comm.InsertComments(prod_ref, 1, DateTime.Now, oprcode, current.UserName, current.UserDesignation, 1, prod_id, "INI", txtcomm.Text, "", "");
+            pro.InsertCtldet(prod_ref, prod_id, max_prod + 1, "B", mrrdata[0].Production.Split(':')[1], mrrdata[0].Issuedate, "I", "", "", "", "", "", "");
+            
+
+
+            trn_flg = true;
+            skip_trn: ;
+
+            if (trn_flg)
+            {
+                myTrn.Commit();
+                //myTrn.Rollback();
+
+            }
+            else
+            {
+                myTrn.Rollback();
+                lblmsg.Visible = true;
+                lblmsg.Text = "Insufficient Qty in Stock";
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            lblmsg.Visible = true;
+            lblmsg.Text = ex.Message.ToString();     
+            myTrn.Rollback();
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(trndet.Connection, myTrn);
+        }
+
+        if (trn_flg)
+        {
+            Session[clsStatic.sessionMrrDetData] = null;
+            lbllogref.Text = prod_ref;
+            ModalPopupExtender5.Show();
+            mail_send(prod_ref);
+        }
+
+        
+    }
+
+
+    private void mail_send(string b_ref_no)
+    {
+        //mailsend
+        tblUserInfoTableAdapter usr = new tblUserInfoTableAdapter();
+        dsLinkoffice.tblUserInfoDataTable dtusr = new dsLinkoffice.tblUserInfoDataTable();
+
+        User_Role_DefinitionTableAdapter role = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable roledt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        string usercode = current.UserId.ToString();
+        roledt = role.GetDataByRole("prod1");
+
+        string ms;
+
+
+        ms = System.Configuration.ConfigurationSettings.AppSettings["smtpserver"].ToString();
+
+        SmtpClient smtp = new SmtpClient(ms);
+        MailMessage msg = new MailMessage();
+        string mbody;
+        msg.From = new MailAddress("masud.mis@sevencircle-bd.com", "SSCML Commercial Module");
+
+
+        //msg.To.Add(new MailAddress("monju@link3.net", "M Monjurul Islam"));
+        //msg.To.Add(new MailAddress("masud.mis@sevencircle-bd.com", "MIS SCBL"));        
+
+        foreach (SCBLDataSet.User_Role_DefinitionRow dr in roledt.Rows)
+        {
+            dtusr = new dsLinkoffice.tblUserInfoDataTable();
+            dtusr = usr.GetDataByUserId(dr.user_id, current.CompanyCode);
+
+            if (dtusr.Rows.Count > 0)
+            {
+                if (dtusr[0].UserEmail != "")
+                {
+                    msg.To.Add(new MailAddress(dtusr[0].UserEmail, dtusr[0].UserName));
+                }
+            }
+
+        }
+
+        msg.Subject = "Production Entry Notification " + lblproduction.Text;
+
+
+        mbody = "\n\n " + "A BULK Production Initiated and pending for your approval. Production brief information as bellow :";
+        mbody += "\n\n   Production Date         : " + lblissudate.Text;
+        mbody += "\n Production Batch Ref No  : " + b_ref_no;
+        mbody += "\n Production Name             : " + lblproduction.Text;
+
+
+        mbody += "\n\n\n\n\n";
+
+        mbody += "\n " + "To view details please login in at http://203.76.114.131/cml/cmlcom/frmLogin.aspx ";
+        mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+
+
+        msg.Body = mbody;
+        smtp.Send(msg);
+
+
+    }
+
+    protected void btnCancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("./frm_prod_mat_entry_bulk.aspx");
+    }
+    protected void btnok_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("./frm_prod_mat_entry_bulk.aspx");
+    }
+   
+    
+}

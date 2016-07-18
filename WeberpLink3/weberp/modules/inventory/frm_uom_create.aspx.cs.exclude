@@ -1,0 +1,108 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using LibraryDAL;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+
+public partial class frm_uom_create : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        //current.UserId = "MON";
+        //current.UserName = "Monjurul";
+
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btnupdate, "Are you sure to add / Update ?");
+        
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            clear_all();           
+            load_all_data();
+        }
+
+    }
+
+    private void load_all_data()
+    {
+        InMa_UomTableAdapter uom = new InMa_UomTableAdapter();
+        SCBLIN.InMa_UomDataTable dt = new SCBLIN.InMa_UomDataTable();
+
+
+        dt = uom.GetAllData();
+
+        gduom.DataSource = dt;
+        gduom.DataBind();
+
+ 
+    }
+
+ 
+
+    private void clear_all()
+    {
+
+        txtcode.Text = "";
+        txtname.Text = "";
+       
+    }
+
+ 
+    
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        InMa_UomTableAdapter uom = new InMa_UomTableAdapter();
+
+        if ((txtcode.Text == "") || (txtname.Text == "")) return;
+
+
+        if (uom.GetDataBycode(txtcode.Text).Count == 0)
+        {
+            uom.InsertUom(txtcode.Text.ToUpper(), txtname.Text.ToUpper(), DateTime.Now, "", "", "", 0);
+            lblupdate.Text = "ADDED SUCCESSFULLY";
+            lblupdate.Visible = true;
+            
+        }
+        else
+        {
+            uom.UpdateUom(txtname.Text.ToUpper(), DateTime.Now, txtcode.Text.ToUpper());
+            lblupdate.Text = "UPDATED SUCCESSFULLY";
+            lblupdate.Visible = true;
+
+
+        }
+
+        load_all_data();
+         clear_all();
+    }
+    protected void gduom_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onmouseover"] = "this.style.cursor='pointer';this.style.textDecoration='underline';this.style.color='blue';";
+            e.Row.Attributes["onmouseout"] = "this.style.textDecoration='none';this.style.color='black';";
+            e.Row.Attributes["onclick"] = ClientScript.GetPostBackClientHyperlink(this.gduom, "Select$" + e.Row.RowIndex);
+        }
+
+
+    }
+    protected void gduom_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        lblupdate.Visible = false;
+        if (gduom.SelectedIndex > -1)
+        {
+            txtcode.Text = gduom.Rows[gduom.SelectedIndex].Cells[0].Text;
+            txtname.Text = gduom.Rows[gduom.SelectedIndex].Cells[1].Text;
+            
+        }
+    }
+}
+

@@ -1,0 +1,144 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_prod_cs_report.aspx.cs" Inherits="frm_prod_cs_report"  EnableEventValidation="false" %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register Assembly="eWorld.UI, Version=2.0.6.2393, Culture=neutral, PublicKeyToken=24d65337282035f2"
+    Namespace="eWorld.UI" TagPrefix="ew" %>
+
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px; text-align: right;">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                PRODUCTION COST ALLOCATION REPORT</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: right">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 25px; text-align: center">
+                <table style="width:100%;">
+                    <tr>
+                        <td style="width: 172px">
+                            &nbsp;</td>
+                        <td style="width: 92px; text-align: left;">
+                            PERIOD</td>
+                        <td style="width: 22px">
+                            :</td>
+                        <td style="text-align: left; width: 162px;">
+                            <ew:CalendarPopup ID="cldfrdate" runat="server" 
+                                Culture="English (United Kingdom)" DisableTextBoxEntry="False" Nullable="false"  
+                                 Width="85px">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew:CalendarPopup>
+                        </td>
+                        <td style="text-align: left">
+                            TO</td>
+                        <td style="text-align: left">
+                            <ew:CalendarPopup ID="cldtodate" runat="server" 
+                                Culture="English (United Kingdom)" DisableTextBoxEntry="False" Nullable="false" 
+                                 Width="85px">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew:CalendarPopup>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 172px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 92px">
+                            &nbsp;</td>
+                        <td style="width: 22px">
+                            &nbsp;</td>
+                        <td style="text-align: left" colspan="3">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 172px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 92px">
+                            PRODUCTION</td>
+                        <td style="width: 22px">
+                            :</td>
+                        <td style="text-align: left" colspan="3">
+                            <asp:DropDownList ID="ddlprod" runat="server"
+                                CssClass="txtbox"
+                                Width="400px">
+                            </asp:DropDownList>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 172px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 92px">
+                            &nbsp;</td>
+                        <td style="width: 22px">
+                            &nbsp;</td>
+                        <td style="text-align: left" colspan="3">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 172px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 92px">
+                            &nbsp;</td>
+                        <td style="width: 22px">
+                            &nbsp;</td>
+                        <td colspan="3" style="text-align: left">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 172px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 92px">
+                            &nbsp;</td>
+                        <td style="width: 22px">
+                            &nbsp;</td>
+                        <td colspan="3" style="text-align: left">
+                            <asp:Button ID="btnview" runat="server" CssClass="btn2" onclick="btnview_Click" 
+                                Text="VIEW"  Width="117px" />
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 34px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="text-align: center">
+                </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+  
+
+</asp:Content>
+

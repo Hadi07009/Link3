@@ -1,0 +1,251 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using LibraryDAL;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+
+public partial class frm_supplier_create : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        //current.UserId = "MON";
+        //current.UserName = "Monjurul";
+
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btnupdate, "Are you sure to add / Update ?");
+        
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            clear_all();
+            load_all_data();
+            load_all_grp();
+        }
+
+    }
+
+    private void load_all_grp()
+    {
+
+
+        AccCoaGroupCodeSetupTableAdapter code = new AccCoaGroupCodeSetupTableAdapter();
+        AccDataSet.AccCoaGroupCodeSetupDataTable dt = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+        ListItem lst;
+
+        dt = code.GetDataById("A1");
+        ddlg1.Items.Clear();
+        ddlg1.Items.Add("");
+        foreach (AccDataSet.AccCoaGroupCodeSetupRow dr in dt.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Ccg_Code;
+            lst.Text = dr.Ccg_Code + ":" + dr.Ccg_Name + ":" + dr.Ccg_Short_Name;
+            ddlg1.Items.Add(lst);
+        }
+
+        dt = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+
+        dt = code.GetDataById("A2");
+        ddlg2.Items.Clear();
+        ddlg2.Items.Add("");
+        foreach (AccDataSet.AccCoaGroupCodeSetupRow dr in dt.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Ccg_Code;
+            lst.Text = dr.Ccg_Code + ":" + dr.Ccg_Name + ":" + dr.Ccg_Short_Name;
+            ddlg2.Items.Add(lst);
+        }
+
+
+
+        dt = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+        dt = code.GetDataById("A3");
+        ddlg3.Items.Clear();
+        ddlg3.Items.Add("");
+        foreach (AccDataSet.AccCoaGroupCodeSetupRow dr in dt.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Ccg_Code;
+            lst.Text = dr.Ccg_Code + ":" + dr.Ccg_Name + ":" + dr.Ccg_Short_Name;
+            ddlg3.Items.Add(lst);
+        }
+    }
+
+    private void load_all_data()
+    {
+
+        PuMa_Par_AccTableAdapter acc = new PuMa_Par_AccTableAdapter();
+        ErpDataSet.PuMa_Par_AccDataTable dtacc = new ErpDataSet.PuMa_Par_AccDataTable();
+
+        dtacc = acc.GetAllData();
+        gdsupplier.DataSource = dtacc;
+        gdsupplier.DataBind();
+    }
+
+    private void clear_all()
+    {
+        get_max_ref();
+        txtpartydet.Text = "";
+        txtname.Text = "";
+        txtadd1.Text = "";
+        txtadd2.Text = "";
+        txtadd3.Text = "";
+        txtadd4.Text = "";
+        txtadd5.Text = "";
+        txttel.Text = "";
+        txtfax.Text = "";
+        txtemail.Text = "";
+        txtcon.Text = "";
+        txtconstatus.Text = "";
+        txtmob.Text = "";
+        txtcoa.Text = "";
+        ddlg1.SelectedIndex = 0;
+        ddlg2.SelectedIndex = 0;
+        ddlg3.SelectedIndex = 0;
+    }
+
+    private void get_max_ref()
+    {
+        PuMa_Par_AccTableAdapter det = new PuMa_Par_AccTableAdapter();
+        
+        double maxref = Convert.ToDouble(det.GetMaxSl()) + 1;
+        string max_ref = "21.001.001." + string.Format("{0:0000}", maxref);
+        txtcode.Text = max_ref;
+    }
+    
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        PuMa_Par_AccTableAdapter acc = new PuMa_Par_AccTableAdapter();
+        PuMa_Par_AdrTableAdapter adr = new PuMa_Par_AdrTableAdapter();
+        PuMa_Par_Acc_Pmt_DetTableAdapter pmt = new PuMa_Par_Acc_Pmt_DetTableAdapter();
+        AccCoaAccountsGroupTableAdapter grp = new AccCoaAccountsGroupTableAdapter();
+
+
+        DateTime dtdate = Convert.ToDateTime(DateTime.Now.ToShortDateString());
+        if ((txtcode.Text == "") || (txtname.Text == "")) return;
+
+        string adrcode = "SPL" + txtcode.Text.Substring(txtcode.Text.Length - 4, 4);
+        if (acc.GetDataByCode(txtcode.Text).Count == 0)
+        {
+
+            acc.InsertAcc(txtcode.Text, txtname.Text.ToUpper(), adrcode, "S", "O", "", null, "Y", dtdate, "", 0, 0, 0, 0, 0, 0, "", "BDT", "Y", "Y", "Y", "C", txtcoa.Text, "", "", 0);
+            adr.InsertAdrDet(adrcode, txtname.Text.ToUpper(), adrcode, txtadd1.Text, txtadd2.Text, txtadd3.Text, txtadd4.Text, txtadd5.Text, txtconstatus.Text, txtmob.Text, txtcon.Text, txttel.Text, txtfax.Text, txtemail.Text, txtcode.Text, "", dtdate, "Y", dtdate, 0, 0, "", "", "", 0);
+            pmt.InsertPmt(txtcode.Text, adrcode, "", 0, 0, 0, 0, "N", "0", "", "", "", 0);
+
+
+            lblupdate.Text = "ADDED SUCCESSFULLY";
+            lblupdate.Visible = true;
+            
+        }
+        else
+        {
+            int aa = acc.UpdateAccName(txtname.Text.ToUpper(), txtcoa.Text, txtcode.Text);
+            adr.UpdateAdrData(txtname.Text.ToUpper(), txtadd1.Text, txtadd2.Text, txtadd3.Text, txtadd4.Text, txtadd5.Text, txtconstatus.Text, txtmob.Text, txtcon.Text, txttel.Text, txtfax.Text, txtemail.Text, adrcode);
+            lblupdate.Text = "UPDATED SUCCESSFULLY";
+            lblupdate.Visible = true;
+
+
+        }
+        
+        grp.DeleteAccCode(txtcode.Text);
+        grp.InsertAccGrp(txtcode.Text, "A0", "2");
+
+        if (ddlg1.Text != "")
+            grp.InsertAccGrp(txtcode.Text, "A1", ddlg1.SelectedValue.ToString());
+
+        if (ddlg2.Text != "")
+            grp.InsertAccGrp(txtcode.Text, "A2", ddlg2.SelectedValue.ToString());
+
+        if (ddlg3.Text != "")
+            grp.InsertAccGrp(txtcode.Text, "A3", ddlg3.SelectedValue.ToString());
+
+
+        //AssignCoaGRP update
+        grp.ExecAssignCoaGRP();
+        load_all_data();
+         clear_all();
+    }
+    protected void gdsupplier_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onmouseover"] = "this.style.cursor='pointer';this.style.textDecoration='underline';this.style.color='blue';";
+            e.Row.Attributes["onmouseout"] = "this.style.textDecoration='none';this.style.color='black';";
+            e.Row.Attributes["onclick"] = ClientScript.GetPostBackClientHyperlink(this.gdsupplier, "Select$" + e.Row.RowIndex);
+        }
+
+
+    }
+    protected void gdsupplier_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        lblupdate.Visible = false;
+        if (gdsupplier.SelectedIndex > -1)
+        {
+            PuMa_Par_AccTableAdapter acc = new PuMa_Par_AccTableAdapter();
+            PuMa_Par_AdrTableAdapter adr = new PuMa_Par_AdrTableAdapter();
+            ErpDataSet.PuMa_Par_AdrDataTable dt = new ErpDataSet.PuMa_Par_AdrDataTable();
+
+            AccCoaAccountsGroupTableAdapter grp = new AccCoaAccountsGroupTableAdapter();
+            AccDataSet.AccCoaAccountsGroupDataTable dtgrp;
+
+            string acccode = gdsupplier.Rows[gdsupplier.SelectedIndex].Cells[0].Text;
+            string adrcode = "SPL" + acccode.Substring(acccode.Length-4, 4);
+
+            dt = adr.GetDataByAdrCode(adrcode);
+            if (dt.Rows.Count == 0)
+            {                
+                return;
+            }
+
+            txtcode.Text = dt[0].Par_Adr_Acc_Code;
+            txtname.Text = dt[0].par_adr_name;
+            txtadd1.Text = dt[0].Par_Adr_Line_1;
+            txtadd2.Text = dt[0].Par_Adr_Line_2;
+            txtadd3.Text = dt[0].Par_Adr_Line_3;
+            txtadd4.Text = dt[0].Par_Adr_Line_4;
+            txtadd5.Text = dt[0].Par_Adr_Line_5;
+            txttel.Text = dt[0].Par_Adr_Tel_No;
+            txtfax.Text = dt[0].Par_Adr_Fax_No;
+            txtemail.Text = dt[0].Par_Adr_Email_Id;
+            txtcon.Text = dt[0].Par_Adr_Cnt_No;
+            txtconstatus.Text = dt[0].Par_Adr_Cst_No;
+            txtmob.Text = dt[0].Par_Adr_Lst_No;
+            txtcoa.Text = acc.GetDataByCode(txtcode.Text)[0].T_C1;
+
+            dtgrp = new AccDataSet.AccCoaAccountsGroupDataTable();
+            dtgrp = grp.GetDataByIdCode(acccode, "A1");
+            if (dtgrp.Count > 0)
+                ddlg1.SelectedValue = dtgrp[0].Coa_Grp_Code;
+            else
+                ddlg1.SelectedIndex = 0;
+
+            dtgrp = new AccDataSet.AccCoaAccountsGroupDataTable();
+            dtgrp = grp.GetDataByIdCode(acccode, "A2");
+            if (dtgrp.Count > 0)
+                ddlg2.SelectedValue = dtgrp[0].Coa_Grp_Code;
+            else
+                ddlg2.SelectedIndex = 0;
+
+
+            dtgrp = new AccDataSet.AccCoaAccountsGroupDataTable();
+            dtgrp = grp.GetDataByIdCode(acccode, "A3");
+            if (dtgrp.Count > 0)
+                ddlg3.SelectedValue = dtgrp[0].Coa_Grp_Code;
+            else
+                ddlg3.SelectedIndex = 0;
+
+
+
+        }
+    }
+    
+}
+

@@ -1,0 +1,112 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_change_routing.aspx.cs" Inherits="frm_change_routing" Title=""   ValidateRequest="false" %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register src="usercontrols/ctl_change_routing.ascx" tagname="ctl_change_routing" tagprefix="uc1" %> 
+    
+        
+       
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+    <table class="tblmas" style="width: 100%" id="tblmaster" runat="server">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                CHANGE PURCHASE TYPE</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: right">
+                <asp:Label ID="lblplants" runat="server" Font-Bold="True" Text="Label" 
+                    Width="300px" style="text-align: right"></asp:Label>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 14px; text-align: left">
+                Sort by :
+                 <asp:DropDownList ID="ddlsort" runat="server" AutoPostBack="True" CssClass="txtbox"
+                    OnSelectedIndexChanged="ddlsort_SelectedIndexChanged" Width="102px">
+                    <asp:ListItem Value="1">Item</asp:ListItem>
+                    <asp:ListItem Value="2">MPR</asp:ListItem>
+                </asp:DropDownList>
+              </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 2px; text-align: center">
+                AVAILABLE ITEMS FOR CHANGING PURCHASE TYPE</td>
+        </tr>
+        <tr>
+        <td class="tbl" colspan="3" style="height: 24px; text-align:left">
+            
+        <asp:UpdatePanel ID="updpannel" runat="server">
+        <ContentTemplate>
+           <asp:Label ID="lblcount" runat="server" Text="Total Item: " Width="200px"></asp:Label>
+            <asp:PlaceHolder ID="celctl" runat="server"></asp:PlaceHolder>
+           <asp:UpdateProgress ID="sp1" runat="server">
+                        <ProgressTemplate>
+                            <%--<div class="TransparentGrayBackground"></div>--%>
+                            <asp:Panel  ID="alwaysVisibleAP" runat="server" style="text-align: center" >
+                            
+                                <div style="text-align: center">
+                                    <asp:Image  ID="ajaxLoadNotificationImage" 
+                                                runat="server" 
+                                                ImageUrl="~/images/Loading.gif" 
+                                                AlternateText="[image]" />
+                                    
+                                </div>
+                            
+                            </asp:Panel>
+                            <ajaxToolKit:AlwaysVisibleControlExtender 
+                                ID="AlwaysVisibleControlExtender" 
+                                runat="server"
+                                TargetControlID="alwaysVisibleAP"
+                                HorizontalSide="Center"
+                                HorizontalOffset="0"
+                                VerticalSide="Middle"
+                                VerticalOffset="0">
+                            </ajaxToolKit:AlwaysVisibleControlExtender>
+                           
+                        </ProgressTemplate>
+                    </asp:UpdateProgress>
+            </ContentTemplate>
+            
+            <Triggers>            
+            <asp:AsyncPostBackTrigger ControlID="ddlsort" EventName="SelectedIndexChanged" />
+            </Triggers>
+         </asp:UpdatePanel>
+        
+        </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: center">
+            
+                </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+        <tr>
+            <td style="height: 57px">
+            </td>
+            <td style="height: 57px">
+            </td>
+            <td style="height: 57px">
+            </td>
+        </tr>
+    </table>
+
+</asp:Content>
+

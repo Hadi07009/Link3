@@ -1,0 +1,135 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLQryTableAdapters;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.ProdReportDataSetTableAdapters;
+using LibraryDAL.ProdDataSetTableAdapters;
+using CrystalDecisions.Shared;
+using LibraryDAL.FpiDataSetTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+
+public partial class frm_fpi_rm_monitoring_report : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+
+        if (!Page.IsPostBack)
+        {
+            cldfrdate.SelectedDate = Convert.ToDateTime("01/01/2014");
+            cldtodate.SelectedDate = DateTime.Now;
+            loaditem();
+            loadmprref();
+        }
+        else
+        {
+
+        }
+    }
+    private void loaditem()
+    {
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitm = new ErpDataSet.InMa_Itm_DetDataTable();
+
+        dtitm = itm.GetDataByItmType("R");
+        ListItem lst;
+        ddlitem.Items.Clear();
+        ddlitem.Items.Add("");
+
+        foreach (LibraryDAL.ErpDataSet.InMa_Itm_DetRow dr in dtitm.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Itm_Det_Sec_Code;
+            lst.Text = dr.Itm_Det_desc;
+            ddlitem.Items.Add(lst);
+        }
+
+    }
+
+    private void loadmprref()
+    {
+        get_mpr_ref_noTableAdapter refno = new get_mpr_ref_noTableAdapter ();
+        LibraryDAL.FpiDataSet.get_mpr_ref_noDataTable dtrefno = new FpiDataSet.get_mpr_ref_noDataTable();
+        ListItem lst;
+        ddlmprref.Items.Clear();
+        ddlmprref.Items.Add("");
+        dtrefno = refno.GetData();
+        foreach (FpiDataSet.get_mpr_ref_noRow dr in dtrefno.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.IN_Det_Ref+":"+dr.IN_Det_Icode;
+            lst.Text = dr.IN_Det_Ref+":"+dr.IN_Hdr_St_DATE.ToShortDateString()+":"+dr.IN_Det_Lin_Qty+":"+dr.IN_Det_Itm_Desc +":"+dr.IN_Det_Itm_Uom;
+            ddlmprref.Items.Add(lst);
+        }
+    }
+   
+    protected void btnview_Click(object sender, EventArgs e)
+    {
+        DateTime fdate = Convert.ToDateTime(cldfrdate.SelectedDate.ToShortDateString());
+        DateTime tdate = Convert.ToDateTime(cldtodate.SelectedDate.ToShortDateString());
+
+        LibraryDTO.clsReport rpt = new LibraryDTO.clsReport();
+        ParameterFields myParams = new ParameterFields();
+        string title = "" ;
+        if (fdate > tdate) return;
+
+        rpt.SelectionFormulla = "";
+
+        rpt.SelectionFormulla = "({view_rm_monitoring.IN_Hdr_St_DATE} in " + "datetime('" + fdate + "') to " + "datetime('" + tdate + "'))";
+
+        if (chkallitm.Checked == false)
+        {
+            rpt.SelectionFormulla += " and {view_rm_monitoring.IN_Det_Icode} = '" + ddlitem.SelectedItem.Value+ "'";
+        }
+
+        if (chkallmpr.Checked == false)
+        {
+            rpt.SelectionFormulla += " and {view_rm_monitoring.IN_Det_Ref} = '" + ddlmprref.SelectedItem.Value.Split(':')[0] + "'";
+           
+        }
+
+
+        parameterpass(myParams, "companytitle", current.CompanyName);
+        parameterpass(myParams, "companyaddress", current.CompanyAddress);
+
+        title = "Raw Material Import Monitoring Report "+"("+rdoliststatus.SelectedItem.Text+")";
+        parameterpass(myParams, "title", title);
+        parameterpass(myParams, "period", "Period :" + fdate.ToShortDateString() + " To " + tdate.ToShortDateString());
+        rpt.ParametersFields = myParams;
+        rpt.FileName = "files/rpt_fpi_rm_import_monitoring.rpt";
+
+        rpt.PageZoomFactor = 100;
+
+        current.SessionReport = rpt;
+
+        RegisterStartupScript("click", "<script>window.open('reports/frm_rpt_viewer.aspx');</script>");
+
+    }
+
+    private void parameterpass(ParameterFields myParams, string pname, string value)
+    {
+        ParameterField param = new ParameterField();
+        ParameterDiscreteValue dis1 = new ParameterDiscreteValue();
+        param.ParameterFieldName = pname;
+        dis1.Value = value;
+        param.CurrentValues.Add(dis1);
+        myParams.Add(param);
+
+    }
+
+}

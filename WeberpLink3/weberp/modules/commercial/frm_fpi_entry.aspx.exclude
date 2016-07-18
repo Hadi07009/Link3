@@ -1,0 +1,333 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_fpi_entry.aspx.cs" Inherits="frm_fpi_entry" Title=""   %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register assembly="eWorld.UI.Compatibility" namespace="eWorld.UI.Compatibility" tagprefix="ew1" %>
+<%@ Register src="usercontrols/ctl_fpi_mpr_item_view.ascx" tagname="ctl_fpi_mpr_item_view" tagprefix="uc1" %>
+<%@ Register src="usercontrols/ctl_fpi_download.ascx" tagname="ctl_fpi_download" tagprefix="uc3" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" style="text-align: center">
+                PI ENTRY</td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc1:ctl_fpi_mpr_item_view ID="ctl_fpi_mpr_item_view1" runat="server" />
+               
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+
+            <asp:UpdatePanel ID="pnl1" runat="server">
+<ContentTemplate>
+                
+                <table style="width:100%;">
+                    <tr>
+                        <td class="heading" colspan="4" style="text-align: center; color: #FFFFFF; ">
+                            Proforma Invoice Information Entry</td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Reference&nbsp; No:</td>
+                        <td class="style1" style="width: 15%">
+                            <asp:Label ID="lbl_ref_no" runat="server" style="font-weight: bold" 
+                                Width="176px"></asp:Label>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            Date:</td>
+                        <td class="style16" style="width: 36%">
+                            <ew1:CalendarPopup ID="dt_date" runat="server" CssClass="txtbox" 
+                                Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="76px">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew1:CalendarPopup>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            User&#39;s Name:</td>
+                        <td class="style1" style="width: 15%">
+                            <asp:TextBox ID="txt_user_name" runat="server" Width="175px"></asp:TextBox>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            Expenses Nature:</td>
+                        <td class="style19" style="width: 36%">
+                            <asp:TextBox ID="txt_expense_nature" runat="server" Width="179px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Location:</td>
+                        <td class="style3" colspan="3">
+                            <asp:TextBox ID="txt_location" runat="server" Width="492px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            PI/Indent No:</td>
+                        <td class="style1" style="width: 15%">
+                            <asp:TextBox ID="txt_pi_no" runat="server" Width="175px"></asp:TextBox>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            Date:</td>
+                        <td class="style16" style="width: 36%">
+                            <ew1:CalendarPopup ID="dt_date_PI" runat="server" CssClass="txtbox" 
+                                Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="76px">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew1:CalendarPopup>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Supplier Name:</td>
+                        <td class="style3" colspan="3">
+                            <asp:TextBox ID="txt_supllier_name" runat="server" Width="492px"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txt_supllier_name_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx_01" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" Enabled="True" 
+                                MinimumPrefixLength="1" ServiceMethod="GetPartyAdrList" 
+                                ServicePath="~/modules/commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" 
+                                TargetControlID="txt_supllier_name">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Item Details:</td>
+                        <td class="style3" colspan="3">
+                            <asp:TextBox ID="txt_item_details" runat="server" Width="492px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Origin:</td>
+                        <td class="style3" colspan="3">
+                            <asp:TextBox ID="txt_origin" runat="server" Width="492px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Quantity:</td>
+                        <td class="style1" style="height: 20px; width: 15%">
+                            <asp:TextBox ID="txt_quantity" runat="server" AutoPostBack="True" 
+                                ontextchanged="txt_quantity_TextChanged" Width="175px"></asp:TextBox>
+                            <ajaxToolkit:FilteredTextBoxExtender ID="txt_quantity_FilteredTextBoxExtender" 
+                                runat="server" Enabled="True" FilterMode="ValidChars" 
+                                FilterType="Custom, Numbers" TargetControlID="txt_quantity" ValidChars=".">
+                            </ajaxToolkit:FilteredTextBoxExtender>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            Unit:</td>
+                        <td class="style16" style="width: 36%">
+                            <asp:DropDownList ID="txt_unit" runat="server" Width="179px"></asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Unit rate:</td>
+                        <td class="style1" style="height: 20px; width: 15%">
+                            <asp:TextBox ID="txt_unit_rate" runat="server" AutoPostBack="True" 
+                                ontextchanged="txt_unit_rate_TextChanged" Width="175px"></asp:TextBox>
+                            <ajaxToolkit:FilteredTextBoxExtender ID="txt_unit_rate_FilteredTextBoxExtender" 
+                                runat="server" Enabled="True" FilterMode="ValidChars" 
+                                FilterType="Custom, Numbers" TargetControlID="txt_unit_rate" ValidChars=".">
+                            </ajaxToolkit:FilteredTextBoxExtender>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            currency:</td>
+                        <td class="style24" style="width: 36%">
+                            <asp:TextBox ID="txt_currency" runat="server" Width="179px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style27" style="text-align: right; width: 32%;">
+                            Total value:</td>
+                        <td class="style1" style="height: 20px; width: 15%">
+                            <asp:Label ID="lbl_total_value" runat="server" style="font-weight: bold" 
+                                Width="175px"></asp:Label>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            currency:</td>
+                        <td class="style19" style="width: 36%">
+                            <asp:TextBox ID="txt_currency_total_value" runat="server" Width="179px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Payment Tems:</td>
+                        <td class="style3" colspan="3" style="height: 32px">
+                            <asp:TextBox ID="txt_payment_terms" runat="server" TextMode="MultiLine" 
+                                Width="492px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Date of Shipment:</td>
+                        <td class="style1" style="height: 25px; width: 15%">
+                            <ew1:CalendarPopup ID="dt_shipment_date" runat="server" CssClass="txtbox" 
+                                Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="76px">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew1:CalendarPopup>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            LC Validity:</td>
+                        <td class="style16" style="width: 36%">
+                            <ew1:CalendarPopup ID="dt_lc_validity_date" runat="server" CssClass="txtbox" 
+                                Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="76px">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew1:CalendarPopup>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Port of Loading:</td>
+                        <td class="style3" colspan="3" style="height: 20px">
+                            <asp:TextBox ID="txt_port_of_loading" runat="server" Width="492px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Port of Discharge:</td>
+                        <td class="style1" style="height: 25px; width: 15%">
+                            <asp:TextBox ID="txt_port_of_discharge" runat="server" Width="175px"></asp:TextBox>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            Expect Arival Time:</td>
+                        <td class="style16" style="width: 36%">
+                            <ew1:CalendarPopup ID="dt_arrival" runat="server" CssClass="txtbox" 
+                                Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="76px">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew1:CalendarPopup>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Name of C&amp;F Agent:</td>
+                        <td class="style20" colspan="3">
+                            <asp:TextBox ID="txt_cf_agent" runat="server" Width="492px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Tranport Contractor:</td>
+                        <td class="style3" colspan="3">
+                            <asp:TextBox ID="txt_transport_contact" runat="server" Width="492px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Mode of Transport:</td>
+                        <td class="style1" style="width: 15%">
+                            <asp:TextBox ID="txt_mode_of_transport" runat="server" Width="175px"></asp:TextBox>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            Stock In Hand:</td>
+                        <td class="style16" style="width: 36%">
+                            <asp:TextBox ID="txt_stock_in_hand" runat="server" ReadOnly="True" 
+                                Width="179px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            L/C Details Pipeline:</td>
+                        <td class="style3" colspan="3">
+                            <asp:TextBox ID="txt_LC_details" runat="server" Width="492px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Total Stock With Pipeline:</td>
+                        <td class="style1" style="width: 15%">
+                            <asp:TextBox ID="txt_total_stock" runat="server" Width="175px"></asp:TextBox>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            Production CoveragePeriod:</td>
+                        <td class="style16" style="width: 36%">
+                            <ew1:CalendarPopup ID="dt_production_period" runat="server" CssClass="txtbox" 
+                                Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="76px">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew1:CalendarPopup>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            Previous Unit&nbsp; Rate:</td>
+                        <td class="style1" style="width: 15%">
+                            <asp:TextBox ID="txt_previous_date" runat="server" Width="175px"></asp:TextBox>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            Date</td>
+                        <td class="style16" style="width: 36%">
+                            <ew1:CalendarPopup ID="dt_date_previous_rate" runat="server" CssClass="txtbox" 
+                                Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="76px">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew1:CalendarPopup>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 32%;">
+                            &nbsp;</td>
+                        <td class="style1" style="width: 15%">
+                            <asp:Label ID="Label1" runat="server" style="color: #FF3300; font-weight: 700" 
+                                Text="Label" Visible="False"></asp:Label>
+                        </td>
+                        <td style="text-align: right; width: 183px;">
+                            &nbsp;</td>
+                        <td class="style16" style="width: 36%">
+                            &nbsp;</td>
+                    </tr>
+                </table>
+
+                 </ContentTemplate>
+   <Triggers>
+   <asp:AsyncPostBackTrigger ControlID="txt_quantity" EventName="TextChanged" />
+   <asp:AsyncPostBackTrigger ControlID="txt_unit_rate" EventName="TextChanged" />
+   </Triggers>
+</asp:UpdatePanel>
+            </td>
+        </tr>
+        <tr>
+            <td style="height: 28px; text-align: center;">
+               
+                PI Document(PDF) :
+                            <asp:FileUpload ID="updoc" runat="server" Width="492px" />
+               
+            </td>
+        </tr>
+        <tr>
+            <td style="height: 28px; text-align: center;">
+               
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height: 28px; text-align: center;">
+               
+                            <asp:Button ID="btn_submit" runat="server" 
+                                Text="Submit" Width="100px" onclick="btn_submit_Click" />
+               
+            </td>
+        </tr>
+        <tr>
+            <td style="height: 28px; text-align: left;">
+               
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height: 92px">
+            </td>
+        </tr>
+    </table>
+  
+</asp:Content>
+

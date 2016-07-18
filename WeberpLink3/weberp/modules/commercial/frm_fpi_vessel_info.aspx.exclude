@@ -1,0 +1,94 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_fpi_vessel_info.aspx.cs" Inherits="frm_fpi_vessel_info" Title="" EnableEventValidation ="false"   %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+
+<%@ Register src="usercontrols/ctl_fpi_mpr_item_view.ascx" tagname="ctl_fpi_mpr_item_view" tagprefix="uc1" %>
+
+
+<%@ Register assembly="eWorld.UI.Compatibility" namespace="eWorld.UI.Compatibility" tagprefix="ew1" %>
+
+<%@ Register src="usercontrols/ctl_fpi_download.ascx" tagname="ctl_fpi_download" tagprefix="uc3" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+
+          <%--  <asp:UpdatePanel ID="pnl1" runat="server">
+<ContentTemplate>--%>
+                
+                <table style="width:100%;">
+                    <tr>
+                        <td class="heading" colspan="4" style="text-align: center; color: #FFFFFF; ">
+                            Vessel Information Entry</td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 38%;">
+                            Vessel Type:</td>
+                        <td class="style1" style="width: 15%">
+                            <asp:DropDownList ID="ddlvesseltype" runat="server" Width="250px" AutoPostBack="True" OnSelectedIndexChanged="ddlvesseltype_SelectedIndexChanged">
+                            </asp:DropDownList>
+                        </td>
+                        <td style="text-align: right; width: 276px;">
+                            </td>
+                        <td class="style16" style="width: 36%">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 38%;">Vessel Name:</td>
+                        <td class="style1" style="width: 15%">
+                            <asp:TextBox ID="txtvesselname" runat="server" Width="250px"></asp:TextBox>
+                        </td>
+                        <td style="text-align: right; width: 276px;">&nbsp;</td>
+                        <td class="style16" style="width: 36%">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 38%;">&nbsp;</td>
+                        <td class="style1" style="width: 15%; text-align: right;">
+                            <asp:Button ID="btnclear" runat="server" Text="Clear" Width="65px" OnClick="btnclear_Click" />
+                            <asp:Button ID="btnadd" runat="server" Text="Add" Width="65px" OnClick="btnadd_Click" />
+                            &nbsp;<asp:Button ID="btnupdate" runat="server" Text="Update" Width="65px" OnClick="btnupdate_Click" />
+                        </td>
+                        <td style="text-align: right; width: 276px;">&nbsp;</td>
+                        <td class="style16" style="width: 36%">&nbsp;</td>
+                    </tr>
+                </table>
+
+    <table>
+
+        <tr>
+            <td style="width: 367px">
+                <td>
+                    <asp:GridView ID="gvvesselinfo" runat="server" Width="328px" OnRowDataBound="gvvesselinfo_RowDataBound" OnSelectedIndexChanged="gvvesselinfo_SelectedIndexChanged">
+                            </asp:GridView>
+
+                </td>
+
+            </td>
+
+        </tr>
+    </table>
+
+  <%--</ContentTemplate>
+   <Triggers>
+       <asp:AsyncPostBackTrigger ControlID="gvvesselinfo"/>
+       <%-- <asp:AsyncPostBackTrigger ControlID="gvvesselinfo" EventName="SelectedIndexChanged" />--%>
+  
+
+ <%--  </Triggers>
+</asp:UpdatePanel>--%>
+            </td>
+        </tr>
+        <tr>
+            <td style="height: 92px">
+            </td>
+        </tr>
+    </table>
+  
+</asp:Content>
+

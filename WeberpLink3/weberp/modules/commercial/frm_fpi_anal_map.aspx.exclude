@@ -1,0 +1,183 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_fpi_anal_map.aspx.cs" Inherits="frm_fpi_anal_map" Title="" EnableEventValidation ="false"   %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register assembly="eWorld.UI.Compatibility" namespace="eWorld.UI.Compatibility" tagprefix="ew1" %>
+
+<%@ Register src="usercontrols/ctl_fpi_mpr_item_view.ascx" tagname="ctl_fpi_mpr_item_view" tagprefix="uc1" %>
+
+<%@ Register src="usercontrols/ctl_fpi_download.ascx" tagname="ctl_fpi_download" tagprefix="uc3" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="height: 22px">
+                &nbsp;</td>
+        </tr>
+        
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+
+          <%--  <asp:UpdatePanel ID="pnl1" runat="server">
+<ContentTemplate>--%>
+                
+                <table style="width:100%;">
+                    <tr>
+                        <td class="heading" colspan="4" style="text-align: center; color: #FFFFFF; ">
+                            Analysis Mapping Entry</td>
+                    </tr>
+                    <tr>
+                        <td class="style26" style="text-align: right; width: 38%;">
+                            Loan Type:</td>
+                        <td class="style1" style="width: 15%">
+                            <asp:DropDownList ID="ddltype" runat="server" Width="250px" AutoPostBack="True" OnSelectedIndexChanged="ddltype_SelectedIndexChanged">
+                                <asp:ListItem Selected="True"></asp:ListItem>
+                                <asp:ListItem>IC</asp:ListItem>
+                                <asp:ListItem>LC</asp:ListItem>
+                            </asp:DropDownList>
+                        </td>
+                        <td style="text-align: right; width: 276px;">
+                            </td>
+                        <td class="style16" style="width: 36%">
+                            &nbsp;</td>
+                    </tr>
+                    
+                    <tr>
+
+                        
+                        <td class="style26" style="text-align: right; " colspan="4">
+                            &nbsp;</td>
+                    </tr>
+                    </table>
+
+                <table id="tbldet" runat="server">
+
+                    <tr>
+
+                        <td style="width: 194px">
+                            
+
+                             </td>
+
+                        <td>
+                            
+
+                             &nbsp;</td>
+
+                                          <td>
+                            
+
+                <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" Width="696px">
+                    <Columns>
+
+                        
+                       <asp:TemplateField HeaderText="SL">
+                                        <ItemTemplate>
+                                            <asp:Label ID="lblsl" runat="server"></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField> 
+
+                         <asp:TemplateField HeaderText="CODE">
+                                        <ItemTemplate>
+                                            <asp:Label ID="lblcode" runat="server"></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField> 
+                         <asp:TemplateField HeaderText="NAME">
+                                        <ItemTemplate>
+                                            <asp:Label ID="lblname" runat="server"></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField> 
+
+                       <asp:TemplateField HeaderText="Analysis">
+                                        <ItemTemplate>
+                                            <asp:TextBox ID="txt_analysis" Width="400px" runat="server" ></asp:TextBox>
+                                            <ajaxToolkit:AutoCompleteExtender ID="txt_analysis_AutoCompleteExtender"
+                                                 runat="server" CompletionInterval="100"
+                                                 CompletionListCssClass="autocomplete_completionListElement"
+                                                 CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                                 CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                                 DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="1" 
+                                                  ServiceMethod="GetCoaAccountGroupAnalysis" ServicePath="~/modules/commercial/services/autocomplete.asmx" 
+
+                                               
+                                                 TargetControlID="txt_analysis">
+                                            </ajaxToolkit:AutoCompleteExtender>
+
+           
+
+
+                                        </ItemTemplate>
+                                    </asp:TemplateField> 
+                        </Columns>
+
+                </asp:GridView>
+                
+
+                                        </td>
+
+                          <td style="width: 321px">
+                            
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td style="text-align: right;" colspan="4">
+                            
+                            <table>
+                                <tr>
+                                    <td style="width: 504px">&nbsp;</td>
+
+                                    <td>
+                                          &nbsp;</td>
+                                    <td style="width: 448px">&nbsp;</td>
+
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 504px"></td>
+
+                                    <td>
+                                          <asp:Button ID="btnadd" runat="server" Text="Update" Width="65px" OnClick="btnadd_Click" />
+
+                                    </td>
+                                    <td style="width: 448px"></td>
+
+                                </tr>
+
+                            </table>
+                          
+                            
+
+                        </td>
+
+                    </tr>
+
+                    
+
+                </table>
+
+  <%--</ContentTemplate>
+   <Triggers>
+       <asp:AsyncPostBackTrigger ControlID="gvvesselinfo"/>
+       <%-- <asp:AsyncPostBackTrigger ControlID="gvvesselinfo" EventName="SelectedIndexChanged" />--%>  
+
+ <%--  </Triggers>
+</asp:UpdatePanel>--%>
+            </td>
+        </tr>
+        <tr>
+            <td style="height: 92px">
+                            &nbsp;</td>
+        </tr>
+    </table>
+  
+</asp:Content>
+

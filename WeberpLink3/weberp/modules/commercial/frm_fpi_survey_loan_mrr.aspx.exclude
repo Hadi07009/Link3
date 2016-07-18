@@ -1,0 +1,358 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_fpi_survey_loan_mrr.aspx.cs" Inherits="frm_fpi_survey_loan_mrr" Title=""   %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+
+<%@ Register src="usercontrols/ctl_fpi_mpr_item_view.ascx" tagname="ctl_fpi_mpr_item_view" tagprefix="uc1" %>
+<%@ Register assembly="eWorld.UI.Compatibility" namespace="eWorld.UI.Compatibility" tagprefix="ew" %>
+
+<%@ Register src="usercontrols/ctl_fpi_pi_entry_view.ascx" tagname="ctl_fpi_pi_entry_view" tagprefix="uc3" %>
+<%@ Register src="usercontrols/ctl_fpi_lc_entry_view.ascx" tagname="ctl_fpi_lc_entry_view" tagprefix="uc4" %>
+
+<%@ Register src="usercontrols/ctl_fpi_import_consignment_view.ascx" tagname="ctl_fpi_import_consignment_view" tagprefix="uc5" %>
+
+<%@ Register src="usercontrols/ctl_fpi_custom_clearing_view.ascx" tagname="ctl_fpi_custom_clearing_view" tagprefix="uc6" %>
+
+<%@ Register src="usercontrols/ctl_fpi_ctg_entry_view.ascx" tagname="ctl_fpi_ctg_entry_view" tagprefix="uc7" %>
+
+<%@ Register src="usercontrols/ctl_fpi_download.ascx" tagname="ctl_fpi_download" tagprefix="uc8" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+<table id="tbltop" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" style="text-align: center">
+                FACTORY SURVEY ENTRY</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+           
+                PENDING LIST(<asp:Label ID="lblpcount" runat="server" Text="Label"></asp:Label>
+                ) :
+                <asp:DropDownList ID="ddlpolist" runat="server" Width="600px" 
+                    AutoPostBack="True" CssClass="txtbox" 
+                    onselectedindexchanged="ddlpolist_SelectedIndexChanged">
+                </asp:DropDownList>
+                   
+            </td>
+        </tr>
+        </table>
+         
+         <asp:UpdatePanel ID= "updall" runat="server">
+         <ContentTemplate>
+        <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc1:ctl_fpi_mpr_item_view ID="ctl_fpi_mpr_item_view1" runat="server" />
+               
+            </td>
+        </tr>
+             <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+                 <uc8:ctl_fpi_download ID="ctl_fpi_download1" runat="server" />
+               </td>
+        </tr>
+         <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc3:ctl_fpi_pi_entry_view ID="ctl_fpi_pi_entry_view1" runat="server" />
+               
+            </td>
+        </tr>
+
+          <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc4:ctl_fpi_lc_entry_view ID="ctl_fpi_lc_entry_view1" runat="server" />
+               
+            </td>
+        </tr>
+        <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+                <uc5:ctl_fpi_import_consignment_view ID="ctl_fpi_import_consignment_view1" 
+                    runat="server" />
+               
+            </td>
+        </tr>
+
+
+
+        <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+                 <uc6:ctl_fpi_custom_clearing_view ID="ctl_fpi_custom_clearing_view1" 
+                     runat="server" />
+               
+            </td>
+        </tr>
+
+
+
+         <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+                
+                   
+               
+              <uc7:ctl_fpi_ctg_entry_view ID="ctl_fpi_ctg_entry_view1" runat="server" />
+                
+                   
+               
+            </td>
+        </tr>
+
+
+
+       
+   <tr>
+          <td class="tbl" style="height: 24px; text-align: left">
+
+          <table id="tblctgentry" runat="server" style="width:100%;">
+                       
+                        <tr>
+                            <td style="width: 626px; text-align: center;">
+                               
+                                &nbsp;</td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 626px">
+                                <asp:GridView ID="gdItem" runat="server" AutoGenerateColumns="False" 
+                                    BackColor="White" BorderColor="#41519A" BorderStyle="Solid" BorderWidth="1px" 
+                                    CellPadding="4" ForeColor="#333333" GridLines="None" PageSize="100" 
+                                    SkinID="GridView" 
+                                    style="border-top-width: 1px; border-left-width: 1px; border-left-color: #e6e6fa;  border-bottom-width: 1px; border-bottom-color: #e6e6fa; border-top-color: #e6e6fa; border-right-width: 1px; border-right-color: #e6e6fa;" 
+                                    OnRowDataBound="gdItem_RowDataBound" Width="1053px">
+                                    <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                                    <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                                    <SelectedRowStyle Font-Bold="True" />
+                                    <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                                    <EditRowStyle BackColor="#2461BF" />
+                                    <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" 
+                                        Font-Underline="False" />
+                                    <RowStyle Font-Size="8pt" />
+                                    <Columns>
+                                        <asp:TemplateField HeaderText="SL">
+                                            <ItemTemplate>
+                                                <asp:Label ID="lblsl" runat="server"></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:BoundField DataField="seq_no" HeaderStyle-HorizontalAlign="Left" 
+                                            HeaderText="Seq No">
+                                        <HeaderStyle HorizontalAlign="Left" />
+                                        </asp:BoundField>
+                                         <asp:BoundField DataField="port_exit_date" HeaderText="Port Exit Date" DataFormatString="{0:dd/MM/yyyy}"
+                                        HeaderStyle-HorizontalAlign="Left">                                  
+<HeaderStyle HorizontalAlign="Left"></HeaderStyle>
+                                    </asp:BoundField>  
+                                        <asp:BoundField DataField="transport_name" HeaderStyle-HorizontalAlign="Left" 
+                                            HeaderText="Transport Name">
+                                        <HeaderStyle HorizontalAlign="Left" />
+                                        </asp:BoundField>
+                                        <asp:BoundField DataField="ctg_quantity" HeaderStyle-HorizontalAlign="Left" 
+                                            HeaderText="Boat Qty">
+                                        <HeaderStyle HorizontalAlign="Left" />
+                                        </asp:BoundField>
+                                        
+                                         
+
+                                         <asp:TemplateField HeaderText="RM Usaes Type">
+                                        <ItemTemplate>
+                                             <asp:DropDownList ID="ddlRmUsageType" Enabled="false" AutoPostBack="true" OnSelectedIndexChanged="ddlRmUsageType_OnSelectedIndexChanged" runat="server" Width="100px">
+                                           
+                                            </asp:DropDownList>                                           
+                                        </ItemTemplate>
+                                    </asp:TemplateField> 
+
+                                        <asp:TemplateField HeaderText="Survey Date">
+                                        <ItemTemplate>
+                                           <ew:CalendarPopup ID="dtsurveydate" Enabled="false" runat="server" Culture="English (United Kingdom)" DisableTextBoxEntry="False" Nullable="True" SelectedDate="12/22/2013 14:17:49" Width="70px">
+                                                <ButtonStyle CssClass="btn2" />
+                                            </ew:CalendarPopup>
+                                        </ItemTemplate>
+                                    </asp:TemplateField> 
+                                                                             
+                                    <asp:TemplateField HeaderText="Survey Qty">
+                                        <ItemTemplate>
+                                            <asp:TextBox ID="txt_sur_qty" Enabled="false"  runat="server" Width="60"></asp:TextBox>
+                                              <ajaxToolkit:FilteredTextBoxExtender ID="txt_sur_qty_FilteredTextBoxExtender" 
+                                    runat="server" TargetControlID="txt_sur_qty" FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                </ajaxToolkit:FilteredTextBoxExtender>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                          <asp:TemplateField HeaderText="Usaes Details">
+                                        <ItemTemplate>
+                                             <asp:DropDownList ID="ddlRmUsageDet" Enabled="false"  runat="server" Width="180px">
+                                           
+                                            </asp:DropDownList>                                           
+                                        </ItemTemplate>
+                                    </asp:TemplateField> 
+
+                                          <asp:TemplateField HeaderText="MRR Rate (TK)">
+                                        <ItemTemplate>
+                                            <asp:TextBox ID="txt_mrrrate" Enabled="false"  runat="server" Width="60"></asp:TextBox>
+                                              <ajaxToolkit:FilteredTextBoxExtender ID="txt_mrrrate_FilteredTextBoxExtender" 
+                                    runat="server" TargetControlID="txt_mrrrate" FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                </ajaxToolkit:FilteredTextBoxExtender>
+                                        </ItemTemplate>
+                                    </asp:TemplateField> 
+
+                                      
+                                                                        
+                                    <asp:TemplateField HeaderText="">
+                                        <ItemTemplate>
+                                            <asp:Button ID="btn_create_mrr"  Text="SAVE" Width="65px" CssClass="btn2" runat="server" OnClick ="btn_create_mrr_Click"></asp:Button>
+                                        </ItemTemplate>
+                                    </asp:TemplateField> 
+                                   
+                                
+
+                                    </Columns>
+                                </asp:GridView>
+                            </td>
+                            <td style="width: 1%">
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 626px; text-align: center;">
+                                <asp:Label ID="lblmsg" runat="server" ForeColor="Red" Text="Label" 
+                                    Visible="False"></asp:Label>
+
+                                  <asp:Panel ID="Panel4" runat="server" BorderStyle="Solid" BorderWidth="2px" CssClass="tbl"
+                    DefaultButton="btncancel" Height="205px" ScrollBars="Auto"   Style="border: 2px solid black; padding: 20px; background-color: white;  "   Width="534px" HorizontalAlign="Center">
+                    <div  style="border-color: #e6e6fa; border-width: 1px; text-align:center; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='white', startcolorstr='#D6DCF9', gradienttype='0');
+                        width: 100%; height: 205px; text-align: center; background-color: #FFCCCC;">
+                        &nbsp;&nbsp;
+                        <table style="width: 94%">
+                            <tr>
+                                <td style="color: #0000CC; font-size: small;" colspan="3" class="tblbig">
+                                    Are you agree to Close this Consignment!</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="color: #0000CC;">&nbsp;</td>
+                            </tr>
+                        <tr>
+                                <td style="width: 174px; text-align: right;" class="auto-style9">
+                                    Bill of Lading QTY (MT):</td>
+                            <td style="text-align: left; width: 35px;">
+                                &nbsp;</td>
+                                <td style="text-align: left; ">
+                                    <asp:Label ID="lblblqty" runat="server" Text=""></asp:Label>
+                                </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 174px; text-align: right;" class="auto-style9">
+                                MRR QTY (MT):</td>
+                            <td style="width: 35px">
+                                &nbsp;</td>
+                            <td style="text-align: left">
+                                <asp:Label ID="lblmrrqty" runat="server" Text=""></asp:Label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 174px; text-align: right;" class="auto-style9">
+                           
+                                Loan Given QTY (MT):</td>
+                            <td style="text-align: left; width: 35px;">
+                                &nbsp;</td>
+                            <td style="text-align: left">
+                                <asp:Label ID="lblloangivenqty" runat="server" Text=""></asp:Label>
+                            </td>
+                        </tr>
+                            <tr>
+                                <td style="width: 174px; text-align: right;" class="auto-style9">
+                                    Loan Refund QTY (MT):</td>
+                                <td style="text-align: left; width: 35px;">
+                                    &nbsp;</td>
+                                <td style="text-align: left">
+                                    <asp:Label ID="lblloanrefundqty" runat="server" Text=""></asp:Label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="auto-style9" style="width: 174px; text-align: right;">Landel Short/Excess QTY (MT):</td>
+                                <td style="width: 35px">&nbsp;</td>
+                                <td style="text-align: left">
+                                    <asp:Label ID="lblshortaccessqty" runat="server" Text=""></asp:Label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="text-align: right; height: 2px; background-color: #000066;"></td>
+                            </tr>
+                            <tr>
+                                <td class="auto-style9" style="width: 174px; text-align: right;"><strong>Actual Landed Qty (MT):</strong></td>
+                                <td style="width: 35px; text-align: left">&nbsp;</td>
+                                <td style="text-align: left">
+                                    <asp:Label ID="lblactqty" runat="server" Text=""></asp:Label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="auto-style9" style="width: 174px; text-align: right;">&nbsp;</td>
+                                <td style="width: 35px; text-align: left">&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">
+                                    <asp:Button ID="btnok" runat="server" CssClass="btn2" OnClick="btnok_Click" Text="YES" Width="128px" />
+                                    &nbsp;
+                                    <asp:Button ID="btncancel" runat="server" CssClass="btn2" Text="NO" Width="120px" />
+                                    &nbsp;&nbsp; </td>
+                            </tr>
+                    </table>
+                    </div>
+                </asp:Panel>
+                <ajaxToolkit:ConfirmButtonExtender ID="ConfirmButtonExtender5" runat="server" DisplayModalPopupID="ModalPopupExtender5"
+                    TargetControlID="Button2">
+                </ajaxToolkit:ConfirmButtonExtender>
+                <ajaxToolkit:ModalPopupExtender ID="ModalPopupExtender5" runat="server" BackgroundCssClass="modalBackground"
+                    CancelControlID="btncancel" PopupControlID="Panel4" TargetControlID="Button2">
+                </ajaxToolkit:ModalPopupExtender>
+                <asp:Button ID="Button2" runat="server" Text="Button" Visible="False" />
+                            </td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 626px; text-align: center;">
+                                &nbsp;<asp:Button ID="btn_complete" runat="server" Height="23px" 
+                                    onclick="btn_complete_Click" Text="CLOSE CONSIGNMENT PROCESS" Width="239px" />
+                            </td>
+                            <td style="width: 1%">
+                                        &nbsp;</td>
+                        </tr>
+                        </table>
+
+                            &nbsp;</td>
+        </tr>
+
+       
+        
+
+
+    </table>
+
+
+     </ContentTemplate>
+         <Triggers>
+           <asp:AsyncPostBackTrigger ControlID="ddlpolist" EventName="SelectedIndexChanged" />
+             <%--<asp:PostBackTrigger ControlID="btn_save" />
+             <asp:PostBackTrigger ControlID="btn_save_forward" />
+             <asp:PostBackTrigger ControlID="btn_complete" />
+             <asp:AsyncPostBackTrigger ControlID="txt_invoice_value" EventName="TextChanged" />--%>
+           
+          
+           
+         </Triggers>
+         </asp:UpdatePanel>
+</asp:Content>
+

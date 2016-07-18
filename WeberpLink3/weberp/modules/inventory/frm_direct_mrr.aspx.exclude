@@ -1,0 +1,450 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_direct_mrr.aspx.cs" Inherits="frm_direct_mrr" Title=""   EnableEventValidation="false" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register Assembly="eWorld.UI, Version=2.0.6.2393, Culture=neutral, PublicKeyToken=24d65337282035f2"
+    Namespace="eWorld.UI" TagPrefix="ew" %>
+
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <asp:UpdatePanel ID="updgrid" runat="server">
+<ContentTemplate>
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                DIRECT MATERIAL RECEIVE</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+                <table style="width:100%;">
+                    <tr>
+                        <td colspan="3">
+                            &nbsp;</td>
+                        <td colspan="4">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 92px">
+                            Type:</td>
+                        <td style="width: 92px">
+                            <asp:DropDownList ID="ddltype" runat="server" AutoPostBack="false" 
+                                Width="135px">
+                                <asp:ListItem>LPO</asp:ListItem>
+                                <asp:ListItem>SPO</asp:ListItem>
+                                <asp:ListItem>FPO</asp:ListItem>
+                            </asp:DropDownList>
+                        </td>
+                        <td style="width: 71px">
+                            Date:</td>
+                        <td style="width: 207px">
+                            &nbsp;<ew:CalendarPopup ID="cldmrrdate" runat="server" 
+                                Culture="English (United Kingdom)" DisableTextBoxEntry="False" 
+                                Width="87px" Enabled="False">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew:CalendarPopup>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 92px">
+                            MRR Type:</td>
+                        <td style="width: 92px">
+                            <asp:DropDownList ID="ddlUnit" runat="server" AutoPostBack="false" 
+                                Width="135px">
+                            </asp:DropDownList>
+                        </td>
+                        <td style="width: 71px">
+                            PO Ref</td>
+                        <td style="width: 207px">
+                            &nbsp;<asp:TextBox ID="txtporef" runat="server" CssClass="txtbox" Width="290px"></asp:TextBox>
+                        </td>
+                        <td colspan="2">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 92px">
+                            &nbsp;</td>
+                        <td style="width: 92px">
+                            &nbsp;</td>
+                        <td style="width: 71px">
+                            &nbsp;</td>
+                        <td style="width: 207px">
+                            &nbsp;</td>
+                        <td colspan="2">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 92px">
+                            Party:</td>
+                        <td colspan="5">
+                            <asp:DropDownList ID="ddlparty" runat="server" AutoPostBack="True" 
+                                CssClass="txtbox" onselectedindexchanged="ddlparty_SelectedIndexChanged" 
+                                Width="400px">
+                            </asp:DropDownList>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 92px">
+                            Sub Party/LC:</td>
+                        <td colspan="5">
+                            <asp:TextBox ID="txtpartydet" runat="server" 
+                                CssClass="txtbox" Width="555px"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="AutoCompleteExtender2" runat="server" 
+                                BehaviorID="AutoCompleteEx2" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="1" 
+                                ServiceMethod="GetPartyAdrListByParty" 
+                                ServicePath="../commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtpartydet">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 92px">
+                            &nbsp;</td>
+                        <td colspan="5">
+                            <asp:TextBox ID="txtepmdet" runat="server" CssClass="txtbox" Visible="False" 
+                                Width="555px"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="AutoCompleteExtender3" runat="server" 
+                                BehaviorID="AutoCompleteEx3" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="1" 
+                                ServiceMethod="GetEmployeeList" 
+                                ServicePath="../commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtepmdet">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 92px">
+                            Carring Cost:</td>
+                        <td colspan="5">
+                            <asp:TextBox ID="txtcarcost" runat="server" CssClass="txtbox" Width="110px" AutoCompleteType="Disabled"></asp:TextBox>
+                            <ajaxToolkit:FilteredTextBoxExtender ID="FilteredTextBoxExtender1" 
+                                runat="server" FilterType="Custom, Numbers" TargetControlID="txtcarcost" 
+                                ValidChars=".">
+                            </ajaxToolkit:FilteredTextBoxExtender>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 92px">
+                            Carring Acc:</td>
+                        <td colspan="5">
+                            <asp:DropDownList ID="ddlcarr" runat="server" AutoPostBack="True" 
+                                CssClass="txtbox" onselectedindexchanged="ddlcarr_SelectedIndexChanged" 
+                                Width="400px">
+                            </asp:DropDownList>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 92px">
+                            Carring Anal:</td>
+                        <td colspan="5">
+                            <asp:TextBox ID="txtcaranal" runat="server" CssClass="txtbox" Width="555px"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtcaranal_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx3" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="1" 
+                                ServiceMethod="GetPartyAdrListByParty" 
+                                ServicePath="../commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtcaranal">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="7">
+                            &nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: right">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: center">
+                   <asp:UpdatePanel ID="update" runat="server">
+                        <ContentTemplate>
+                <asp:GridView ID="gdItem" runat="server" BackColor="White" BorderColor="#41519A" style="border-top-width: 1px; border-left-width: 1px; border-left-color: #e6e6fa;  border-bottom-width: 1px; border-bottom-color: #e6e6fa; border-top-color: #e6e6fa; border-right-width: 1px; border-right-color: #e6e6fa;"
+                    BorderStyle="Solid" BorderWidth="1px" CellPadding="4" ForeColor="#333333" GridLines="None"
+                    
+                    PageSize="100" SkinID="GridView" Width="95%" 
+                                OnSelectedIndexChanged="gdItem_SelectedIndexChanged">
+                    <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                    <SelectedRowStyle Font-Bold="True" />
+                    <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <EditRowStyle BackColor="#2461BF" />
+                    <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" 
+                        Font-Underline="False" />
+                    <Columns>
+                        <asp:CommandField SelectText="Remove" ShowSelectButton="True" >
+                            <ItemStyle ForeColor="Red" />
+                        </asp:CommandField>
+                    </Columns>
+                    <RowStyle Font-Size="8pt" />
+                </asp:GridView>                   
+                        <asp:UpdateProgress ID="sp1" runat="server">
+                        <ProgressTemplate>
+                           <%-- <div class="TransparentGrayBackground"> </div>--%>
+                            <asp:Panel  ID="alwaysVisibleAP" runat="server" style="text-align: center" >
+                            
+                                <div style="text-align: center">
+                                    <asp:Image  ID="ajaxLoadNotificationImage" 
+                                                runat="server" 
+                                                ImageUrl="~/images/Loading.gif" 
+                                                AlternateText="[image]" />
+                                    
+                                </div>
+                            
+                            </asp:Panel>
+                            <ajaxToolKit:AlwaysVisibleControlExtender 
+                                ID="AlwaysVisibleControlExtender" 
+                                runat="server"
+                                TargetControlID="alwaysVisibleAP"
+                                HorizontalSide="Center"
+                                HorizontalOffset="0"
+                                VerticalSide="Middle"
+                                VerticalOffset="0">
+                            </ajaxToolKit:AlwaysVisibleControlExtender>
+                           
+                        </ProgressTemplate>
+                    </asp:UpdateProgress>
+                 </ContentTemplate>
+                        <Triggers>
+                            <asp:AsyncPostBackTrigger ControlID="btnAdd" EventName="Click" />
+                            
+                        </Triggers>
+                        
+              
+                    </asp:UpdatePanel></td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: center">
+                
+                
+                <asp:Button ID="btnProceed" runat="server" CssClass="btn2" 
+                    onclick="btnProceed_Click" Text="Proceed" Visible="False" Width="117px" />
+                
+                
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 34px; text-align: left">
+                
+                
+                <table style="width:669px;">
+                    <tr>
+                        <td style="width: 64px; height: 23px;">
+                            </td>
+                        <td style="width: 10px; height: 23px;">
+                            </td>
+                        <td style="height: 23px;">
+                            <asp:Label ID="lblmsg" runat="server" ForeColor="Red" Text="Label" 
+                                Visible="False" Width="300px"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 64px">
+                            Item</td>
+                        <td style="width: 10px">
+                            :</td>
+                        <td>
+                            <asp:TextBox ID="txtitem" runat="server" autocomplete="off" CssClass="txtbox" 
+                                Width="500px">
+                                </asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="autoComplete1" runat="server" 
+                                BehaviorID="AutoCompleteEx1" CompletionInterval="1000" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="1" 
+                                ServiceMethod="GetItemListforrec" ServicePath="../commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtitem">
+                            </ajaxToolkit:AutoCompleteExtender>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 64px">
+                            Store</td>
+                        <td style="width: 10px">
+                            :</td>
+                        <td> <asp:DropDownList ID="ddlstore" Width="387px" CssClass="txtbox" 
+                                runat="server" />
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 64px; height: 20px;">
+                            Quantity</td>
+                        <td style="width: 10px; height: 20px;">
+                            :</td>
+                        <td style="height: 20px;">
+                            <asp:TextBox ID="txtqty" runat="server" AutoCompleteType="Disabled" 
+                                CssClass="txtbox"></asp:TextBox>
+                            <ajaxToolkit:FilteredTextBoxExtender ID="txtqty_FilteredTextBoxExtender" 
+                                runat="server" FilterType="Custom, Numbers" TargetControlID="txtqty" 
+                                ValidChars=".">
+                            </ajaxToolkit:FilteredTextBoxExtender>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 64px; height: 20px;">
+                            Rate</td>
+                        <td style="width: 10px; height: 20px;">
+                            :</td>
+                        <td style="height: 20px;">
+                            <asp:TextBox ID="txtrate" runat="server" AutoCompleteType="Disabled" 
+                                CssClass="txtbox"></asp:TextBox>
+                            <ajaxToolkit:FilteredTextBoxExtender ID="txtrate_FilteredTextBoxExtender" 
+                                runat="server" FilterType="Custom, Numbers" TargetControlID="txtrate" 
+                                ValidChars=".">
+                            </ajaxToolkit:FilteredTextBoxExtender></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 64px; height: 20px;">
+                            Brand</td>
+                        <td style="width: 10px; height: 20px;">
+                            :</td>
+                        <td style="height: 20px;">
+                            <asp:TextBox ID="txtbrand" runat="server" CssClass="txtbox" Width="250px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 64px; height: 20px;">
+                            Origin</td>
+                        <td style="width: 10px; height: 20px;">
+                            :</td>
+                        <td style="height: 20px;">
+                            <asp:TextBox ID="txtorigin" runat="server" CssClass="txtbox" Width="250px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 64px; height: 20px;">
+                            Packing</td>
+                        <td style="width: 10px; height: 20px;">
+                            :</td>
+                        <td style="height: 20px;">
+                            <asp:TextBox ID="txtpacking" runat="server" CssClass="txtbox" Width="250px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 64px">
+                            </td>
+                        <td style="width: 10px">
+                            </td>
+                        <td>
+                            </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 64px">
+                        </td>
+                        <td style="width: 10px">
+                        </td>
+                        <td>
+                            <asp:Button ID="btnAdd" runat="server" CssClass="btn2" OnClick="btnAdd_Click" 
+                                Text="Add" Width="141px" />
+                        </td>
+                    </tr>
+                </table>
+                
+                
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 22px; text-align: left">
+                
+                        &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+    </ContentTemplate>
+                
+ </asp:UpdatePanel>
+                
+<script type="text/javascript">
+
+
+         function ColorRow(CheckBoxObj) {
+             if (CheckBoxObj.checked == true) {
+                 CheckBoxObj.parentElement.parentElement.style.backgroundColor = '#88AAFF';
+             }
+             else {
+                 CheckBoxObj.parentElement.parentElement.style.backgroundColor = '#F8E5A1';
+             }
+
+         }
+         
+         function ShowHideField(DecisionControl, ToggleControl1) {
+
+             if (DecisionControl.checked == true) {
+                 ToggleControl1.style.visibility = 'visible';                 
+             }
+             else 
+             {
+                 ToggleControl1.style.visibility = 'hidden';                 
+             }
+
+         }
+
+         
+        
+    </script>
+
+</asp:Content>
+

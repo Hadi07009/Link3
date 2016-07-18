@@ -1,0 +1,528 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using LibraryDAL;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+
+
+public partial class frm_item_create : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        //current.UserId = "MON";
+        //current.UserName = "Monjurul";
+
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btnupdate, "Are you sure to Update ?");
+        clsStatic.MsgConfirmBox(btnadd, "Are you sure to add ?");
+        
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            clear_all();
+            load_itms();
+            loaduom_grp();
+        }
+    }
+
+    private void load_itms()
+    {
+        ddlmattype.Items.Clear();
+        ddlmattype.Items.Add("");
+        
+        ListItem lst;
+
+        lst = new ListItem();
+        lst.Text = "Finish Goods";
+        lst.Value = "F";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "Raw Material";
+        lst.Value = "R";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "Process Material";
+        lst.Value = "P";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "Packing Material";
+        lst.Value = "K";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "Mechanical";
+        lst.Value = "M";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "Electrical";
+        lst.Value = "E";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "Tools";
+        lst.Value = "T";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "General Hardware";
+        lst.Value = "H";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "Fuel & Lubricant";
+        lst.Value = "L";
+        ddlmattype.Items.Add(lst);
+        //
+        lst = new ListItem();
+        lst.Text = "Civil";
+        lst.Value = "C";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "Domestic Equipments";
+        lst.Value = "D";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "Wastage and Scrap";
+        lst.Value = "W";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "Fixed Asset";
+        lst.Value = "A";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "IT Equipments";
+        lst.Value = "I";
+        ddlmattype.Items.Add(lst);
+
+        lst = new ListItem();
+        lst.Text = "Auto Mobile";
+        lst.Value = "V";
+        ddlmattype.Items.Add(lst);
+
+        //Item Location 
+       
+    }
+
+    private void loaduom_grp() 
+    {
+        InMa_UomTableAdapter uom = new InMa_UomTableAdapter();
+        SCBLIN.InMa_UomDataTable dtuom = new SCBLIN.InMa_UomDataTable();
+
+        dtuom = uom.GetAllData();
+        ListItem lst;
+        ddluom.Items.Clear();
+        ddluom.Items.Add("");
+
+        foreach (SCBLIN.InMa_UomRow dr in dtuom.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Uom_Code;
+            lst.Text = dr.Uom_Code + ":" + dr.Uom_Name;
+            ddluom.Items.Add(lst);
+        }
+
+        InMa_Grp_CodeTableAdapter code = new InMa_Grp_CodeTableAdapter();
+        ErpDataSet.InMa_Grp_CodeDataTable dt = new ErpDataSet.InMa_Grp_CodeDataTable();
+
+        dt = code.GetDataById("I01");
+        ddlg1.Items.Clear();
+        ddlg1.Items.Add("");
+        foreach (ErpDataSet.InMa_Grp_CodeRow dr in dt.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Grp_Code;
+            lst.Text = dr.Grp_Code + ":" + dr.Grp_Code_Name;
+            ddlg1.Items.Add(lst);
+        }
+
+        ddlg2.Items.Clear();
+        ddlg3.Items.Clear();
+    }
+
+    private void clear_all()
+    {
+        txtitemdet.Text = "";
+        txtstk.Text = "";
+        txtcode.Text = "";
+        txtname.Text = "";
+        ddluom.SelectedIndex = -1;
+        ddlg1.SelectedIndex = -1;
+        ddlg2.SelectedIndex = -1;
+        ddlg3.SelectedIndex = -1;
+        txtloccode.Text = "";
+        lblloc.Text = "";
+        txtcoa.Text = "";
+        txtremarks.Text = "";
+        ddlmattype.SelectedIndex = -1;
+    }
+
+    private string getitmloc()
+    {
+        InMa_Itm_LocTableAdapter loc = new InMa_Itm_LocTableAdapter();
+        SCBLIN.InMa_Itm_LocDataTable dtloc = new SCBLIN.InMa_Itm_LocDataTable();
+
+        string locstr = "";
+
+        string[] tmp = txtloccode.Text.Split('.');
+        if (tmp.Length != 4) return "";
+
+        dtloc = loc.GetDataByTypeId("B", tmp[0]);
+        if (dtloc.Count == 0) return ""; else locstr = dtloc[0].Itm_Loc_Name;
+
+        dtloc = loc.GetDataByTypeId("F", tmp[1]);
+        if (dtloc.Count == 0) return ""; else locstr = locstr + "." + dtloc[0].Itm_Loc_Name;
+
+        dtloc = loc.GetDataByTypeId("R", tmp[2]);
+        if (dtloc.Count == 0) return ""; else locstr = locstr + "." + dtloc[0].Itm_Loc_Name;
+
+        dtloc = loc.GetDataByTypeId("L", tmp[3]);
+        if (dtloc.Count == 0) return ""; else locstr = locstr + "." + dtloc[0].Itm_Loc_Name;
+
+        return locstr;
+    }
+
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        InMa_Itm_GrpTableAdapter grp = new InMa_Itm_GrpTableAdapter();
+        //tbl_prod_itm_mapTableAdapter map = new tbl_prod_itm_mapTableAdapter();
+        LibraryDAL.AccDataSetTableAdapters.budgTableAdapter budg = new LibraryDAL.AccDataSetTableAdapters.budgTableAdapter();    
+
+        string loccode = "", locdet = "";
+        locdet = getitmloc();
+        if (locdet != "") loccode = txtloccode.Text;
+
+        DateTime dtdate = Convert.ToDateTime(DateTime.Now.ToShortDateString());
+        if ((txtcode.Text.Length != 15) || (txtname.Text.Length < 3) || (ddluom.SelectedIndex == 0)) return;
+        if (budg.GetDataByCoaCode(txtcoa.Text).Rows.Count == 0) return;
+        if (ddlmattype.Text =="")
+        {
+            lblupdate.Text = "TYPE SELECTION ERROR";
+            lblupdate.Visible = true;
+            return;
+        }
+
+        if (itm.GetItemByCode(txtcode.Text).Count == 0)
+        {
+
+            lblupdate.Text = "ITEM NOT FOUND";
+        }
+        else
+        {
+            
+            itm.UpdateItem(txtname.Text.ToUpper(), ddluom.SelectedValue.ToString(), ddluom.SelectedValue.ToString(),(short) (txtstk.Text == "" ? 0 : Convert.ToInt32(txtstk.Text)), txtremarks.Text, txtcoa.Text, ddlmattype.SelectedValue.ToString(),loccode,locdet, txtcode.Text);
+
+            //grp.DeleteQuery(txtcode.Text);
+            //if (ddlg1.Text != "")
+            //{
+            //    grp.InsertGrp(txtcode.Text, "I01", ddlg1.SelectedValue.ToUpper());
+            //}
+
+            //if (ddlg2.Text != "")
+            //{
+            //    grp.InsertGrp(txtcode.Text, "I02", ddlg2.SelectedValue.ToUpper());
+            //}
+
+            //if (ddlg3.Text != "")
+            //{
+            //    grp.InsertGrp(txtcode.Text, "I03", ddlg3.SelectedValue.ToUpper());
+            //}
+
+            
+
+            lblupdate.Text = "UPDATED SUCCESSFULLY";
+           
+            clear_all();
+        }
+
+       
+        lblupdate.Visible = true;
+             
+
+       
+       
+    }
+    protected void btnadd_Click(object sender, EventArgs e)
+    {
+        if (ddlmattype.Text == "")
+        {
+            lblupdate.Text = "TYPE SELECTION ERROR";
+            lblupdate.Visible = true;
+            return;
+        }
+
+
+        LibraryDAL.AccDataSetTableAdapters.budgTableAdapter budg = new LibraryDAL.AccDataSetTableAdapters.budgTableAdapter();      
+
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        InMa_Itm_GrpTableAdapter grp = new InMa_Itm_GrpTableAdapter();
+        //tbl_prod_itm_mapTableAdapter map = new tbl_prod_itm_mapTableAdapter();
+
+        DateTime dtdate = Convert.ToDateTime(DateTime.Now.ToShortDateString());
+
+        string loccode = "", locdet = "";
+        locdet = getitmloc();
+        if (locdet != "") loccode = txtloccode.Text;
+
+        if (budg.GetDataByCoaCode(txtcoa.Text).Rows.Count == 0) return;
+
+        if ((txtcode.Text.Length != 15) || (txtname.Text.Length < 3) || (ddluom.SelectedIndex == 0)) return;
+
+
+        if (itm.GetItemByCode(txtcode.Text).Count == 0)
+        {
+            
+            itm.InsertInmaItmDet(txtcode.Text, txtcode.Text, txtname.Text.ToUpper(), loccode, locdet, "", ddluom.SelectedValue.ToString(), ddluom.SelectedValue.ToString(), (txtstk.Text == "" ? 0 : Convert.ToInt32(txtstk.Text)), "0", "0", "N", 0, "", "Y", dtdate, dtdate, "", "", "C", "", "", "", "", "", "", "", "", "", ddlmattype.SelectedValue.ToString(), txtremarks.Text, txtcoa.Text, "Y", 0);
+            grp.DeleteQuery(txtcode.Text);
+
+            if (ddlg1.Text != "")
+            {
+                grp.InsertGrp(txtcode.Text, "I01", ddlg1.SelectedValue.ToUpper());
+            }
+
+            if (ddlg2.Text != "")
+            {
+                grp.InsertGrp(txtcode.Text, "I02", ddlg2.SelectedValue.ToUpper());
+            }
+
+            if (ddlg3.Text != "")
+            {
+                grp.InsertGrp(txtcode.Text, "I03", ddlg3.SelectedValue.ToUpper());
+            }
+
+            lblupdate.Text = "ADDED SUCCESSFULLY";
+            clear_all();
+        }
+        else
+        {
+            
+            lblupdate.Text = "ITEM ALREADY EXIST";
+        }
+              
+        lblupdate.Visible = true;
+    }
+
+    protected void txtitemdet_TextChanged(object sender, EventArgs e)
+    {
+        string[] tmp = txtitemdet.Text.Split(':');
+        if (tmp.Length < 2) { clear_all(); return; }
+        load_itm(tmp[0]);
+    }
+
+    private void load_itm(string icode)
+    {
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitm = new ErpDataSet.InMa_Itm_DetDataTable();
+        InMa_Itm_GrpTableAdapter grp = new InMa_Itm_GrpTableAdapter();
+        ErpDataSet.InMa_Itm_GrpDataTable dtgrp = new ErpDataSet.InMa_Itm_GrpDataTable();
+
+        ddlg1.SelectedIndex = -1;
+        ddlg2.SelectedIndex = -1;
+        ddlg3.SelectedIndex = -1;
+
+        dtitm = itm.GetItemByCode(icode);
+        if (dtitm.Count == 0) { clear_all(); return; }
+
+       // dtmap = map.GetDataByIcode(icode);
+
+        txtcode.Text = dtitm[0].Itm_Det_Icode;
+        txtname.Text = dtitm[0].Itm_Det_desc;
+        txtstk.Text = dtitm[0].Itm_Det_unit_wgt.ToString();
+        txtcoa.Text = dtitm[0].T_C2;
+        txtremarks.Text = dtitm[0].T_C1;
+        txtloccode.Text= dtitm[0].Itm_Det_add_des1;
+        lblloc.Text = dtitm[0].Itm_Det_add_des2;
+
+        ddlmattype.SelectedValue = dtitm[0].Itm_Det_Type_flag;
+
+        try
+        {
+            ddluom.SelectedValue = dtitm[0].Itm_Det_PUSA_unit;
+        }
+        catch 
+        {
+            ddluom.SelectedValue = "";
+        }
+
+        //dtgrp = grp.GetDataByIcode(icode, "I01");
+        //if (dtgrp.Count == 0)
+        //{
+        //    ddlg1.SelectedIndex = -1;
+        //}
+        //else
+        //{
+        //    ddlg1.SelectedValue = dtgrp[0].Itm_Grp_Code;
+        //    grp1_ch();
+        //}
+
+
+        //dtgrp = new ErpDataSet.InMa_Itm_GrpDataTable();
+        //dtgrp = grp.GetDataByIcode(icode, "I02");
+        //if (dtgrp.Count == 0)
+        //{
+        //    ddlg2.SelectedIndex = -1;
+        //}
+        //else
+        //{
+        //    ddlg2.SelectedValue = dtgrp[0].Itm_Grp_Code;
+        //    grp2_ch();
+        //}
+
+        //dtgrp = new ErpDataSet.InMa_Itm_GrpDataTable();
+        //dtgrp = grp.GetDataByIcode(icode, "I03");
+        //if (dtgrp.Count == 0)
+        //{
+        //    ddlg3.SelectedIndex = -1;
+        //}
+        //else
+        //{
+        //    ddlg3.SelectedValue = dtgrp[0].Itm_Grp_Code;
+        //}
+
+    }
+
+    protected void txtcoa_TextChanged(object sender, EventArgs e)
+    {
+        if (txtcoa.Text.Length > 14) { txtcoa.Text = txtcoa.Text.Substring(0, 15); } else { txtcoa.Text = ""; }
+    }
+    protected void gditm_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onmouseover"] = "this.style.cursor='pointer';this.style.textDecoration='underline';this.style.color='blue';";
+            e.Row.Attributes["onmouseout"] = "this.style.textDecoration='none';this.style.color='black';";
+            e.Row.Attributes["onclick"] = ClientScript.GetPostBackClientHyperlink(this.gditm, "Select$" + e.Row.RowIndex);
+        }
+
+    }
+
+    protected void gditm_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        lblupdate.Visible = false;
+        int indx = gditm.SelectedIndex;
+
+        if (indx != -1)
+        {
+            load_itm(gditm.Rows[indx].Cells[0].Text.Trim());            
+        }
+    }
+    protected void ddlmattype_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dt = new ErpDataSet.InMa_Itm_DetDataTable();
+
+        dt = itm.GetDataByItmTypeCodeOrd(ddlmattype.SelectedValue.ToString());
+
+        gditm.DataSource = dt;
+        gditm.DataBind();
+    }
+
+    
+    protected void txtloccode_TextChanged(object sender, EventArgs e)
+    {
+        lblloc.Text = getitmloc();
+    }
+
+    private void grp1_ch()
+    {
+        InMa_Grp_CodeTableAdapter code = new InMa_Grp_CodeTableAdapter();
+        ErpDataSet.InMa_Grp_CodeDataTable dt = new ErpDataSet.InMa_Grp_CodeDataTable();
+        ListItem lst;
+
+        dt = code.GetDataByCode("I02", ddlg1.SelectedValue.ToString(), "");
+        ddlg2.Items.Clear();
+        ddlg2.Items.Add("");
+        foreach (ErpDataSet.InMa_Grp_CodeRow dr in dt.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Grp_Code;
+            lst.Text = dr.Grp_Code + ":" + dr.Grp_Code_Name;
+            ddlg2.Items.Add(lst);
+        }
+        ddlg3.Items.Clear();
+        getnewcode();
+    }
+
+    protected void ddlg1_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        grp1_ch();
+       
+    }
+    private void grp2_ch()
+    {
+        InMa_Grp_CodeTableAdapter code = new InMa_Grp_CodeTableAdapter();
+        ErpDataSet.InMa_Grp_CodeDataTable dt = new ErpDataSet.InMa_Grp_CodeDataTable();
+        ListItem lst;
+
+        dt = code.GetDataByCode("I03", ddlg1.SelectedValue.ToString(), ddlg2.SelectedValue.ToString());
+        ddlg3.Items.Clear();
+        ddlg3.Items.Add("");
+        foreach (ErpDataSet.InMa_Grp_CodeRow dr in dt.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Grp_Code;
+            lst.Text = dr.Grp_Code + ":" + dr.Grp_Code_Name;
+            ddlg3.Items.Add(lst);
+        }
+        getnewcode();
+    }
+
+    protected void ddlg2_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        grp2_ch();       
+    }
+
+    protected void ddlg3_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        getnewcode();
+    }
+
+    private void getnewcode()
+    {
+        string grpf, grps, grpt, ipref, icode;
+
+        grpf = ddlg1.SelectedValue.ToString();
+        grps = ddlg2.SelectedValue.ToString();
+        grpt = ddlg3.SelectedValue.ToString();
+
+        txtname.Text = "";
+
+        if ((grpf == "") || (grps == "") || (grpt == "")) 
+        {
+            txtcode.Text = ""; 
+            return; 
+        }
+
+        ipref = grpf + "." + grps + "." + grpt + ".";
+        if (ipref.Length!=11)
+        {
+            txtcode.Text = "";
+            return;
+        }
+
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+
+        int maxsl = Convert.ToInt32(itm.GetLastSl(ipref)) + 1;
+
+        icode = ipref + string.Format("{0:0000}", maxsl);
+        txtcode.Text = icode;
+        
+    }
+}
+

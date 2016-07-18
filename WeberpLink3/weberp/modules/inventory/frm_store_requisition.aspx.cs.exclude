@@ -1,0 +1,655 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using System.Threading;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+
+public partial class frm_store_requisition : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        clsStatic.MsgConfirmBox(btnSubmit, "Are you sure to submit?");
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            ViewState[clsStatic.sessionTempDatatable] = null;
+            getcombodata();
+            txtDate.Text = DateTime.Now.Date.ToShortDateString();
+            cldduedate.SelectedDate = DateTime.Now.AddDays(10);
+            set_grid();            
+            load_dbt_code();
+        }
+        else
+        {           
+
+        }
+    }
+
+    private void load_dbt_code()
+    {
+        tbl_inv_dbt_codeTableAdapter dbt = new tbl_inv_dbt_codeTableAdapter();
+        SCBLIN.tbl_inv_dbt_codeDataTable dtdbt = new SCBLIN.tbl_inv_dbt_codeDataTable();
+
+        dtdbt = dbt.GetAllData();
+        ddlDbtacc.Items.Clear();
+        ListItem lst;
+
+        ddlDbtacc.Items.Add("");
+
+        foreach (SCBLIN.tbl_inv_dbt_codeRow dr in dtdbt.Rows)
+        {
+            lst = new ListItem();
+            lst.Text = dr.inv_acc_code + ":" + dr.inv_acc_name;
+            lst.Value = dr.inv_acc_code;
+            ddlDbtacc.Items.Add(lst);
+        }
+
+
+    }
+    
+
+    private void getcombodata()
+    {
+        LibraryDAL.SCBLINTableAdapters.Hrms_Dept_MasterTableAdapter dpt = new LibraryDAL.SCBLINTableAdapters.Hrms_Dept_MasterTableAdapter();
+        SCBLIN.Hrms_Dept_MasterDataTable dtdept = new SCBLIN.Hrms_Dept_MasterDataTable();
+
+
+        tbl_trn_detTableAdapter trn = new tbl_trn_detTableAdapter();
+        SCBLDataSet.tbl_trn_detDataTable dttrn = new SCBLDataSet.tbl_trn_detDataTable();
+
+        User_Role_DefinitionTableAdapter uda = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable udt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        InMa_Str_LocTableAdapter str = new InMa_Str_LocTableAdapter();
+        ErpDataSet.InMa_Str_LocDataTable dtstr = new ErpDataSet.InMa_Str_LocDataTable();
+
+        ListItem lst;
+        string ucode = current.UserId.ToString();
+        int i;
+        string[] items;
+
+        //set noe
+
+
+        ddlstore.Items.Clear();
+        ddlstore.Items.Add("");
+        dtstr = str.GetAllStore();
+
+        foreach (ErpDataSet.InMa_Str_LocRow dr in dtstr.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Str_Loc_Id;
+            lst.Text = dr.Str_Loc_Id + ":" + dr.Str_Loc_Name;
+            ddlstore.Items.Add(lst);
+        }
+
+        
+        //set dept
+
+        ddlfromdept.Items.Clear();
+        ddltodept.Items.Clear();
+        dtdept = dpt.GetAllDept();
+
+        ddlfromdept.Items.Add("");
+        ddltodept.Items.Add("");
+        foreach (SCBLIN.Hrms_Dept_MasterRow dr in dtdept.Rows)
+        {
+            lst = new ListItem();
+            lst.Value = dr.Dept_Code;
+            lst.Text = dr.Dept_Code + ":" + dr.Dept_Name;
+            ddlfromdept.Items.Add(lst);
+
+            lst = new ListItem();
+            lst.Value = dr.Dept_Code;
+            lst.Text = dr.Dept_Code + ":" + dr.Dept_Name;
+            ddltodept.Items.Add(lst);
+
+        }
+
+
+        udt = uda.GetDataByUserCodeRole(ucode, "SRQ");               
+
+        
+        ddlUnit.Items.Clear();       
+        if (udt.Rows.Count==0) return;
+
+        items=udt[0].plant_list.Split(',');
+
+        dttrn = trn.GetAllCodeByType("SR");
+        
+
+        foreach (SCBLDataSet.tbl_trn_detRow dr in dttrn.Rows)
+        {
+            for (i=0; i<items.Length ;i++)
+            {
+                if (dr.trn_code.Substring(0, 2) == items[i].ToString())
+                {
+                    lst = new ListItem();
+                    lst.Value = dr.trn_code.ToString();
+                    lst.Text = dr.trn_code.ToString();
+                    ddlUnit.Items.Add(lst);
+                    goto nextsrc;
+                }
+            }
+        nextsrc: ;
+        }
+
+    }
+
+   
+    
+    private void set_grid()
+    {
+        btnSubmit.Visible = false;
+        gdItem.Visible = false;
+
+        if (ViewState[clsStatic.sessionTempDatatable] != null)
+        {
+            DataTable dt = new DataTable();
+            DataTable dtgrid = new DataTable();
+            int cnt = 0;
+           
+            dt = (DataTable)ViewState[clsStatic.sessionTempDatatable];
+
+            if (dt.Rows.Count > 0)
+            {
+                btnSubmit.Visible = true;
+                gdItem.Visible = true;
+
+                dtgrid.Rows.Clear();
+                dtgrid.Columns.Clear();
+
+                dtgrid.Columns.Add("Sl", typeof(int));
+                dtgrid.Columns.Add("Item Code", typeof(string));
+                dtgrid.Columns.Add("Item Desc", typeof(string));
+                dtgrid.Columns.Add("UOM", typeof(string));
+                dtgrid.Columns.Add("Cur Qty", typeof(string));
+                dtgrid.Columns.Add("Req Qty", typeof(string));
+                dtgrid.Columns.Add("Store Code", typeof(string));
+                dtgrid.Columns.Add("Store Desc", typeof(string));               
+                dtgrid.Columns.Add("Due Date", typeof(string));                
+                dtgrid.Columns.Add("Old Itm Qty", typeof(string));
+                dtgrid.Columns.Add("Remarks", typeof(string));
+                dtgrid.Columns.Add("Dbt Code", typeof(string));
+                dtgrid.Columns.Add("Dbt Anal", typeof(string));
+                               
+
+                foreach (DataRow dr in dt.Rows)
+                {                    
+                    cnt += 1;
+                    dtgrid.Rows.Add(cnt, dr["icode"].ToString(), dr["idesc"].ToString(), dr["uom"].ToString(), dr["curstk"].ToString(), dr["qty"].ToString(), dr["scode"].ToString(), dr["sdesc"].ToString(), dr["ddate"].ToString(), dr["prio"].ToString(), dr["remarks"].ToString(), dr["dbtcode"].ToString(), dr["dbtanal"].ToString());
+                }
+
+                gdItem.DataSource = dtgrid;
+                gdItem.DataBind();
+
+            }
+
+        }
+    }
+
+    private bool chk_duplicate_data(string icode )
+    {
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+
+        bool flg = true;        
+        
+        DataTable dt = new DataTable();
+        dt = (DataTable)ViewState[clsStatic.sessionTempDatatable];
+        if (dt != null)
+        {
+            if (dt.Rows.Count != 0)
+            {
+                foreach (DataRow dr in dt.Rows)
+                {
+                    if (dr["icode"].ToString() == icode) { flg = false; }
+                }
+
+               
+
+            }           
+        }        
+
+        return flg;
+    }
+
+   
+
+    protected void btnAdd_Click(object sender, EventArgs e)
+    {
+        txtitem.Focus();
+
+        lblmsg.Visible = false;
+        DataTable dt=new DataTable();
+        string[] tdata;
+        string icode, idesc, sdesc,uom;        
+        decimal qty;
+
+        tdata = txtitem.Text.Split(':');
+        if (ddlstore.Text == "")
+        {
+            lblmsg.Text = "Store Error";
+            lblmsg.Visible = true;
+            return;
+        }
+
+        if ((tdata.Length < 3)||(txtqty.Text==""))
+        {
+            lblmsg.Text = "Item/Quantity Error";
+            lblmsg.Visible = true;
+            return;
+        }
+        
+        qty = Convert.ToDecimal(txtqty.Text);
+
+        if( qty <= 0)
+        {
+            lblmsg.Text = "Quantity Error";
+            lblmsg.Visible = true;
+            return;
+        }
+
+        icode = tdata[0].Trim();       
+                
+        if (chk_duplicate_data(icode) == false)
+        {
+            lblmsg.Text = "Item Already Added";
+            lblmsg.Visible = true;
+            return;
+        }
+
+
+
+        if (ddlDbtacc.SelectedValue == "")
+        {
+            lblmsg.Text = "Debited Code ?";
+            lblmsg.Visible = true;
+            return;
+        }
+
+        budgTableAdapter bud = new budgTableAdapter();
+
+        if (bud.GetDataByCoaCode(ddlDbtacc.SelectedValue).Count == 0)
+        {
+            lblmsg.Text = "Debited Code not found";
+            lblmsg.Visible = true;
+            return;
+        }
+
+        if ((ddlanalysis.Items.Count>0)&&(ddlanalysis.Text == ""))
+        {
+            lblmsg.Text = "Debited Analysis Code not found";
+            lblmsg.Visible = true;
+            return;
+        }
+
+        //get stk, rate
+
+        LibraryDAL.ErpDataSetTableAdapters.InMa_Stk_CtlTableAdapter stk = new LibraryDAL.ErpDataSetTableAdapters.InMa_Stk_CtlTableAdapter();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstk=new ErpDataSet.InMa_Stk_CtlDataTable();
+        
+        InMa_Itm_StkTableAdapter itmstk = new InMa_Itm_StkTableAdapter();
+        ErpDataSet.InMa_Itm_StkDataTable dtitmstk = new ErpDataSet.InMa_Itm_StkDataTable();
+
+        dtitmstk = itmstk.GetDataByItm(icode);
+
+        string store_code = ddlstore.SelectedValue.ToString();
+
+
+        decimal rate, curstk, totamnt;
+        dtstk = stk.GetDataByItemStore(icode, store_code);
+
+        if (dtstk.Rows.Count == 0)
+        {           
+            curstk = 0;
+        }
+        else
+        {
+            curstk = (decimal)dtstk[0].Stk_Ctl_Cur_Stk;           
+        }
+
+
+        if (dtitmstk.Count > 0)
+        {
+            rate = dtitmstk[0].Itm_Stk_AVE_Rat;
+        }
+        else
+        {
+            rate = 0;
+        }
+        totamnt = rate * qty;
+
+        LibraryDAL.ErpDataSetTableAdapters.InMa_Itm_DetTableAdapter itm = new LibraryDAL.ErpDataSetTableAdapters.InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetRow dritm;
+        LibraryDAL.ErpDataSetTableAdapters.InMa_Str_LocTableAdapter store = new LibraryDAL.ErpDataSetTableAdapters.InMa_Str_LocTableAdapter();
+        ErpDataSet.InMa_Str_LocRow drstore;
+
+        dritm = itm.GetItemByCode(icode)[0];
+        idesc = dritm.Itm_Det_desc.ToString();
+        uom = dritm.Itm_Det_PUSA_unit.ToString();
+        drstore = store.GetDataByCode(store_code)[0];
+        sdesc = drstore.Str_Loc_Name;
+        
+
+        if (ViewState[clsStatic.sessionTempDatatable] != null)
+        {
+            dt = (DataTable)ViewState[clsStatic.sessionTempDatatable];
+        }
+        else
+        {
+            dt.Rows.Clear();
+            dt.Columns.Clear();
+
+            //dt.Columns.Add("Sl", typeof(int));
+            dt.Columns.Add("icode", typeof(string));
+            dt.Columns.Add("idesc", typeof(string));
+            dt.Columns.Add("uom", typeof(string));
+            dt.Columns.Add("curstk", typeof(string));
+            dt.Columns.Add("qty", typeof(string));
+            dt.Columns.Add("scode", typeof(string));
+            dt.Columns.Add("sdesc", typeof(string));
+            dt.Columns.Add("amnt", typeof(decimal));
+            dt.Columns.Add("irate", typeof(decimal));
+            dt.Columns.Add("ddate", typeof(string));
+            dt.Columns.Add("prio", typeof(string));            
+            dt.Columns.Add("remarks", typeof(string));
+            dt.Columns.Add("dbtcode", typeof(string));
+            dt.Columns.Add("dbtanal", typeof(string));
+
+           
+        }
+
+        dt.Rows.Add(icode, idesc, uom, curstk.ToString("N2"), txtqty.Text, store_code, sdesc, totamnt, rate, cldduedate.SelectedDate.ToShortDateString(), txtprio.Text, txtremarks.Text, ddlDbtacc.SelectedValue.ToString(), ddlanalysis.SelectedValue.ToString());
+
+       
+        txtitem.Text = "";
+        txtqty.Text = "";        
+        ddlstore.Text = "";
+        txtprio.Text = "";
+        txtremarks.Text = "";
+        //txtDbtacc.Text = "51.001.001.0008:Truck Repair & Maintenance/Spare Parts:P";
+        //ddlanalysis.Items.Clear();
+             
+
+        ViewState[clsStatic.sessionTempDatatable] = new DataTable();
+        ViewState[clsStatic.sessionTempDatatable] = dt;
+        set_grid();
+
+        //updsub.Update();
+        
+    }
+    protected void gdItem_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        int indx = gdItem.SelectedIndex;
+
+         if (indx != -1)
+         {
+             DataTable dt = new DataTable();
+
+             dt = (DataTable)ViewState[clsStatic.sessionTempDatatable];
+             dt.Rows.RemoveAt(indx);
+             ViewState[clsStatic.sessionTempDatatable] = dt;
+             set_grid();
+         }
+    }
+
+    private bool check_data()
+    {
+        bool flg = true;
+        DataTable dt = new DataTable();
+        dt = (DataTable)ViewState[clsStatic.sessionTempDatatable];
+            
+        if (dt.Rows.Count < 1) flg = false;
+
+        if ((ddlfromdept.Text == "") || (ddltodept.Text == "")) { flg = false; Response.Write("Department not found"); }
+
+        return flg;
+
+    }
+
+
+    private string get_flow_tepmate(string req_type, string cash_type, decimal totval)
+    {
+        App_Flow_DefinitionTableAdapter app = new App_Flow_DefinitionTableAdapter();
+        SCBLDataSet.App_Flow_DefinitionDataTable dt = new SCBLDataSet.App_Flow_DefinitionDataTable();
+
+        string tem_id = "";
+        dt = app.GetTemplate("SR", req_type, cash_type, totval);
+
+        if (dt.Rows.Count > 0)
+            tem_id = dt[0].flow_id.ToString();
+
+
+        return tem_id;
+    }
+    private string get_pend_for(string selval)
+    {
+        string pend_for = "";
+        tbl_app_ruleTableAdapter tbl = new tbl_app_ruleTableAdapter();
+        try
+        {
+            pend_for = tbl.GetDataByTypeSeq(selval, 1)[0].app_id.ToString();
+        }
+        catch
+        {
+            pend_for = "";
+        }
+        return pend_for;
+    }
+
+    protected void btnSubmit_Click(object sender, EventArgs e)
+    {
+
+        bool isok = true;
+        string sid, sname, msub, mbody;
+        
+
+        clsEmailReceiver[] rec_det = new clsEmailReceiver[20];
+        int remailcnt=0;
+        string pend_for = "";
+        dsLinkoffice.tblUserInfoRow  udr;
+        LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter usrdal = new LibraryDAL.dsLinkofficeTableAdapters.tblUserInfoTableAdapter();
+        User_Role_DefinitionTableAdapter roleta = new User_Role_DefinitionTableAdapter();
+        SCBLDataSet.User_Role_DefinitionDataTable roledt = new SCBLDataSet.User_Role_DefinitionDataTable();
+        tbl_CommentsTableAdapter com = new tbl_CommentsTableAdapter();
+        
+        clsStatic.CheckUserAuthentication();
+        
+        if (check_data() == false) return;
+        string frdeptcode = ddlfromdept.SelectedValue.ToString();
+        string frdeptdet = ddlfromdept.SelectedItem.Text.Split(':')[1];
+
+        string todeptcode = ddltodept.SelectedValue.ToString();
+        string todeptdet = ddltodept.SelectedItem.Text.Split(':')[1];
+
+        udr = usrdal.GetUserByCode(current.UserId.ToString())[0];
+
+        DataTable dt = new DataTable();
+        dt = (DataTable)ViewState[clsStatic.sessionTempDatatable];
+        
+        string entprd;        
+        int curyear = DateTime.Now.Year;
+
+        entprd = DateTime.Now.Year.ToString() + "/" + string.Format("{0:00}", DateTime.Now.Month);
+
+        int rcnt;
+        
+        string selval= ddlUnit.SelectedValue.ToString();        
+        string app_flow;
+        decimal totanmt,lrate,lamnt;
+        decimal gtotanmt=0;
+
+        InTr_Sr_HdrTableAdapter hdr = new InTr_Sr_HdrTableAdapter();
+        InTr_Sr_DetTableAdapter det = new InTr_Sr_DetTableAdapter();        
+
+        InSu_Trn_SetTableAdapter scfset = new InSu_Trn_SetTableAdapter();
+
+        string last_num = scfset.GetDataByType_Code("SR", selval)[0].Trn_Set_Iq_Next_No.ToString();
+        string ref_no = selval.Substring(0, 2).ToString() + "SR" + string.Format("{0:00}", Convert.ToInt32(DateTime.Now.Year.ToString().Substring(2, 2))) + string.Format("{0:00}", DateTime.Now.Month) + "-" + last_num;
+
+        string next_num = string.Format("{0:00000}", Convert.ToInt32(last_num) + 1);
+
+        
+        SqlTransaction myTrn = HelperTA.OpenTransaction(hdr.Connection);
+        SqlTransaction myScblTrn = HelperTA.OpenTransaction(scfset.Connection);
+
+
+        try
+        {
+            hdr.AttachTransaction(myTrn);
+            det.AttachTransaction(myTrn);
+            com.AttachTransaction(myTrn);
+           
+
+            scfset.AttachTransaction(myScblTrn);
+                         
+            rcnt=0;
+            foreach (DataRow dr in dt.Rows)
+            {
+                rcnt= rcnt + 1;
+
+                lrate=Convert.ToDecimal(dr["irate"].ToString());
+                lamnt = lrate * Convert.ToDecimal(dr["qty"]);
+
+                det.InsertSrdet("SR", selval, ref_no, (short)rcnt, "", "", "", 0, dr["icode"].ToString().Trim(), dr["idesc"].ToString().Trim(), dr["uom"].ToString().Trim(), dr["scode"].ToString().Trim(), "", "", Convert.ToDateTime(dr["ddate"].ToString()), Convert.ToDouble(dr["qty"]), 0, Convert.ToDouble(dr["qty"]), 0, "O", "N", lrate, lamnt, lamnt, "", dr["prio"].ToString(), dr["remarks"].ToString(), "", "", Convert.ToDouble(dr["curstk"].ToString()), dr["dbtcode"].ToString(), dr["dbtanal"].ToString(), "", 0);
+
+                //update budget
+                totanmt = Convert.ToDecimal(dr["amnt"]);               
+                gtotanmt += lamnt;
+            }
+
+            
+            app_flow = get_flow_tepmate(selval, "", gtotanmt);
+            
+
+            pend_for = get_pend_for(app_flow);
+
+            if ((app_flow == "") || (pend_for == "")) { isok = false; }
+
+            hdr.InsertSrHdr("SR", selval, ref_no, "RUN", pend_for, app_flow, frdeptcode, todeptcode, frdeptcode, DateTime.Now, DateTime.Now, txtreason.Text, txtloc.Text, "", "", frdeptdet, todeptdet, "", "", "", "", gtotanmt, "H", entprd, current.UserId.ToString(), "", "", "", "", "", 0, "", "");
+
+            com.InsertComments(ref_no, 1, DateTime.Now, current.UserId.ToString(), current.UserName.ToString(), udr.UserDesignation, 1, "SRINI", "INI", "(INITIATOR)", "", "");
+
+            scfset.UpdateNextNum(next_num, "SR", selval);
+
+            if (isok)
+            {
+                //myTrn.Rollback();
+                //myScblTrn.Rollback();
+                myTrn.Commit();
+                myScblTrn.Commit();
+            }
+            else
+            {
+                myTrn.Rollback();
+                myScblTrn.Rollback();
+            }
+            ViewState[clsStatic.sessionTempDatatable] = null;
+            
+        }
+        catch
+        {
+            myTrn.Rollback();
+            myScblTrn.Rollback();
+            isok = false;
+        }
+        finally
+        {
+            HelperTA.CloseTransaction(hdr.Connection, myTrn);
+            HelperTA.CloseTransaction(scfset.Connection, myScblTrn);
+        }
+        lblporef.Text = ref_no;
+
+        if (isok)
+        {
+            //send mail
+            
+            sid = udr.UserEmail.ToString();
+            sname = udr.UserName.ToString();
+            
+            msub = "A store requisition submitted [" + ref_no + "]";
+            mbody = "\n\n " + "A store requisition submitted [" + ref_no + "]";
+            mbody += "\n " + "To view details please login in at http://203.76.114.131/cml/cmlcom ";
+            mbody += "\n " + "**THIS IS AUTO GENERATED EMAIL AND DONT REQUIRE A REPLY.**";
+
+            roledt = roleta.GetDataByRole(pend_for);
+
+            foreach (SCBLDataSet.User_Role_DefinitionRow rdr in roledt.Rows)
+            {
+                rec_det[remailcnt] = new clsEmailReceiver();
+                rec_det[remailcnt].Rname = rdr.user_name;
+                rec_det[remailcnt].Rid = usrdal.GetUserByCode(rdr.user_id)[0].UserEmail;
+                remailcnt++;
+            }
+
+            clsStatic.SendMail(sid, sname, rec_det, msub, mbody);
+            ModalPopupExtender5.Show();    
+        }
+
+        
+
+
+    }
+    protected void btnok_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("../commercial/frm_com_inbox.aspx");    
+    }
+    
+
+    protected void ddlUnit_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        ViewState[clsStatic.sessionTempDatatable] = null;
+        set_grid();
+     
+    }
+
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+
+    }
+    
+    protected void ddlDbtacc_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        ddlanalysis.Items.Clear();
+
+        string dbtcode = ddlDbtacc.SelectedValue;
+        string dbtname = ddlDbtacc.SelectedItem.Text;
+        if (dbtcode == "") return;
+
+        AccCoaAnalysisTableAdapter anal = new AccCoaAnalysisTableAdapter();
+        AccCoaGroupCodeSetupTableAdapter grp = new AccCoaGroupCodeSetupTableAdapter();
+        AccDataSet.AccCoaAnalysisDataTable dtanal = new AccDataSet.AccCoaAnalysisDataTable();
+        AccDataSet.AccCoaGroupCodeSetupDataTable dtgrp = new AccDataSet.AccCoaGroupCodeSetupDataTable();
+        ListItem lst;
+        dtanal = anal.GetDataByCode(dbtcode);
+
+        if (dtanal.Rows.Count == 0) return;
+
+        dtgrp = grp.GetDataByID_name_ord(dtanal[0].COST_ID);       
+
+        ddlanalysis.Items.Add("");
+
+        foreach (AccDataSet.AccCoaGroupCodeSetupRow dr in dtgrp.Rows)
+        {
+            lst = new ListItem();
+            lst.Text = dr.Ccg_Name;
+            lst.Value = dr.Ccg_Code;
+            ddlanalysis.Items.Add(lst);
+        }
+
+    }
+}
+

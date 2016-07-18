@@ -1,0 +1,330 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLQryTableAdapters;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBL2DataSetTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.AccDataSetTableAdapters;
+using LibraryDAL.ProdDataSetTableAdapters;
+
+public partial class frm_prod_mat_entry_bag : System.Web.UI.Page
+{  
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+       
+        if (!Page.IsPostBack)
+        {                    
+           
+            get_all_prod();
+           
+        }
+        else
+        {
+
+        }
+    }
+
+    private void get_all_prod() 
+    {
+        tbl_prod_nameTableAdapter pro = new tbl_prod_nameTableAdapter();
+        ProdDataSet.tbl_prod_nameDataTable dtpro = new ProdDataSet.tbl_prod_nameDataTable();
+        ListItem lst;
+        dtpro = pro.GetDataByProdType("P");
+
+        ddlprod.Items.Clear();
+        ddlprod.Items.Add("");
+
+        foreach (ProdDataSet.tbl_prod_nameRow dr in dtpro.Rows)
+        {
+            lst = new ListItem();
+            lst.Text = dr.prod_name;
+            lst.Value = dr.prod_id;
+            ddlprod.Items.Add(lst);
+        }
+
+    }
+
+
+
+    private void load_prod_items(string prodid)
+    {
+        InMa_Str_LocTableAdapter loc = new InMa_Str_LocTableAdapter();
+        ErpDataSet.InMa_Str_LocDataTable dtloc = new ErpDataSet.InMa_Str_LocDataTable();
+
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitm = new ErpDataSet.InMa_Itm_DetDataTable();
+
+        tbl_prod_nameTableAdapter name = new tbl_prod_nameTableAdapter();
+
+        tbl_prod_itm_mapTableAdapter map = new tbl_prod_itm_mapTableAdapter();
+        ProdDataSet.tbl_prod_itm_mapDataTable dtmap = new ProdDataSet.tbl_prod_itm_mapDataTable();
+
+        InMa_Itm_StkTableAdapter stk = new InMa_Itm_StkTableAdapter();
+        ErpDataSet.InMa_Itm_StkDataTable dtctl = new ErpDataSet.InMa_Itm_StkDataTable();
+
+        bool prcflg = false;
+        
+        int indx = 0;
+               
+        Label lblicode;
+        Label lblidet;
+        Label lbluom;       
+        Label lblavlqty;        
+        DropDownList ddlstore;
+        TextBox txtissueqty;
+        
+        ListItem lst;
+
+        dtloc= loc.GetAllStore();
+
+        dtmap = map.GetDataByProdRm(prodid, 1);
+
+        gdItem.DataSource = dtmap;
+        gdItem.DataBind();
+
+
+        foreach (ProdDataSet.tbl_prod_itm_mapRow dr in dtmap.Rows)
+        {            
+            lblicode = new Label();
+            lblidet = new Label();
+            lbluom = new Label();            
+            ddlstore = new DropDownList();       
+            lblavlqty = new Label();
+                       
+            txtissueqty = new TextBox();
+                     
+            
+            lblicode = (Label)gdItem.Rows[indx].FindControl("Label1");
+            lblidet = (Label)gdItem.Rows[indx].FindControl("Label2");
+            lbluom = (Label)gdItem.Rows[indx].FindControl("Label3");
+            lblavlqty = (Label)gdItem.Rows[indx].FindControl("Label4");
+            
+            ddlstore = (DropDownList)gdItem.Rows[indx].FindControl("DropDownList1");
+            
+          
+            txtissueqty = (TextBox)gdItem.Rows[indx].FindControl("TextBox1");
+                        
+           
+            lblicode.Text = dr.itm_code.ToString();
+            lblidet.Text = dr.itm_det.ToString();
+            lbluom.Text = dr.itm_uom.ToString();            
+            dtctl = stk.GetDataByItm(dr.itm_code.ToString());
+            if (dtctl.Count == 0)
+            {
+                lblavlqty.Text = "0";
+            }
+            else { lblavlqty.Text = stk.GetDataByItm(dr.itm_code.ToString())[0].Itm_Stk_Cur.ToString("N2"); }
+
+
+            ddlstore.Items.Clear();
+            if (dtloc.Rows.Count > 1)
+            {
+                ddlstore.Items.Add("");
+            }
+
+            foreach (ErpDataSet.InMa_Str_LocRow drs in dtloc.Rows)
+            {
+                lst = new ListItem();
+                lst.Text = drs.Str_Loc_Id;
+                lst.Value = drs.Str_Loc_Id;
+                ddlstore.Items.Add(lst);
+            }
+
+            
+
+            txtissueqty.Text = "0";
+                                   
+
+            indx++;
+        }
+        if (prcflg)
+        {
+            btnProceed.Visible = true;            
+        }
+
+        
+    }
+
+    protected void gdItem_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        
+    }     
+
+    private void generate_data()
+    {
+        
+        string prodid = ddlprod.SelectedValue.ToString();
+
+        if (prodid == "")
+        {
+            gdItem.Visible = false;
+            btnProceed.Visible = false;
+            return;
+        }
+
+        gdItem.Visible = true;
+        btnProceed.Visible = true;
+        load_prod_items(prodid);               
+        
+    }
+
+
+    protected void ddlsrlist_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        generate_data();        
+    }
+
+    protected void btnProceed_Click(object sender, EventArgs e)
+    {
+
+        lblmsg.Visible = false;
+
+        if ((gdItem.Rows.Count < 1) || (gdItem.Visible == false)) return;
+
+        if (ddlprod.Text == "") { lblmsg.Text = "SELECT PRODUCTION"; lblmsg.Visible = true; return; }
+        if (cldissdate.SelectedValue == null) { lblmsg.Text = "SELECT DATE"; lblmsg.Visible = true; return; }
+        if (cldissdate.SelectedValue > DateTime.Now) { lblmsg.Text = "DATE SELECTION ERROR"; lblmsg.Visible = true; return; }
+
+        InTr_Trn_HdrTableAdapter intrhdr = new InTr_Trn_HdrTableAdapter();
+       // ErpDataSet.InTr_Trn_HdrDataTable dthdr = new ErpDataSet.InTr_Trn_HdrDataTable();
+
+        tbl_prod_ctl_detTableAdapter pro = new tbl_prod_ctl_detTableAdapter();
+        ProdDataSet.tbl_prod_ctl_detDataTable dtpro = new ProdDataSet.tbl_prod_ctl_detDataTable();
+        budgTableAdapter bud = new budgTableAdapter();
+
+        InMa_Stk_CtlTableAdapter stkctl = new InMa_Stk_CtlTableAdapter();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstkctl = new ErpDataSet.InMa_Stk_CtlDataTable();
+
+        tbl_prod_itm_mapTableAdapter map = new tbl_prod_itm_mapTableAdapter();
+        ProdDataSet.tbl_prod_itm_mapDataTable dtmap = new ProdDataSet.tbl_prod_itm_mapDataTable();
+
+        clsMrrData[] mrrdata = new clsMrrData[100];
+        bool entry_check = true;
+        int cnt = 0;
+                
+        Label lblicode, lblidet, lbluom, lblavlqty;
+        TextBox txtissueqty;
+        DropDownList ddlstore;       
+        decimal availqty, issqty;
+
+
+       // dthdr = intrhdr.GetDataByPlantfordate(store.Substring(0, 2).ToString() + "SRQ");
+      //  if (dthdr.Count > 0)
+       // {
+            //if (dthdr[0].Trn_Hdr_DATE > cldissdate.SelectedDate) return;
+       // }
+
+
+        foreach (GridViewRow gr in gdItem.Rows)
+        {            
+            lblicode = new Label();
+            lblidet = new Label();            
+            lbluom = new Label();           
+            lblavlqty = new Label();            
+            txtissueqty = new TextBox();            
+            ddlstore = new DropDownList();
+            
+            lblicode = (Label)gr.FindControl("Label1");
+            lblidet = (Label)gr.FindControl("Label2");
+            lbluom = (Label)gr.FindControl("Label3");            
+            lblavlqty = (Label)gr.FindControl("Label4");
+            txtissueqty = (TextBox)gr.FindControl("TextBox1");            
+            ddlstore = (DropDownList)gr.FindControl("DropDownList1");
+            
+
+           
+            try
+            {
+                
+                if (ddlstore.Text == "") { lblmsg.Text = "STORE ERROR"; lblmsg.Visible = true; return; }
+
+
+                dtstkctl = new ErpDataSet.InMa_Stk_CtlDataTable();
+                dtstkctl = stkctl.GetDataByItemStore(lblicode.Text, ddlstore.SelectedValue.ToString());
+                if (dtstkctl.Count == 0)
+                {
+                    availqty = 0;
+                }
+                else 
+                {
+                    availqty = (decimal) dtstkctl[0].Stk_Ctl_Free_Stk;
+                }
+
+                issqty = Convert.ToDecimal(txtissueqty.Text);
+
+                   
+                if ((issqty == 0) || (issqty > availqty))
+                {
+                    entry_check = false;
+                }
+                else
+                {
+
+                    dtmap = new ProdDataSet.tbl_prod_itm_mapDataTable();
+                    dtmap = map.GetDataByItmProd(lblicode.Text, ddlprod.SelectedValue.ToString());
+
+                    if (dtmap.Rows.Count == 0) { lblmsg.Text = "DEBIT CODE NOT ADDIGNED IN PRODUCTION RECIPE"; lblmsg.Visible = true; return; }
+                    if (dtmap[0].coa_code == "") { lblmsg.Text = "DEBIT CODE NOT ADDIGNED IN PRODUCTION RECIPE"; lblmsg.Visible = true; return; }
+                    mrrdata[cnt] = new clsMrrData();
+                    mrrdata[cnt].Seqno = cnt + 1;                       
+                    mrrdata[cnt].Icode = lblicode.Text;
+                    mrrdata[cnt].Production = ddlprod.SelectedValue.ToString() + ":" + ddlprod.SelectedItem.Text;
+                    mrrdata[cnt].Idet = lblidet.Text;
+                    mrrdata[cnt].Store = ddlstore.SelectedValue.ToString();
+                    mrrdata[cnt].Uom = lbluom.Text;
+                    mrrdata[cnt].Availqty = Convert.ToDecimal(lblavlqty.Text);
+                    mrrdata[cnt].Entryqty = Convert.ToDecimal(txtissueqty.Text);
+                    mrrdata[cnt].StdRatio = 0;
+                    mrrdata[cnt].Plant = "CM";
+                    mrrdata[cnt].Issuedate = cldissdate.SelectedDate;
+                    mrrdata[cnt].Dcode = dtmap[0].coa_code;                                           
+                    cnt++;
+                }
+            }
+            catch
+            {
+                entry_check = false;
+            }
+        }
+       
+
+        if ((!entry_check) || (cnt == 0)) { lblmsg.Text = "QNTY ERROR"; lblmsg.Visible = true; return; }
+
+        dtpro = pro.GetDataByProdIdStatusDate(ddlprod.SelectedValue.ToString(), "I", "F", "C", Convert.ToDateTime(cldissdate.SelectedDate.ToShortDateString()));
+        if (dtpro.Rows.Count > 0)
+        {
+            lblmsg.Text = "PORDUCTION ALREADY INITIATED FOR DATE :" + dtpro[0].prod_date.ToShortDateString(); lblmsg.Visible = true; return;
+        }
+
+
+        dtpro = new ProdDataSet.tbl_prod_ctl_detDataTable();
+        dtpro = pro.GetDataByProdIdStatus(ddlprod.SelectedValue.ToString(), "I", "F", "");
+        if (dtpro.Rows.Count > 0)
+        {
+            lblmsg.Text = "EARLIER PORDUCTION NOT POSTED YET"; lblmsg.Visible = true; return;
+        }
+        
+        Session[clsStatic.sessionMrrDetData] = mrrdata;
+        Response.Redirect("./frm_prod_mat_entry_confirm_bag.aspx");
+    }
+
+    protected void ddlprod_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        generate_data();
+    }
+}

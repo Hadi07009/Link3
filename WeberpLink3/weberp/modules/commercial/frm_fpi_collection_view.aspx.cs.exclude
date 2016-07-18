@@ -1,0 +1,171 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDTO;
+using LibraryDAL;
+using LibraryDAL.SCBLDataSetTableAdapters;
+
+public partial class frm_fpi_collection_view : System.Web.UI.Page
+{
+   
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+               
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+        getpage();
+        if (!Page.IsPostBack)
+        {
+            HtmlInputButton btnnewwindow = new HtmlInputButton();
+            btnnewwindow.Attributes.Add("onclick ", "window.open('./frm_fpi_collection_print.aspx')");
+            btnnewwindow.ID = "btnnewwindow";
+            btnnewwindow.Value = "Print Version";
+            btnnewwindow.Attributes.Add("class", "btn2");
+            lnkView.Controls.Add(btnnewwindow);
+
+            HtmlInputButton btnnewwindow2 = new HtmlInputButton();
+            btnnewwindow2.Attributes.Add("onclick ", "window.open('./frm_fpi_collection_mail.aspx')");
+            btnnewwindow2.ID = "btnnewwindow2";
+            btnnewwindow2.Value = "Email Version";
+            btnnewwindow2.Attributes.Add("class", "btn2");
+            lnkMail.Controls.Add(btnnewwindow2);
+        }
+        else
+        {
+
+        }
+          
+    }
+    private void getpage()
+    {
+        HtmlTable htbl = (HtmlTable)Session[clsStatic.sessionTempHtmlTable];
+        HtmlTableRow hrow;
+        TextBox tbx;
+        CheckBox chk;
+        string[] tempdata;              
+        int slno = 1;
+
+        foreach (HtmlTableRow hr in htbl.Rows)
+        {
+
+            hrow = new HtmlTableRow();
+
+            hrow.Cells.Add(new HtmlTableCell());
+            hrow.Cells.Add(new HtmlTableCell());
+            hrow.Cells.Add(new HtmlTableCell());
+            hrow.Cells.Add(new HtmlTableCell());
+            hrow.Cells.Add(new HtmlTableCell());
+            hrow.Cells.Add(new HtmlTableCell());
+            hrow.Cells.Add(new HtmlTableCell());
+
+            hrow.Cells[0].InnerText = hr.Cells[1].InnerText;
+            hrow.Cells[1].InnerText = hr.Cells[4].InnerText;
+
+
+
+            try
+            {
+
+                if (hr.Cells[1].InnerText == "\r\n                            Sl") goto skip;
+
+                chk = new CheckBox();
+                chk = (CheckBox)hr.Cells[0].Controls[0];
+
+                if (chk.Checked)
+                {
+                    hrow.Cells[0].InnerText = slno.ToString();
+                    slno++;
+                }
+
+                tbx = new TextBox();
+                tbx = (TextBox)hr.Cells[5].Controls[0];
+                if (tbx.Text == "")
+                    hrow.Cells[2].InnerText = ".";
+                else
+                    hrow.Cells[2].InnerText = tbx.Text;
+
+                tbx = new TextBox();
+                tbx = (TextBox)hr.Cells[6].Controls[0];
+                if (tbx.Text == "")
+                    hrow.Cells[3].InnerText = ".";
+                else
+                    hrow.Cells[3].InnerText = tbx.Text;
+
+                tbx = new TextBox();
+                tbx = (TextBox)hr.Cells[7].Controls[0];
+                if (tbx.Text == "")
+                    hrow.Cells[4].InnerText = ".";
+                else
+                    hrow.Cells[4].InnerText = tbx.Text;
+
+                tbx = new TextBox();
+                tbx = (TextBox)hr.Cells[8].Controls[0];
+                if (tbx.Text == "")
+                    hrow.Cells[5].InnerText = ".";
+                else
+                    hrow.Cells[5].InnerText = tbx.Text;
+
+                tbx = new TextBox();
+                tbx = (TextBox)hr.Cells[9].Controls[0];
+                if (tbx.Text == "")
+                    hrow.Cells[6].InnerText = ".";
+                else
+                    hrow.Cells[6].InnerText = tbx.Text;
+
+
+
+                if (chk.Checked)
+                    tblhtml.Rows.Add(hrow);
+            skip: ;
+            }
+            catch
+            {
+            }
+
+        }
+
+        tempdata = (string[])Session[clsStatic.sessionTempPrintData];
+
+        lbldate.Text = tempdata[0];
+        lblto.Text = tempdata[1];
+        lblsub.Text = tempdata[2];
+        lblfrom.Text = tempdata[3];        
+        lbladd.Text = tempdata[7];
+        lblphone.Text = tempdata[8];
+        lblfax.Text = tempdata[9];
+        lblemail.Text = tempdata[10];
+
+        
+        
+
+    }
+  
+    protected void lnkView_Click(object sender, EventArgs e)
+    {
+
+        RegisterStartupScript("click", "<script>window.open('./frm_fpi_collection_print.aspx');</script>");
+
+    }
+    protected void lnkMail_Click(object sender, EventArgs e)
+    {
+        RegisterStartupScript("click", "<script>window.open('./frm_fpi_collection_mail.aspx');</script>");
+    }
+    
+   
+    
+    protected void btnagain_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("./frm_fpi_collection.aspx");
+    }
+    
+}
+

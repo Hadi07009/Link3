@@ -1,0 +1,56 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_fpi_initiate.aspx.cs" Inherits="frm_fpi_initiate" Title=""   %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register assembly="eWorld.UI.Compatibility" namespace="eWorld.UI.Compatibility" tagprefix="ew" %>
+
+
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+    <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" style="text-align: center">
+                PI APPROVAL INITIATE</td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: center">
+                ITEM LIST:
+                <asp:Label ID="Label1" runat="server" Text="(0)"></asp:Label>
+&nbsp;<asp:DropDownList ID="ddlitemlist" runat="server" CssClass="txtbox" 
+                    Width="650px" Font-Size="10px">
+                    <asp:ListItem>052.001.0097: Cement Clinker in Bulk</asp:ListItem>
+                </asp:DropDownList>
+            &nbsp;
+                <asp:LinkButton ID="lnkgo" runat="server" Width="101px" onclick="lnkgo_Click">PROCEED</asp:LinkButton>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height: 28px; text-align: center;">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height: 92px">
+            </td>
+        </tr>
+    </table>
+</asp:Content>
+

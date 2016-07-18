@@ -1,0 +1,197 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_po_cancel_ini.aspx.cs" Inherits="frm_po_cancel_ini" Title=""   ValidateRequest="false" %>
+  
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register src="usercontrols/ctl_po_item_view.ascx" tagname="ctl_po_item_view" tagprefix="uc1" %>    
+    
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <table class="tblmas" style="width: 100%" id="tblmaster" runat="server">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                PURCHASE ORDER CANCEL SCREEN&nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: right">
+                <asp:Label ID="lblplant" runat="server" Text="Label" Width="300px"></asp:Label>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+                PO LIST:
+                <asp:DropDownList ID="ddlpolist" runat="server" CssClass="txtbox"
+                Width="570px" AutoPostBack="True" 
+                OnSelectedIndexChanged="ddlpolist_SelectedIndexChanged">
+            </asp:DropDownList>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+            
+                <table id="tbl_po_det" runat="server" style="width: 650px; border-top-width: 1px; border-left-width: 1px; border-left-color: #e6e6fa; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='white', startcolorstr='#D6DCF9', gradienttype='0'); border-bottom-width: 1px; border-bottom-color: #e6e6fa; border-top-color: #e6e6fa; border-right-width: 1px; border-right-color: #e6e6fa;">
+                    <tr>
+                        <td style="width: 58px">
+                        </td>
+                        <td style="width: 9px">
+                        </td>
+                        <td style="width: 22px">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <table style="width: 620px">
+                                <tr>
+                                    <td style="width: 106px">
+                                        PO Ref</td>
+                                    <td style="width: 13px">
+                                        :</td>
+                                    <td>
+                                        <asp:Label ID="lblref" runat="server" Font-Bold="True" Text="Label" Width="168px" ForeColor="Red"></asp:Label></td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 106px">
+                                        Req Type</td>
+                                    <td style="width: 13px">
+                                        :</td>
+                                    <td>
+                                        <asp:Label ID="lblreqtype" runat="server" Text="Label" Width="217px"></asp:Label></td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 106px">
+                                        Purchase Type</td>
+                                    <td style="width: 13px">
+                                        :</td>
+                                    <td>
+                                        <asp:Label ID="lblpurtype" runat="server" Text="Label" Width="217px"></asp:Label></td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 106px">
+                                        Party</td>
+                                    <td style="width: 13px">
+                                        :</td>
+                                    <td>
+                                        <asp:Label ID="lblparty" runat="server" Text="Label" Width="440px"></asp:Label></td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 106px">
+                                        Amount</td>
+                                    <td style="width: 13px">
+                                        :</td>
+                                    <td>
+                                        <asp:Label ID="lblamount" runat="server" Text="Label" Width="139px"></asp:Label></td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 106px">
+                                        Inward</td>
+                                    <td style="width: 13px">
+                                        :</td>
+                                    <td>
+                                        <asp:Label ID="lblinward" runat="server" Text="Label" Width="440px" Font-Bold="True"></asp:Label></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: center">
+                            <span style="font-size: 10pt; color: #000099"><strong>ITEMS DETAIL</strong></span></td>
+                    </tr>
+                    <tr>
+                        <td  colspan="3" style="text-align: left">                           
+                                <asp:PlaceHolder ID="celdetail" runat="server"></asp:PlaceHolder>                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td runat="server" colspan="3" style="text-align: center">
+                            <span style="font-size: 10pt; color: #000099"><strong>TERMS &amp; CONDITIONS</strong></span> </td>
+                    </tr>
+                    <tr>
+                        <td runat="server" colspan="3" style="text-align: left">
+                            <span style="font-size: 10pt; color: #000099"><strong>GENERAL TERMS </strong>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td id="celgent" runat="server" colspan="3" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td  runat="server" colspan="3" style="text-align: left">
+                            <span style="font-size: 10pt; color: #000099"><strong>SPECIAL TERMS</strong></span></td>
+                    </tr>
+                    <tr>
+                        <td id="celspet" runat="server" colspan="3" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td  runat="server" colspan="3" style="text-align: left">
+                            <span style="font-size: 10pt; color: #000099"><strong>PAYMENT TERMS</strong></span></td>
+                    </tr>
+                    <tr>
+                        <td id="celpayt" runat="server" colspan="3" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td  colspan="3" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td  colspan="3" style="text-align: left">
+                            COMMENTS: 
+                            <asp:TextBox ID="txtcomments" runat="server" TextMode="MultiLine" Width="524px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td  colspan="3" style="text-align: center">
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" 
+                                ControlToValidate="txtcomments" ErrorMessage="TYPE YOUR COMMENTS"></asp:RequiredFieldValidator>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td  colspan="3" style="text-align: center">
+                            <asp:Button ID="btnsend" runat="server" CssClass="btn2" onclick="btnsend_Click" 
+                                Text="Send Request for PO Cancel" Width="272px" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td  colspan="3" style="text-align: center">
+                            &nbsp;</td>
+                    </tr>
+                    </table>
+          
+           
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+            </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+        <tr>
+            <td style="height: 57px">
+            </td>
+            <td style="height: 57px">
+            </td>
+            <td style="height: 57px">
+            </td>
+        </tr>
+    </table>
+
+</asp:Content>
+

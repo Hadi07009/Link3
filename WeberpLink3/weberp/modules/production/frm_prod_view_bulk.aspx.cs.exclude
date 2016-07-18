@@ -1,0 +1,346 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+using LibraryDAL;
+using LibraryDTO;
+using LibraryDAL.SCBLDataSetTableAdapters;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.ProdDataSetTableAdapters;
+using LibraryDAL.ProdReportDataSetTableAdapters;
+using LibraryDAL.SCBLQryTableAdapters;
+
+public partial class frm_prod_view_bulk : System.Web.UI.Page
+{
+   
+
+    protected void Page_Load(object sender, EventArgs e)
+    {      
+
+        clsStatic.CheckUserAuthentication();
+        tblmaster.BgColor = "FFFFFFF";
+        if (Request.QueryString.Count < 2) return;
+        generate_comments(Request.QueryString["ref_no"].ToString());
+        if (!Page.IsPostBack)
+        {
+           
+            string ref_no = Request.QueryString["ref_no"].ToString();
+            string prod_id = Request.QueryString["prod_id"].ToString();
+            generate_detail_data(ref_no, prod_id);
+                   
+        }
+       
+          
+    }
+
+
+    private void generate_detail_data(string ref_no, string selprod)
+    {
+        tbl_prod_ctl_detTableAdapter ctl = new tbl_prod_ctl_detTableAdapter();
+        ProdDataSet.tbl_prod_ctl_detDataTable dtctl = new ProdDataSet.tbl_prod_ctl_detDataTable();
+        tbl_prod_ctl_detTableAdapter prodet = new tbl_prod_ctl_detTableAdapter();
+
+        tbl_prod_entryTableAdapter prod = new tbl_prod_entryTableAdapter();
+        ProdDataSet.tbl_prod_entryDataTable dtprod = new ProdDataSet.tbl_prod_entryDataTable();
+        InTr_Trn_DetTableAdapter trndet = new InTr_Trn_DetTableAdapter();
+        ErpDataSet.InTr_Trn_DetDataTable dttrndet = new ErpDataSet.InTr_Trn_DetDataTable();
+
+        InTr_Trn_HdrTableAdapter trnhdr = new InTr_Trn_HdrTableAdapter();
+        ErpDataSet.InTr_Trn_HdrDataTable dttrnhdr = new ErpDataSet.InTr_Trn_HdrDataTable();
+
+        tbl_prod_itm_mapTableAdapter map = new tbl_prod_itm_mapTableAdapter();
+        ProdDataSet.tbl_prod_itm_mapDataTable dtmap = new ProdDataSet.tbl_prod_itm_mapDataTable();
+
+        InMa_Itm_StkTableAdapter stk = new InMa_Itm_StkTableAdapter();
+        ErpDataSet.InMa_Itm_StkDataTable dtstk = new ErpDataSet.InMa_Itm_StkDataTable();
+
+        DataTable dt = new DataTable();
+
+        decimal stdrat, actratio, avlqty, diffratio, totqty = 0;
+
+        dtctl = ctl.GetDataByRef(ref_no);
+        if (dtctl.Count == 0) { return; }
+        
+        lblref.Text = dtctl[0].ref_no;
+        lblprodname.Text = dtctl[0].prod_name;
+        lbldate.Text = dtctl[0].prod_date.ToShortDateString();
+        
+        //set status
+        btnview.Visible = false;
+
+        switch (dtctl[0].issue_status)
+        {
+            case "R":
+                lblstatus.Text = "REJECTED";
+                break;
+
+            case "I":
+                lblstatus.Text = "Production Approval Pending";
+                break;
+
+            case "F":
+                lblstatus.Text = "Production Posting Pending";
+                break;
+
+            case "C":
+                lblstatus.Text = "Production Completed";
+                btnview.Visible = true;
+                break;
+
+            default:
+                lblstatus.Text = "";
+                break;
+
+
+        }
+
+
+        //row material issue
+
+        dt.Rows.Clear();
+        dt.Columns.Clear();
+
+        dt.Columns.Add("SL", typeof(int));
+        dt.Columns.Add("ITEM CODE", typeof(string));
+        dt.Columns.Add("ITEM DETAIL", typeof(string));
+        dt.Columns.Add("UOM", typeof(string));
+        dt.Columns.Add("STORE", typeof(string));
+        dt.Columns.Add("AVL QTY", typeof(string));
+        dt.Columns.Add("ISSUE QTY (PLC Record)", typeof(string));
+        dt.Columns.Add("STD RATIO(%)", typeof(string));
+        dt.Columns.Add("ACTUAL RATIO(%)", typeof(string));
+        dt.Columns.Add("DIFFERENCE(%) (std-act)", typeof(string));
+
+        dttrnhdr = trnhdr.GetDataByIssueProd("IS",ref_no, selprod, "H", "P", "B");
+
+        if (dttrnhdr.Rows.Count == 0) return;
+
+
+        dttrndet = trndet.GetDataByRef(dttrnhdr[0].Trn_Hdr_Ref);
+
+        foreach (ErpDataSet.InTr_Trn_DetRow dr in dttrndet.Rows)
+        {
+            totqty += (decimal)dr.Trn_Det_Lin_Qty;
+        
+        }
+
+
+        int cnt = 1;
+
+        foreach (ErpDataSet.InTr_Trn_DetRow dr in dttrndet.Rows)
+        {
+            actratio = (100 * (decimal)dr.Trn_Det_Lin_Qty) / totqty;
+            dtmap = new ProdDataSet.tbl_prod_itm_mapDataTable();
+            dtmap = map.GetDataByItmProd(dr.Trn_Det_Icode, selprod);
+            stdrat = dtmap[0].Isprod_std_ratioNull() ? 0 : dtmap[0].prod_std_ratio;
+            diffratio = stdrat - actratio;
+
+            avlqty = (decimal) stk.GetDataByItm(dr.Trn_Det_Icode)[0].Itm_Stk_Cur;
+            dt.Rows.Add(cnt++, dr.Trn_Det_Icode, dr.Trn_Det_Itm_Desc, dr.Trn_Det_Itm_Uom, dr.Trn_Det_Str_Code, avlqty.ToString("N2"), dr.Trn_Det_Lin_Qty.ToString("N2"), stdrat.ToString("N2"), actratio.ToString("N2"), diffratio.ToString("N2"));
+        }
+
+
+        gdItem.DataSource = dt;
+        gdItem.DataBind();
+
+
+        //add finish product
+        dtprod = prod.GetDataByProd(ref_no, selprod);
+        gdfinnItem.DataSource = dtprod;
+        gdfinnItem.DataBind();
+
+
+      
+
+    }
+
+  
+
+    private void generate_comments(string ref_no)
+    {
+        
+
+        tbl_CommentsTableAdapter com = new tbl_CommentsTableAdapter();
+        SCBLDataSet.tbl_CommentsDataTable dt = new SCBLDataSet.tbl_CommentsDataTable();
+        phcomments.Controls.Clear();
+                
+        dt = com.GetCommentsByRef(ref_no);
+       
+        foreach (SCBLDataSet.tbl_CommentsRow dr in dt.Rows)
+        {
+            ClientSide_modules_commercial_usercontrols_ctl_comments ctl = (ClientSide_modules_commercial_usercontrols_ctl_comments)LoadControl("~/modules/commercial/usercontrols/ctl_comments.ascx");
+            Label lblname = (Label)ctl.FindControl("lblname");
+            Label lbldate = (Label)ctl.FindControl("lbldate");
+            HtmlTableCell celcomm = (HtmlTableCell)ctl.FindControl("celcomm");
+            Image imgimage = (Image)ctl.FindControl("imgimage");
+
+            imgimage.ImageUrl = "~/handler/hndImage.ashx?id=" + dr.app_id;
+
+            ctl.ID = "ctl_" + phcomments.Controls.Count.ToString();
+
+            lblname.Text = dr.app_name.ToString() + " (" + dr.app_designation.ToString() + ")";
+            lbldate.Text = dr.app_date.ToString();
+            celcomm.InnerText = dr.gen_comments.ToString();
+
+            phcomments.Controls.Add(ctl);
+        }
+
+    }
+    protected void btnview_Click(object sender, EventArgs e)
+    {
+        tbl_prod_cs_reportTableAdapter prod = new tbl_prod_cs_reportTableAdapter();
+        dtProdIssueTableAdapter iss = new dtProdIssueTableAdapter();
+        ProdReportDataSet.dtProdIssueDataTable dtiss = new ProdReportDataSet.dtProdIssueDataTable();
+        ProdReportDataSet.dtProdIssueDataTable dtfinn = new ProdReportDataSet.dtProdIssueDataTable();
+        tbl_prod_entryTableAdapter entry = new tbl_prod_entryTableAdapter();
+        ProdDataSet.tbl_prod_entryDataTable dtop = new ProdDataSet.tbl_prod_entryDataTable();
+        dtOverheadTableAdapter oh = new dtOverheadTableAdapter();
+        ProdReportDataSet.dtOverheadDataTable dtoh = new ProdReportDataSet.dtOverheadDataTable();
+        InMa_Itm_DetTableAdapter itm_det = new InMa_Itm_DetTableAdapter();
+        ErpDataSet.InMa_Itm_DetDataTable dtitm_det = new ErpDataSet.InMa_Itm_DetDataTable();
+        tbl_prod_ctl_detTableAdapter ctl = new tbl_prod_ctl_detTableAdapter();
+        ProdDataSet.tbl_prod_ctl_detDataTable dtctl = new ProdDataSet.tbl_prod_ctl_detDataTable();
+      
+        string ref_no = lblref.Text;       
+        string tp = "cs_batch";
+        string uid = current.UserId;
+       
+        string prod_id = Request.QueryString["prod_id"].ToString();
+        string prod_name = lblprodname.Text;
+        int seq = 1;
+        double toisqnty = 0, toisamt = 0, totismainqty = 0;
+        double tofiqty = 0, tofiamt = 0;
+        double toconqty = 0, toconamt = 0;
+        double directamnt = 0, indirectamnt = 0;
+
+        if (prod_id == "") return;
+
+
+        prod.DeleteByUser(uid);
+
+        dtiss = iss.GetDataByProdId("IS", ref_no, prod_id);
+        dtfinn = iss.GetDataByProdId("FI", ref_no, prod_id);
+
+        dtctl = ctl.GetDataByRefProd(ref_no, prod_id);
+
+        if ((dtiss.Rows.Count == 0) || (dtfinn.Rows.Count == 0) || (dtctl.Rows.Count == 0)) return;
+
+        DateTime stdate = dtctl[0].prod_date;
+        DateTime enddate = dtctl[0].prod_date;
+        
+
+        //totismainqty = dtiss[0].qty;
+        foreach (ProdReportDataSet.dtProdIssueRow dr in dtiss.Rows)
+        {
+            dtitm_det = new ErpDataSet.InMa_Itm_DetDataTable();
+            dtitm_det = itm_det.GetItemByCode(dr.Trn_Det_Icode);
+            if ((dtitm_det[0].Itm_Det_Type_flag == "R") || (dtitm_det[0].Itm_Det_Type_flag == "F"))
+            {
+                totismainqty += dr.qty;
+            }
+        }
+
+        prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, "", "Raw & Process Material Consumed", "", "", "", "", 1, 0);
+
+
+        foreach (ProdReportDataSet.dtProdIssueRow dr in dtiss.Rows)
+        {
+            seq++;
+            prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, dr.Trn_Det_Icode, dr.Trn_Det_Itm_Desc, "", dr.qty.ToString("N2"), (dr.qty == 0) ? "" : ((double)dr.amnt / dr.qty).ToString("N2"), dr.amnt.ToString("N2"), 0, 0);
+            toisqnty += dr.qty;
+            toisamt += (double)dr.amnt;
+        }
+
+        seq++;
+        prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, "", "", "", "", "", "", 0, 0);
+
+
+        //total rm
+
+        toconqty = totismainqty;
+        toconamt = toisamt;
+
+        seq++;
+        prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, "", "", "", (toisqnty).ToString("N2"), ((toisqnty) == 0) ? "" : (toconamt / (toisqnty)).ToString("N2"), toconamt.ToString("N2"), 1, 1);
+
+        seq++;
+        prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, "", "Overhead", "", "", "", "", 1, 0);
+
+        dtoh = oh.GetDataByref_Prod(ref_no, prod_id);
+
+        //direct
+        seq++;
+        directamnt = (double)dtoh[0].directamnt;
+        prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, "", "Power & Utility (Variable)", "", dtoh[0].directqty.ToString("N2"), (dtoh[0].directqty == 0) ? "" : (dtoh[0].directamnt / dtoh[0].directqty).ToString("F4"), dtoh[0].directamnt.ToString("N2"), 0, 0);
+
+
+        //indirect
+        seq++;
+        indirectamnt = (double)dtoh[0].indirectamnt;
+        prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, "", "Factory Overhead", "", dtoh[0].indirectqty.ToString("N2"), (dtoh[0].indirectqty == 0) ? "" : (dtoh[0].indirectamnt / dtoh[0].indirectqty).ToString("F4"), dtoh[0].indirectamnt.ToString("N2"), 0, 0);
+
+        seq++;
+        prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, "", "", "", "", "", "", 0, 0);
+
+
+
+        seq++;
+        prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, "", "Total Production Cost", "", (toconqty).ToString("N2"), ((toconamt + directamnt + indirectamnt) / (toconqty)).ToString("N2"), (toconamt + directamnt + indirectamnt).ToString("N2"), 1, 1);
+
+        //seq++;
+        //prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, "", "", "", "", "", "", 0, 0);
+
+
+
+
+        //seq++;
+        //prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, "", "Total Production Cost of Finn Goods", "", (toconqty).ToString("N2"), ((toconamt + directamnt + indirectamnt) / (toconqty)).ToString("N2"), (toconamt + directamnt + indirectamnt).ToString("N2"), 1, 1);
+
+
+        seq++;
+        prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, "", "", "", "", "", "", 0, 0);
+
+        seq++;
+        prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, "", "Output", "", "", "", "", 1, 0);
+
+
+
+        foreach (ProdReportDataSet.dtProdIssueRow dr in dtfinn.Rows)
+        {
+            seq++;
+            prod.InsertData(uid, seq, ref_no, prod_id, prod_name, stdate, enddate, dr.Trn_Det_Icode, dr.Trn_Det_Itm_Desc, "", dr.qty.ToString("N2"), (dr.qty == 0) ? "" : ((double)dr.amnt / dr.qty).ToString("N2"), dr.amnt.ToString("N2"), 0, 0);
+            tofiqty += dr.qty;
+            tofiamt += (double)dr.amnt;
+        }
+
+        //seq++;
+        //prod.InsertData(uid, seq,ref_no,  prod_id,  prod_name, stdate, enddate, "", "", "", tofiqty.ToString("N2"), (tofiqty == 0) ? "" : (tofiamt / tofiqty).ToString("N2"), tofiamt.ToString("N2"), 1, 1);
+
+
+        //seq++;
+        //prod.InsertData(uid, seq,ref_no, prod_id,  prod_name, stdate, enddate, "", "", "", "", "", "", 0, 0);
+
+
+        //seq++;
+        //prod.InsertData(uid, seq, prod_id, prod_name, stdate, enddate, "", "Normal Loss", "", (toconqty - tofiqty).ToString("N2"), "", "", 0, 0);
+
+        seq++;
+        prod.InsertData(uid, seq,  ref_no, prod_id, prod_name, stdate, enddate, "", "", "", "", "", "", 0, 0);
+
+
+        //seq++;
+        //prod.InsertData(uid, seq,ref_no, prod_id, prod_name, stdate, enddate, "", "Total Reconsiled Quantity", "", (toconqty).ToString("N2"), "", "", 1, 0);
+
+
+
+        RegisterStartupScript("Click", "<script>window.open('./reports/frm_report_viewer.aspx?ref_no=" + uid + "&prod_id=" + prod_id + "&tp=" + tp + "');</script>");
+    }
+}

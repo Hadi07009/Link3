@@ -1,0 +1,657 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_pay_request_view.aspx.cs" Inherits="frm_pay_request_view" Title=""   ValidateRequest="false" MaintainScrollPositionOnPostback="true" %>
+  <%@ Register Assembly="eWorld.UI, Version=2.0.6.2393, Culture=neutral, PublicKeyToken=24d65337282035f2"
+    Namespace="eWorld.UI" TagPrefix="ew" %>
+    <%@ Register assembly="AjaxControlToolkit" namespace="AjaxControlToolkit.HTMLEditor" tagprefix="HTMLEditor" %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register src="usercontrols/ctl_po_item_mrr_view.ascx" tagname="ctl_po_item_mrr_view" tagprefix="uc1" %>  
+<%@ Register src="usercontrols/ctl_comments.ascx" tagname="ctl_comments" tagprefix="uc2" %>   
+    
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <table class="tblmas" style="width: 90%" id="tblmaster" runat="server">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                PAYMENT REQUEST VIEW SCREEN&nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: right">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: center">
+                REQ REF / PO REF / SUPPLIER:
+                            <asp:TextBox ID="txtsupplier" runat="server" CssClass="txtbox" Width="500px" Font-Size="8pt" AutoPostBack="True" OnTextChanged="txtsupplier_TextChanged"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txttaxowncode0_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx7" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetPaymentRequest" ServicePath="~/modules/commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtsupplier">
+                            </ajaxToolkit:AutoCompleteExtender>
+                                        
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+            
+                <table id="tbl_data_det" runat="server" 
+                    
+                    style="border-color: #e6e6fa; border-width: 1px; width: 900px; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='white', startcolorstr='#D6DCF9', gradienttype='0'); " >
+                    <tr >
+                        <td >
+                            <table id="tbl_po_det" runat="server">
+                                <tr >
+                                    <td >
+                            <table  >
+                                <tr >
+                                    <td style="width: 106px" >
+                                        PO Ref</td>
+                                    <td style="width: 13px" >
+                                        :</td>
+                                    <td >
+                                        <asp:Label ID="lblref" runat="server" Font-Bold="True" Text="Label" 
+                                            Width="168px" ForeColor="Red"></asp:Label></td>
+                                </tr>
+                                <tr >
+                                    <td style="width: 106px" >
+                                        Req Type</td>
+                                    <td style="width: 13px" >
+                                        :</td>
+                                    <td >
+                                        <asp:Label ID="lblreqtype" runat="server" Text="Label" Width="217px"></asp:Label></td>
+                                </tr>
+                                <tr >
+                                    <td style="width: 106px" >
+                                        Purchase Type</td>
+                                    <td style="width: 13px" >
+                                        :</td>
+                                    <td >
+                                        <asp:Label ID="lblpurtype" runat="server" Text="Label" Width="217px"></asp:Label></td>
+                                </tr>
+                                <tr >
+                                    <td style="width: 106px">
+                                        Party</td>
+                                    <td style="width: 13px" >
+                                        :</td>
+                                    <td __designer:mapid="e0">
+                                        <asp:Label ID="lblparty" runat="server" Text="Label" Width="440px"></asp:Label></td>
+                                </tr>
+                                <tr __designer:mapid="e2">
+                                    <td style="width: 106px" __designer:mapid="e3">
+                                        Amount</td>
+                                    <td style="width: 13px" __designer:mapid="e4">
+                                        :</td>
+                                    <td __designer:mapid="e5">
+                                        <asp:Label ID="lblamount" runat="server" Text="Label" Width="139px"></asp:Label></td>
+                                </tr>
+                                <tr __designer:mapid="e7">
+                                    <td style="width: 106px" __designer:mapid="e8">
+                                        Inward</td>
+                                    <td style="width: 13px" __designer:mapid="e9">
+                                        :</td>
+                                    <td __designer:mapid="ea">
+                                        <asp:Label ID="lblinward" runat="server" Text="Label" Width="440px" 
+                                            Font-Bold="True"></asp:Label></td>
+                                </tr>
+                            </table>
+                                    </td>
+                                </tr>
+                                <tr __designer:mapid="ec">
+                                    <td __designer:mapid="ed">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="ee">
+                                    <td style="text-align: center" __designer:mapid="ef">
+                            <span style="font-size: 10pt; color: #000099" __designer:mapid="f0">
+                                        <strong __designer:mapid="f1">ITEMS DETAIL</strong></span></td>
+                                </tr>
+                                <tr __designer:mapid="f2">
+                                    <td __designer:mapid="f3">
+                                <asp:PlaceHolder ID="celdetail" runat="server"></asp:PlaceHolder>                            
+                                    </td>
+                                </tr>
+                                <tr __designer:mapid="f5">
+                                    <td __designer:mapid="f6">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="f7">
+                                    <td style="text-align: center" __designer:mapid="f8">
+                            <span style="font-size: 10pt; color: #000099" __designer:mapid="f9">
+                                        <strong __designer:mapid="fa">TERMS &amp; CONDITIONS</strong></span> </td>
+                                </tr>
+                                <tr __designer:mapid="fb">
+                                    <td __designer:mapid="fc">
+                            <span style="font-size: 10pt; color: #000099" __designer:mapid="fd">
+                                        <strong __designer:mapid="fe">GENERAL TERMS </strong>
+                            </span>
+                                    </td>
+                                </tr>
+                                <tr __designer:mapid="ff">
+                                    <td id="celgent" runat="server" __designer:mapid="100">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="101">
+                                    <td __designer:mapid="102">
+                            <span style="font-size: 10pt; color: #000099" __designer:mapid="103">
+                                        <strong __designer:mapid="104">SPECIAL TERMS</strong></span></td>
+                                </tr>
+                                <tr __designer:mapid="105">
+                                    <td id="celspet" runat="server" __designer:mapid="106">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="107">
+                                    <td __designer:mapid="108">
+                            <span style="font-size: 10pt; color: #000099" __designer:mapid="109">
+                                        <strong __designer:mapid="10a">PAYMENT TERMS</strong></span></td>
+                                </tr>
+                                <tr __designer:mapid="10b">
+                                    <td  id="celpayt" runat="server" __designer:mapid="10c">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="10d">
+                                    <td __designer:mapid="10e" >
+                                        &nbsp;</td>
+                                </tr>
+                                </table>
+                        </td>
+                    </tr>
+                    <tr __designer:mapid="121">
+                        <td style="text-align: left" __designer:mapid="122">
+                            &nbsp;</td>
+                    </tr>
+                    <tr __designer:mapid="123">
+                        <td style="text-align: center" __designer:mapid="124" 
+                            class="heading">
+                            PAMENT DETAIL</td>
+                    </tr>
+                    <tr __designer:mapid="125">
+                        <td style="text-align: left" __designer:mapid="126">
+                            <table  __designer:mapid="2b3">
+                                <tr __designer:mapid="2b4">
+                                    <td style="width: 100px; text-align: right;" __designer:mapid="2b5">
+                                        &nbsp;</td>
+                                    <td style="width: 14px" __designer:mapid="2b6">
+                                        &nbsp;</td>
+                                    <td style="width: 109px" __designer:mapid="2b7">
+                                        &nbsp;</td>
+                                    <td __designer:mapid="2b8">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="2b9">
+                                    <td style="width: 100px" __designer:mapid="2ba">ADVANCE DETAIL</td>
+                                    <td style="width: 14px" __designer:mapid="2bb">:</td>
+                                    <td colspan="2" __designer:mapid="2bc">
+                                        <asp:GridView ID="gdpayadv" runat="server" BackColor="White" BorderColor="#41519A" BorderStyle="Solid" BorderWidth="1px" CellPadding="4" ForeColor="#333333" GridLines="None" PageSize="100" SkinID="GridView" style="border-top-width: 1px; border-left-width: 1px; border-left-color: #e6e6fa; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='white', startcolorstr='#D6DCF9', gradienttype='0'); border-bottom-width: 1px; border-bottom-color: #e6e6fa; border-top-color: #e6e6fa; border-right-width: 1px; border-right-color: #e6e6fa;" Width="90%">
+                                            <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                                            <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                                            <SelectedRowStyle Font-Bold="True" />
+                                            <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                                            <EditRowStyle BackColor="#2461BF" />
+                                            <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" Font-Underline="False" />
+                                            <RowStyle Font-Size="8pt" />
+                                        </asp:GridView>
+                                    </td>
+                                </tr>
+                                <tr __designer:mapid="2c5">
+                                    <td style="width: 100px" __designer:mapid="2c6">PAY REQUEST</td>
+                                    <td style="width: 14px" __designer:mapid="2c7">:</td>
+                                    <td colspan="2" __designer:mapid="2c8">
+                                        <asp:GridView ID="gdpayreq" runat="server" BackColor="White" BorderColor="#41519A" BorderStyle="Solid" BorderWidth="1px" CellPadding="4" ForeColor="#333333" GridLines="None" PageSize="100" SkinID="GridView" style="border-top-width: 1px; border-left-width: 1px; border-left-color: #e6e6fa; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='white', startcolorstr='#D6DCF9', gradienttype='0'); border-bottom-width: 1px; border-bottom-color: #e6e6fa; border-top-color: #e6e6fa; border-right-width: 1px; border-right-color: #e6e6fa;" Width="90%">
+                                            <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                                            <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                                            <SelectedRowStyle Font-Bold="True" />
+                                            <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                                            <EditRowStyle BackColor="#2461BF" />
+                                            <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" Font-Underline="False" />
+                                            <RowStyle Font-Size="8pt" />
+                                        </asp:GridView>
+                                    </td>
+                                </tr>
+                                <tr __designer:mapid="2d1">
+                                    <td style="width: 100px" __designer:mapid="2d2">
+                                        PAYMENT DETAIL</td>
+                                    <td style="width: 14px" __designer:mapid="2d3">
+                                        :</td>
+                                    <td colspan="2" __designer:mapid="2d4">
+                                        <asp:GridView ID="gdpayment" runat="server" BackColor="White" BorderColor="#41519A" BorderStyle="Solid" BorderWidth="1px" CellPadding="4" ForeColor="#333333" GridLines="None" PageSize="100" SkinID="GridView" style="border-top-width: 1px; border-left-width: 1px; border-left-color: #e6e6fa; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='white', startcolorstr='#D6DCF9', gradienttype='0'); border-bottom-width: 1px; border-bottom-color: #e6e6fa; border-top-color: #e6e6fa; border-right-width: 1px; border-right-color: #e6e6fa;" Width="90%">
+                                            <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                                            <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                                            <SelectedRowStyle Font-Bold="True" />
+                                            <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                                            <EditRowStyle BackColor="#2461BF" />
+                                            <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" Font-Underline="False" />
+                                            <RowStyle Font-Size="8pt" />
+                                        </asp:GridView>
+                                    </td>
+                                </tr>
+                                <tr __designer:mapid="2dd">
+                                    <td style="width: 100px" __designer:mapid="2de">
+                                        &nbsp;</td>
+                                    <td style="width: 14px" __designer:mapid="2df">
+                                        &nbsp;</td>
+                                    <td style="width: 109px" __designer:mapid="2e0">
+                                        &nbsp;</td>
+                                    <td __designer:mapid="2e1">
+                                        &nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr __designer:mapid="152">
+                        <td style="text-align: center" class="heading" 
+                            __designer:mapid="153">
+                            REQUEST DETAIL</td>
+                    </tr>
+                    <tr __designer:mapid="154">
+                        <td style="text-align: left" __designer:mapid="155">
+                            &nbsp;</td>
+                    </tr>
+                    <tr __designer:mapid="156">
+                        <td style="text-align: left" __designer:mapid="157">
+                            <table  __designer:mapid="2e8">
+                                <tr __designer:mapid="2e9">
+                                    <td style="width: 186px; text-align: right;" __designer:mapid="2ea">
+                                        REQ REF NO</td>
+                                    <td style="width: 12px" __designer:mapid="2eb">
+                                        :</td>
+                                    <td __designer:mapid="2ec">
+                                        <asp:Label ID="lblref_no" runat="server" style="font-weight: 700" ></asp:Label>
+                                    &nbsp;
+                                                
+                                    </td>
+                                    <td __designer:mapid="2ec">
+                        <asp:Button ID="btnattachment" runat="server" 
+                            Text="VIEW ATTACHMENT " CssClass="btn2" 
+                            Width="125px" />
+                        
+                                    </td>
+                                    <td __designer:mapid="2ee">
+                                        &nbsp;</td>
+                                    <td __designer:mapid="2ee">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="2ef">
+                                    <td style="width: 186px; text-align: right;" __designer:mapid="2f0">PO VALUE</td>
+                                    <td style="width: 12px" __designer:mapid="2f1">:</td>
+                                    <td __designer:mapid="2f2" colspan="2">
+                                        <asp:Label ID="lblpoval" runat="server"></asp:Label>
+                                    </td>
+                                    <td __designer:mapid="2f4">&nbsp;</td>
+                                    <td __designer:mapid="2f4">&nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="2f5">
+                                    <td style="width: 186px; text-align: right;" __designer:mapid="2f6">MRR VALUE</td>
+                                    <td style="width: 12px" __designer:mapid="2f7">:</td>
+                                    <td __designer:mapid="2f8" colspan="2"><asp:Label ID="lblmrrval" runat="server"></asp:Label>
+                                    </td>
+                                    <td __designer:mapid="2fa"></td>
+                                    <td __designer:mapid="2fa">&nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="2fb">
+                                    <td style="width: 186px; text-align: right;" __designer:mapid="2fc">APPROVED REQUESTED AMOUNT</td>
+                                    <td style="width: 12px" __designer:mapid="2fd">:</td>
+                                    <td __designer:mapid="2fe" colspan="2">
+                                        <asp:Label ID="lblapproved_amount" runat="server" ></asp:Label>
+                                    </td>
+                                    <td __designer:mapid="300">&nbsp;</td>
+                                    <td __designer:mapid="300">&nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="307">
+                                    <td style="width: 186px; text-align: right;" __designer:mapid="308">REQUESTED BILL AMOUNT</td>
+                                    <td style="width: 12px" __designer:mapid="309">:</td>
+                                    <td __designer:mapid="30a" colspan="2">
+                                        <asp:Label ID="lblreqamount" runat="server" style="font-size: large" ></asp:Label>
+                                        
+                                    </td>
+                                    <td __designer:mapid="30d">&nbsp;</td>
+                                    <td __designer:mapid="30d">&nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="30e">
+                                    <td style="width: 186px; text-align: right;" __designer:mapid="30f">CARRING AMOUNT</td>
+                                    <td style="width: 12px" __designer:mapid="310">:</td>
+                                    <td __designer:mapid="311" colspan="2">
+                                        <asp:Label ID="lblcaramount" runat="server" ></asp:Label>
+                                        
+                                    </td>
+                                    <td __designer:mapid="314">
+                                        <asp:Label ID="lblcartitle" runat="server" >Carring Dbt Code:</asp:Label>
+                                        
+                                    </td>
+                                    <td __designer:mapid="314">
+                            <asp:TextBox ID="txtcarcode" runat="server" CssClass="txtbox" Width="350px" Font-Size="8pt"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtfodirect1_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx2" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetCoa" ServicePath="~/modules/commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtcarcode">
+                            </ajaxToolkit:AutoCompleteExtender>
+                                        
+                                    </td>
+                                </tr>
+                                <tr __designer:mapid="315">
+                                    <td style="width: 186px; text-align: right;" __designer:mapid="316">LOADING/UNLOADING AMOUNT</td>
+                                    <td style="width: 12px" __designer:mapid="317">:</td>
+                                    <td __designer:mapid="318" colspan="2">
+                                        <asp:Label ID="lblloadamount" runat="server" ></asp:Label>
+                                        
+                                    </td>
+                                    <td __designer:mapid="31b">
+                                        <asp:Label ID="lblloadtitle" runat="server" >Load/unload Dbt Code:</asp:Label>
+                                        
+                                    </td>
+                                    <td __designer:mapid="31b">
+                            <asp:TextBox ID="txtloadcode" runat="server" CssClass="txtbox" Width="350px" Font-Size="8pt"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtcarcode0_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx3" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetCoa" ServicePath="~/modules/commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtloadcode">
+                            </ajaxToolkit:AutoCompleteExtender>
+                                        
+                                    </td>
+                                </tr>
+                                <tr __designer:mapid="31c">
+                                    <td style="width: 186px; text-align: right;" __designer:mapid="31d">OTHER AMOUNT</td>
+                                    <td style="width: 12px" __designer:mapid="31e">:</td>
+                                    <td __designer:mapid="31f" colspan="2">
+                                        <asp:Label ID="lblotheramount" runat="server" ></asp:Label>
+                                        
+                                    </td>
+                                    <td __designer:mapid="322">
+                                        <asp:Label ID="lblotrtitle" runat="server" >Other Dbt Code:</asp:Label>
+                                        
+                                    </td>
+                                    <td __designer:mapid="322">
+                            <asp:TextBox ID="txtothercode" runat="server" CssClass="txtbox" Width="350px" Font-Size="8pt"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtloadcode0_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx4" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetCoa" ServicePath="~/modules/commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtothercode">
+                            </ajaxToolkit:AutoCompleteExtender>
+                                        
+                                    </td>
+                                </tr>
+                                <tr __designer:mapid="323">
+                                    <td style="width: 186px; text-align: right;" __designer:mapid="324">
+                                        INVOICE NO</td>
+                                    <td style="width: 12px" __designer:mapid="325">
+                                        :</td>
+                                    <td __designer:mapid="326" colspan="2">
+                                        <asp:Label ID="lblinvno" runat="server" CssClass="txtbox"></asp:Label>
+                                    </td>
+                                    <td __designer:mapid="328">
+                                        &nbsp;</td>
+                                    <td __designer:mapid="328">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="329">
+                                    <td style="width: 186px; text-align: right;" __designer:mapid="32a">
+                                        INVOICE DATE</td>
+                                    <td style="width: 12px" __designer:mapid="32b">
+                                        :</td>
+                                    <td __designer:mapid="32c" colspan="2">
+                                        <asp:Label ID="lblinvoicedate" runat="server" CssClass="txtbox"></asp:Label>
+                                    </td>
+                                    <td __designer:mapid="32f">
+                                        &nbsp;</td>
+                                    <td __designer:mapid="32f">
+                                        &nbsp;</td>
+                                </tr>
+                                <tr __designer:mapid="33c">
+                                    <td style="width: 186px" __designer:mapid="33d">
+                                        &nbsp;</td>
+                                    <td style="width: 12px" __designer:mapid="33e">
+                                        &nbsp;</td>
+                                    <td __designer:mapid="33f" colspan="2">
+                                        &nbsp;</td>
+                                    <td __designer:mapid="340">
+                                        &nbsp;</td>
+                                    <td __designer:mapid="340">
+                                        &nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr __designer:mapid="18b">
+                        <td style="text-align: left" __designer:mapid="18c">
+                          
+                            <table id="tbl_vat" runat="server"  style="width:100%;">
+                                <tr>
+                                    <td class="heading" colspan="4" style="text-align: center">VAT INFORMATION</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 188px; text-align: right">VAT SOURCE:</td>
+                                    <td style="width: 10px">&nbsp;</td>
+                                    <td>
+                                        <asp:RadioButtonList ID="rdovatsource" runat="server" RepeatDirection="Horizontal" >
+                                            <asp:ListItem Selected="True" Value="0">Own Source</asp:ListItem>
+                                            <asp:ListItem Value="1">Deduct From Party</asp:ListItem>
+                                        </asp:RadioButtonList>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 188px; text-align: right">
+                                        <asp:Label ID="lblvatowntitle" runat="server" >VAT DBT CODE:</asp:Label>
+                                        
+                                    </td>
+                                    <td style="width: 10px">&nbsp;</td>
+                                    <td>
+                            <asp:TextBox ID="txtvatowncode" runat="server" CssClass="txtbox" Width="350px" Font-Size="8pt"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtvatcode0_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx6" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetCoa" ServicePath="~/modules/commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtvatowncode">
+                            </ajaxToolkit:AutoCompleteExtender>
+                                        
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 188px; text-align: right">VAT RATE:</td>
+                                    <td style="width: 10px">&nbsp;</td>
+                                    <td>
+                                        <asp:TextBox ID="txtvatrate" runat="server" AutoCompleteType="Disabled" CssClass="txtbox"></asp:TextBox>
+                                        <ajaxToolkit:FilteredTextBoxExtender ID="txtreqamount_FilteredTextBoxExtender" runat="server" FilterType="Custom, Numbers" TargetControlID="txtvatrate" ValidChars=".">
+                                        </ajaxToolkit:FilteredTextBoxExtender>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 188px; text-align: right">VAT AMOUNT:</td>
+                                    <td style="width: 10px">&nbsp;</td>
+                                    <td>
+                                        <asp:TextBox ID="txtvatamount" runat="server" AutoCompleteType="Disabled" CssClass="txtbox"></asp:TextBox>
+                                        <ajaxToolkit:FilteredTextBoxExtender ID="txtreqamount0_FilteredTextBoxExtender" runat="server" FilterType="Custom, Numbers" TargetControlID="txtvatamount" ValidChars=".">
+                                        </ajaxToolkit:FilteredTextBoxExtender>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 188px; text-align: right">VAT CRD CODE:</td>
+                                    <td style="width: 10px">&nbsp;</td>
+                                    <td>
+                            <asp:TextBox ID="txtvatcode" runat="server" CssClass="txtbox" Width="350px" Font-Size="8pt"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtothercode0_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx5" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetCoa" ServicePath="~/modules/commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txtvatcode">
+                            </ajaxToolkit:AutoCompleteExtender>
+                                        
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr __designer:mapid="18b">
+                        <td style="text-align: center" __designer:mapid="18c">
+                          
+                            <table id="tbl_tax" runat="server"  style="width:100%;">
+                                <tr>
+                                    <td class="heading" colspan="4" style="text-align: center">TAX INFORMATION</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 188px; text-align: right">TAX SOURCE:</td>
+                                    <td style="width: 10px">&nbsp;</td>
+                                    <td>
+                                        <asp:RadioButtonList ID="rdotaxsource" runat="server" RepeatDirection="Horizontal" >
+                                            <asp:ListItem Selected="True" Value="0">Own Source</asp:ListItem>
+                                            <asp:ListItem Value="1">Deduct From Party</asp:ListItem>
+                                        </asp:RadioButtonList>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 188px; text-align: right">
+                                        <asp:Label ID="lbltaxowntitle" runat="server" >TAX DBT CODE:</asp:Label>
+                                        
+                                    </td>
+                                    <td style="width: 10px">&nbsp;</td>
+                                    <td style="text-align: left">
+                            <asp:TextBox ID="txttaxowncode" runat="server" CssClass="txtbox" Width="350px" Font-Size="8pt"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtvatowncode0_AutoCompleteExtender" 
+                                runat="server" BehaviorID="AutoCompleteEx7" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetCoa" ServicePath="~/modules/commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txttaxowncode">
+                            </ajaxToolkit:AutoCompleteExtender>
+                                        
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 188px; text-align: right">TAX RATE:</td>
+                                    <td style="width: 10px">&nbsp;</td>
+                                    <td style="text-align: left">
+                                        <asp:TextBox ID="txttaxrate" runat="server" AutoCompleteType="Disabled" CssClass="txtbox"></asp:TextBox>
+                                        <ajaxToolkit:FilteredTextBoxExtender ID="txtvatrate0_FilteredTextBoxExtender" runat="server" FilterType="Custom, Numbers" TargetControlID="txttaxrate" ValidChars=".">
+                                        </ajaxToolkit:FilteredTextBoxExtender>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 188px; text-align: right">TAX AMOUNT:</td>
+                                    <td style="width: 10px">&nbsp;</td>
+                                    <td style="text-align: left">
+                                        <asp:TextBox ID="txttaxamount" runat="server" AutoCompleteType="Disabled" CssClass="txtbox"></asp:TextBox>
+                                        <ajaxToolkit:FilteredTextBoxExtender ID="txtvatamount0_FilteredTextBoxExtender" runat="server" FilterType="Custom, Numbers" TargetControlID="txttaxamount" ValidChars=".">
+                                        </ajaxToolkit:FilteredTextBoxExtender>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 188px; text-align: right">TAX CRD CODE:</td>
+                                    <td style="width: 10px">&nbsp;</td>
+                                    <td style="text-align: left">
+                            <asp:TextBox ID="txttaxcode" runat="server" CssClass="txtbox" Width="350px" Font-Size="8pt"></asp:TextBox>
+                            <ajaxToolkit:AutoCompleteExtender ID="txtvatcode0_AutoCompleteExtender0" 
+                                runat="server" BehaviorID="AutoCompleteEx8" CompletionInterval="100" 
+                                CompletionListCssClass="autocomplete_completionListElement" 
+                                CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                                CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="20" 
+                                DelimiterCharacters="," EnableCaching="false" MinimumPrefixLength="3" 
+                                ServiceMethod="GetCoa" ServicePath="~/modules/commercial/services/autocomplete.asmx" 
+                                ShowOnlyCurrentWordInCompletionListItem="true" TargetControlID="txttaxcode">
+                            </ajaxToolkit:AutoCompleteExtender>
+                                        
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr __designer:mapid="18b">
+                        <td style="text-align: center" __designer:mapid="18c">
+                          
+                            &nbsp;</td>
+                    </tr>
+                    <tr __designer:mapid="18b">
+                        <td style="text-align: center" __designer:mapid="18c" 
+                            class="heading">
+                          
+                            COMMENTS</td>
+                    </tr>
+                    <tr __designer:mapid="18e">
+                        <td style="text-align: left" __designer:mapid="18f">
+                            &nbsp;</td>
+                    </tr>
+                    <tr __designer:mapid="191">
+                        <td style="text-align: left" __designer:mapid="192">
+                          
+                            <asp:PlaceHolder ID="phcomments" runat="server"></asp:PlaceHolder>
+                          
+                        </td>
+                    </tr>
+                    <tr __designer:mapid="191">
+                        <td style="text-align: left" __designer:mapid="192">
+                            &nbsp;</td>
+                    </tr>
+                    </table>
+          
+           
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+            
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+                &nbsp;</td>
+            <td>
+            </td>
+        </tr>
+        <tr>
+            <td style="height: 57px">
+            </td>
+            <td style="height: 57px">
+            </td>
+            <td style="height: 57px">
+            </td>
+        </tr>
+    </table>
+
+</asp:Content>
+

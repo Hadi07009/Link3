@@ -1,0 +1,254 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_itm_grp_create.aspx.cs" Inherits="frm_itm_grp_create"  Title=""   ValidateRequest="false" EnableEventValidation="false"  %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+  
+
+    <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="3" class="heading" style="text-align: center">
+                NEW ITEM GROUP CREATE SCREEN</td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <asp:UpdatePanel ID="updpnl" runat="server">
+<ContentTemplate>
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 111px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 9px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            <table style="width:100%;">
+                                <tr>
+                                    <td style="width: 100px">&nbsp;</td>
+                                    <td style="width: 54px">GROUP :</td>
+                                    <td>
+                                        <asp:RadioButtonList ID="optgrp" runat="server" AutoPostBack="True" OnSelectedIndexChanged="optgrp_SelectedIndexChanged" RepeatDirection="Horizontal">
+                                            <asp:ListItem Value="1">1st Group</asp:ListItem>
+                                            <asp:ListItem Value="2">2nd Group</asp:ListItem>
+                                            <asp:ListItem Value="3">3rd Group</asp:ListItem>
+                                        </asp:RadioButtonList>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">&nbsp;</td>
+                        <td style="text-align: right; width: 111px">&nbsp;</td>
+                        <td style="text-align: left; width: 9px">&nbsp;</td>
+                        <td style="text-align: left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">&nbsp;</td>
+                        <td style="text-align: right; width: 111px">&nbsp;</td>
+                        <td style="text-align: left; width: 9px">&nbsp;</td>
+                        <td style="text-align: left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">&nbsp;</td>
+                        <td style="text-align: right; width: 111px">
+                            <asp:Label ID="lblfirst" runat="server" Text="1st Group"></asp:Label>
+                        </td>
+                        <td style="text-align: left; width: 9px">&nbsp;</td>
+                        <td style="text-align: left">
+                            <asp:DropDownList ID="ddlggp1" runat="server" AutoPostBack="True" CssClass="txtbox" OnSelectedIndexChanged="ddlggp1_SelectedIndexChanged" Width="400px">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">&nbsp;</td>
+                        <td style="text-align: right; width: 111px">
+                            <asp:Label ID="lbl2nd" runat="server" Text="2nd Group"></asp:Label>
+                        </td>
+                        <td style="text-align: left; width: 9px">&nbsp;</td>
+                        <td style="text-align: left">
+                            <asp:DropDownList ID="ddlggp2" runat="server" CssClass="txtbox" Width="400px" AutoPostBack="True" OnSelectedIndexChanged="ddlggp2_SelectedIndexChanged">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 111px">
+                            Group Code</td>
+                        <td style="text-align: left; width: 9px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtcode" runat="server" CssClass="txtbox" Width="120px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 111px">
+                            Group Name</td>
+                        <td style="text-align: left; width: 9px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtname" runat="server" CssClass="txtbox" 
+                                Width="455px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">&nbsp;</td>
+                        <td style="text-align: right; width: 111px">Short Name</td>
+                        <td style="text-align: left; width: 9px">&nbsp;</td>
+                        <td style="text-align: left">
+                            <asp:TextBox ID="txtshort" runat="server" CssClass="txtbox" Width="150px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 111px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            <asp:Label ID="lblupdate" runat="server" ForeColor="Red" 
+                                Text="ADDED SUCCESSFULLY" Visible="False"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 111px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            <asp:Button ID="btnupdate" runat="server" CssClass="btn2" 
+                                onclick="btnupdate_Click" Text="ADD/UPDATE" Width="143px" Visible="False" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">&nbsp;</td>
+                        <td style="text-align: left; width: 111px">&nbsp;</td>
+                        <td colspan="2" style="text-align: left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">&nbsp;</td>
+                        <td style="text-align: left; width: 111px">&nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                           
+
+                            <asp:GridView ID="gdgrp" runat="server" BackColor="#CCCCCC" 
+                                BorderColor="#999999" BorderStyle="Solid" BorderWidth="3px" CellPadding="7" 
+                                CellSpacing="3" EnableTheming="True" ForeColor="Black" HorizontalAlign="Center" 
+                                Width="100%" CaptionAlign="Right"  ShowFooter="True" style="margin-top: 7px" OnSelectedIndexChanged="gdgrp_SelectedIndexChanged">
+                                <AlternatingRowStyle BorderStyle="None" HorizontalAlign="Right" />
+                                <EditRowStyle BorderStyle="Ridge" HorizontalAlign="Right" 
+                                    VerticalAlign="Middle" />
+                                <FooterStyle BackColor="#CCCCCC" HorizontalAlign="Right" />
+                                <HeaderStyle BackColor="#B9B9B9" BorderWidth="1px" Font-Bold="False" 
+                                    Font-Strikeout="False" ForeColor="#161616"  Font-Size="8pt"
+                                    Wrap="True" HorizontalAlign="Center" />
+                                <PagerStyle BackColor="#CCCCCC" ForeColor="Black" HorizontalAlign="Left" />
+                                <RowStyle BackColor="White" HorizontalAlign="Right"  />
+                                <SelectedRowStyle BackColor="White" Font-Bold="false" ForeColor="Black" />
+                                <SortedAscendingCellStyle BackColor="#F1F1F1" />
+                                <SortedAscendingHeaderStyle BackColor="#808080" />
+                                <SortedDescendingCellStyle BackColor="#CAC9C9" />
+                                <SortedDescendingHeaderStyle BackColor="#383838" />
+                                 <Columns>
+                                    <asp:CommandField ShowSelectButton="True" SelectText="Delete" />
+                                </Columns>
+            </asp:GridView>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 111px">
+                            &nbsp;</td>
+                        <td colspan="2" style="text-align: left">
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;" colspan="4">
+                            ALL GROUP ITEM DETAILS</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align: center;">
+                           
+                            <asp:GridView ID="gdall" runat="server" BackColor="#CCCCCC" 
+                BorderColor="#999999" BorderStyle="Solid" BorderWidth="3px" CellPadding="7" 
+                CellSpacing="3" EnableTheming="True" ForeColor="Black" HorizontalAlign="Center" 
+                Width="100%" CaptionAlign="Right"  ShowFooter="True" style="margin-top: 7px">
+                <AlternatingRowStyle BorderStyle="None" HorizontalAlign="Right" />
+                <EditRowStyle BorderStyle="Ridge" HorizontalAlign="Right" 
+                    VerticalAlign="Middle" />
+                <FooterStyle BackColor="#CCCCCC" HorizontalAlign="Right" />
+                <HeaderStyle BackColor="#B9B9B9" BorderWidth="1px" Font-Bold="False" 
+                    Font-Strikeout="False" ForeColor="#161616" Font-Size="8pt"
+                    Wrap="True" HorizontalAlign="Center" />
+                <PagerStyle BackColor="#CCCCCC" ForeColor="Black" HorizontalAlign="Left" />
+                <RowStyle BackColor="White" HorizontalAlign="Right"  />
+                <SelectedRowStyle BackColor="#000099" Font-Bold="True" ForeColor="White" />
+                <SortedAscendingCellStyle BackColor="#F1F1F1" />
+                <SortedAscendingHeaderStyle BackColor="#808080" />
+                <SortedDescendingCellStyle BackColor="#CAC9C9" />
+                <SortedDescendingHeaderStyle BackColor="#383838" />
+            </asp:GridView>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 57px">
+                            &nbsp;</td>
+                        <td colspan="3" style="text-align: left; ">
+                            &nbsp;</td>
+                    </tr>
+                </table>
+                </ContentTemplate>
+                <Triggers>
+                <asp:AsyncPostBackTrigger ControlID="ddlggp1" EventName="SelectedIndexChanged" />
+                    <asp:AsyncPostBackTrigger ControlID="ddlggp2" EventName="SelectedIndexChanged" />
+                    <asp:AsyncPostBackTrigger ControlID="gdgrp" EventName="SelectedIndexChanged" />
+                    <asp:AsyncPostBackTrigger ControlID="optgrp" EventName="SelectedIndexChanged" />
+                    
+                <asp:AsyncPostBackTrigger ControlID="btnupdate" EventName="Click" />
+                </Triggers>
+   
+</asp:UpdatePanel>
+
+                </td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width: 103px">
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+            <td>
+                &nbsp;</td>
+        </tr>
+    </table>
+    
+</asp:Content>
+

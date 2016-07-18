@@ -1,0 +1,296 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_fpi_consignment_entry.aspx.cs" Inherits="frm_fpi_entry" Title=""   %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+
+<%@ Register src="usercontrols/ctl_fpi_mpr_item_view.ascx" tagname="ctl_fpi_mpr_item_view" tagprefix="uc1" %>
+<%@ Register assembly="eWorld.UI.Compatibility" namespace="eWorld.UI.Compatibility" tagprefix="ew" %>
+
+<%@ Register src="usercontrols/ctl_fpi_pi_entry_view.ascx" tagname="ctl_fpi_pi_entry_view" tagprefix="uc3" %>
+<%@ Register src="usercontrols/ctl_fpi_lc_entry_view.ascx" tagname="ctl_fpi_lc_entry_view" tagprefix="uc4" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+
+ <asp:UpdatePanel ID="upd_all" runat="server">
+            <ContentTemplate>
+
+<table id="tbltop" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+        </tr>
+        <tr>
+            <td class="heading" style="text-align: center">
+                Consignment Information&nbsp; Entry</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td style="text-align: center">
+           
+                PENDING LIST(<asp:Label ID="lblpcount" runat="server" Text="Label"></asp:Label>
+                ) :
+                <asp:DropDownList ID="ddlpolist" runat="server" Width="600px" 
+                    AutoPostBack="True" CssClass="txtbox"  Font-Size="9pt"
+                    onselectedindexchanged="ddlpolist_SelectedIndexChanged">
+                </asp:DropDownList>
+                   
+            
+             
+                   
+            </td>
+        </tr>
+        </table>
+         
+              
+        <table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+
+
+        <tr>
+            <td style="text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc1:ctl_fpi_mpr_item_view ID="ctl_fpi_mpr_item_view1" runat="server" />
+               
+            </td>
+        </tr>
+
+         <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc3:ctl_fpi_pi_entry_view ID="ctl_fpi_pi_entry_view1" runat="server" />
+               
+            </td>
+        </tr>
+
+          <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+               
+                <uc4:ctl_fpi_lc_entry_view ID="ctl_fpi_lc_entry_view1" runat="server" />
+               
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" style="height: 24px; text-align: left">
+           <%-- <asp:UpdatePanel ID="upd_all" runat="server">
+            <ContentTemplate>--%>
+            
+           
+                    <table style="width:100%;">
+                        <tr>
+                            <td class="heading " colspan="5" style="text-align: center">
+                                IMPORT CONSIGNMENT INFORMATION</td>
+                        </tr>
+                        <tr>
+                            <td class="lbl" style="text-align: right; ">
+                                Consignment number:</td>
+                            <td style="width: 188px">
+                                <asp:Label ID="lblconsignment_no" runat="server"></asp:Label>
+                            </td>
+                            <td class="style11" style="text-align: right; color: #FF3300; width: 189px;">
+                                &nbsp;</td>
+                            <td class="style33">
+                                &nbsp;</td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="style38" style="text-align: right; color: #FF3300;">
+                                <strong>LC Quantity:&nbsp; </strong></td>
+                            <td style="width: 188px">
+                                <asp:Label ID="lbl_lc_quantity" runat="server" 
+                                    style="color: #FF3300; font-weight: 700"></asp:Label>
+                            </td>
+                            <td class="style11" style="text-align: right; color: #FF3300; width: 189px;">
+                                <strong>Available Quantity:</strong></td>
+                            <td class="style33">
+                                <asp:Label ID="lbl_available_quantity" runat="server" 
+                                    style="font-weight: 700; color: #FF3300"></asp:Label>
+                            </td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="style38" style="text-align: right">
+                                * Bill of Lading(B/L) Number:
+                            </td>
+                            <td style="width: 188px">
+                                <asp:TextBox ID="txt_bill_of_leading_number" runat="server" Width="175px"></asp:TextBox>
+                            </td>
+                            <td class="style11" style="text-align: right; width: 189px;">
+                                *Date:
+                            </td>
+                            <td class="style33">
+                                <ew:CalendarPopup ID="dt_date" runat="server" CssClass="txtbox" 
+                                    Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="76px">
+                                    <ButtonStyle CssClass="btn2" />
+                                </ew:CalendarPopup>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="style41" style="text-align: right">
+                                * Bill of Lading(B/L) Quantity:
+                            </td>
+                            <td style="width: 188px">
+                                <asp:TextBox ID="txt_bill_of_leading_quantity" runat="server" Width="175px"></asp:TextBox>
+                                <ajaxToolkit:FilteredTextBoxExtender ID="txt_bill_of_leading_quantity_FilteredTextBoxExtender" 
+                                    runat="server" Enabled="True" TargetControlID="txt_bill_of_leading_quantity" FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                </ajaxToolkit:FilteredTextBoxExtender>
+                            </td>
+                            <td class="style27" style="text-align: right; width: 189px;">
+                                *Unit:
+                            </td>
+                            <td class="style42">
+                                <asp:DropDownList  ID="txt_unit" runat="server" Width="175px"></asp:DropDownList>
+                            </td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="style41" style="text-align: right">
+                                *Vessel Name:
+                            </td>
+                            <td style="width: 188px">
+                                
+                                <asp:DropDownList ID="ddlvesselname" runat="server"  Width="175px">
+                                </asp:DropDownList>
+                                
+                            </td>
+                            <td class="style27" style="text-align: right; width: 189px;">
+                                Country:
+                            </td>
+                            <td class="style42">
+                                <asp:TextBox ID="txt_country" runat="server" Width="175px"></asp:TextBox>
+                            </td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="style38" style="text-align: right">
+                                *Import Route name:</td>
+                            <td style="width: 188px">
+                                <asp:TextBox ID="txt_import_rout" runat="server" Width="175px"></asp:TextBox>
+                            </td>
+                            <td style="text-align: right; width: 189px;">
+                                Contact No shipping Agent:</td>
+                            <td class="style42">
+                                <asp:TextBox ID="txt_contact_shipping_agent" runat="server" Width="175px"></asp:TextBox>
+                            </td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="style38" style="text-align: right">
+                                *Import rotation No.:</td>
+                            <td style="width: 188px">
+                                <asp:TextBox ID="txt_import_rotation_no" runat="server" Width="175px"></asp:TextBox>
+                            </td>
+                            <td style="text-align: right; width: 189px;">
+                                Contact NoStevedoring provider:</td>
+                            <td class="style42">
+                                <asp:TextBox ID="txt_contact_stevedoring_service_pro" runat="server" 
+                                    Width="175px"></asp:TextBox>
+                            </td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="style38" style="text-align: right">
+                                Shipping Agent Charge:</td>
+                            <td valign="middle" style="width: 188px">
+                                <asp:TextBox ID="txt_shipping_charge" runat="server" Width="175px"></asp:TextBox>
+                                <ajaxToolkit:FilteredTextBoxExtender ID="txt_shipping_charge_FilteredTextBoxExtender" 
+                                    runat="server" Enabled="True" TargetControlID="txt_shipping_charge" FilterMode="ValidChars" FilterType="Custom, Numbers" ValidChars=".">
+                                </ajaxToolkit:FilteredTextBoxExtender>
+                                &nbsp;</td>
+                            <td style="text-align: right; width: 189px;">
+                                &nbsp;</td>
+                            <td class="style42">
+                                &nbsp;</td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="style38" style="text-align: right">
+                                *Date of Arrival:</td>
+                            <td style="width: 188px">
+                                <ew:CalendarPopup ID="dt_arrival" runat="server" CssClass="txtbox" 
+                                    Culture="English (United Kingdom)" DisableTextBoxEntry="False" Width="76px">
+                                    <ButtonStyle CssClass="btn2" />
+                                </ew:CalendarPopup>
+                            </td>
+                            <td style="text-align: right; width: 189px;">
+                                &nbsp;</td>
+                            <td class="style42">
+                                &nbsp;</td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="style38" style="text-align: right">
+                                Shipping Agent Name:</td>
+                            <td colspan="3">
+                                <asp:TextBox ID="txt_shipping_agent_name" runat="server" Width="468px"></asp:TextBox>
+                            </td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="style38" style="text-align: right">
+                                Stevedoring Service Provider Name:</td>
+                            <td colspan="3">
+                                <asp:TextBox ID="txt_stevedoring_service_pro" runat="server" Width="468px"></asp:TextBox>
+                            </td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="style38" style="text-align: center" colspan="4">
+                                <asp:Label ID="Label1" runat="server" style="color: #CC0000" Text="Label" 
+                                    Visible="False"></asp:Label>
+                            </td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="style38" style="text-align: center" colspan="4">
+                                <asp:Button ID="btn_submit" runat="server" onclick="btn_submit_Click" 
+                                    Text="Submit" Width="100px" />
+                            </td>
+                            <td>
+                                &nbsp;</td>
+                        </tr>
+                    </table>
+           <%-- </ContentTemplate>
+               <Triggers>
+               <asp:AsyncPostBackTrigger ControlID="btn_submit" EventName="Click" />
+              <asp:AsyncPostBackTrigger ControlID="ddlpolist" EventName="SelectedIndexChanged" />
+
+
+               </Triggers>
+                </asp:UpdatePanel>--%>
+            </td>
+        </tr>
+       
+      
+    </table>
+
+
+
+      </ContentTemplate>
+               <Triggers>
+               <asp:AsyncPostBackTrigger ControlID="btn_submit" EventName="Click" />
+              <asp:AsyncPostBackTrigger ControlID="ddlpolist" EventName="SelectedIndexChanged" />
+
+
+               </Triggers>
+                </asp:UpdatePanel>
+  
+</asp:Content>
+

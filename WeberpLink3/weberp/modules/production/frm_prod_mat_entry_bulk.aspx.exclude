@@ -1,0 +1,240 @@
+<%@ Page Language="C#" MasterPageFile="~/masMain.master" AutoEventWireup="true" CodeFile="frm_prod_mat_entry_bulk.aspx.cs" Inherits="frm_prod_mat_entry_bulk" EnableEventValidation="false" %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+<%@ Register Assembly="eWorld.UI, Version=2.0.6.2393, Culture=neutral, PublicKeyToken=24d65337282035f2"
+    Namespace="eWorld.UI" TagPrefix="ew" %>
+
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <asp:UpdatePanel ID="updgrid" runat="server">
+<ContentTemplate>
+<table id="tblmaster" runat="server" class="tblmas" style="width: 100%">
+        <tr>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px">
+            </td>
+            <td style="height: 22px; text-align: right;">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="heading" colspan="3" style="text-align: center">
+                BULK PRODUCTION ENTRY SCREEN</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 24px; text-align: right">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 25px; text-align: center">
+                <table style="width:100%;">
+                    <tr>
+                        <td style="width: 116px">
+                            &nbsp;</td>
+                        <td style="width: 119px; text-align: right;">
+                            PRODUCTION DATE</td>
+                        <td style="width: 22px">
+                            :</td>
+                        <td style="text-align: left">
+                            <ew:CalendarPopup ID="cldissdate" runat="server" 
+                                Culture="English (United Kingdom)" DisableTextBoxEntry="False" Nullable="True"  
+                                SelectedDate="" Width="85px">
+                                <ButtonStyle CssClass="btn2" />
+                            </ew:CalendarPopup>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 116px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 119px">
+                            &nbsp;</td>
+                        <td style="width: 22px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 116px">
+                            &nbsp;</td>
+                        <td style="text-align: right; width: 119px">
+                            PRODUCTION NAME</td>
+                        <td style="width: 22px">
+                            :</td>
+                        <td style="text-align: left">
+                            <asp:DropDownList ID="ddlprod" runat="server" AutoPostBack="True" 
+                                CssClass="txtbox" onselectedindexchanged="ddlprod_SelectedIndexChanged" 
+                                Width="400px">
+                            </asp:DropDownList>
+                        </td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 116px">
+                            &nbsp;</td>
+                        <td style="text-align: left; width: 119px">
+                            &nbsp;</td>
+                        <td style="width: 22px">
+                            &nbsp;</td>
+                        <td style="text-align: left">
+                            &nbsp;</td>
+                        <td>
+                            &nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 34px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 22px; text-align: center">
+                <asp:Label ID="lblmsg" runat="server" Font-Bold="True" ForeColor="Red" 
+                    Visible="False"></asp:Label>
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 22px; text-align: left">
+                
+                
+                <asp:GridView ID="gdItem" runat="server" AutoGenerateColumns="False" 
+                    BackColor="White" BorderColor="#41519A" BorderStyle="Solid" BorderWidth="1px" 
+                    CellPadding="4" ForeColor="#333333" GridLines="None" 
+                    OnRowDataBound="gdItem_RowDataBound" PageSize="100" SkinID="GridView" 
+                    style="border-color: #e6e6fa; border-width: 1px; filter: progid:dximagetransform.microsoft.gradient(endcolorstr='#FFCC0A', startcolorstr='#41519A', gradienttype='0'); text-align: left;" 
+                    Width="98%">
+                    <FooterStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <PagerStyle BackColor="#41519A" ForeColor="White" HorizontalAlign="Center" />
+                    <SelectedRowStyle Font-Bold="True" />
+                    <HeaderStyle BackColor="#41519A" Font-Bold="True" ForeColor="White" />
+                    <EditRowStyle BackColor="#2461BF" />
+                    <AlternatingRowStyle BackColor="Lavender" Font-Size="8pt" 
+                        Font-Underline="False" />
+                    <RowStyle Font-Size="8pt" />
+                    <Columns>
+                        
+                        <asp:TemplateField HeaderText="Item Code">
+                            <ItemTemplate>
+                                <asp:Label ID="Label1" runat="server" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="Item Details">
+                            <ItemTemplate>
+                                <asp:Label ID="Label2" runat="server" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="Uom">
+                            <ItemTemplate>
+                                <asp:Label ID="Label3" runat="server" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="Store">
+                            <ItemTemplate>
+                                <asp:DropDownList ID="DropDownList1" Width="90px" CssClass="txtbox" runat="server" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        
+                        <asp:TemplateField HeaderText="Avl Qnty">
+                            <ItemTemplate>
+                                <asp:Label ID="Label4" runat="server" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="STD Ratio(%)">
+                            <ItemTemplate>
+                                <asp:Label ID="Label5" runat="server" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="Issue Qty (PLC Record)">
+                            <ItemTemplate>
+                                <ajaxToolkit:FilteredTextBoxExtender ID="FilteredTextBoxExtender3" 
+                                    runat="server" FilterType="Custom, Numbers" TargetControlID="TextBox1" 
+                                    ValidChars=".">
+                                </ajaxToolkit:FilteredTextBoxExtender>
+                                <asp:TextBox ID="TextBox1" runat="server" CssClass="txtbox" Width="100px" AutoCompleteType="Disabled" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        
+                    </Columns>
+                </asp:GridView>
+                
+                
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: left">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+                <asp:Button ID="btnProceed" runat="server" CssClass="btn2" Text="Proceed" 
+                    Width="117px" onclick="btnProceed_Click" Visible="False" style="height: 23px" />
+            </td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="height: 8px; text-align: center">
+                &nbsp;</td>
+        </tr>
+        <tr>
+            <td class="tbl" colspan="3" style="text-align: center">
+                </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+    </ContentTemplate>
+               <Triggers>                    
+                    <asp:AsyncPostBackTrigger ControlID="ddlprod" EventName="SelectedIndexChanged" />
+               </Triggers> 
+ </asp:UpdatePanel>
+                
+<script type="text/javascript">
+
+
+         function ColorRow(CheckBoxObj) {
+             if (CheckBoxObj.checked == true) {
+                 CheckBoxObj.parentElement.parentElement.style.backgroundColor = '#88AAFF';
+             }
+             else {
+                 CheckBoxObj.parentElement.parentElement.style.backgroundColor = '#F8E5A1';
+             }
+
+         }
+
+         function ShowHideField(DecisionControl, ToggleControl1, ToggleControl2, ToggleControl3) {
+
+             if (DecisionControl.checked == true) {
+                 ToggleControl1.style.visibility = 'visible';
+                 ToggleControl2.style.visibility = 'visible';
+                 ToggleControl3.style.visibility = 'visible';
+                               
+             }
+             else 
+             {
+                 ToggleControl1.style.visibility = 'hidden';
+                 ToggleControl2.style.visibility = 'hidden';
+                 ToggleControl3.style.visibility = 'hidden';
+                               
+             }
+
+         }
+
+         
+        
+    </script>
+
+</asp:Content>
+

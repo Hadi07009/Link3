@@ -1,0 +1,232 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using LibraryDAL;
+using LibraryDAL.SCBLINTableAdapters;
+using LibraryDAL.ErpDataSetTableAdapters;
+using LibraryDAL.SCBLQryTableAdapters;
+
+
+public partial class frm_item_movement : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        //current.UserId = "MON";
+        //current.UserName = "Monjurul";                
+        clsStatic.CheckUserAuthentication();       
+        tblmaster.BgColor = "FFFFFFF";
+        if (!Page.IsPostBack)
+        {
+            load_store();
+            cldfrdate.SelectedDate = DateTime.Now.AddDays(-1 * DateTime.Now.Day);
+            cldtodate.SelectedDate = DateTime.Now;
+        }
+
+    }
+
+    private void load_store()
+    {
+        InMa_Str_LocTableAdapter store = new InMa_Str_LocTableAdapter();
+        ErpDataSet.InMa_Str_LocDataTable dtstore = new ErpDataSet.InMa_Str_LocDataTable();
+        ListItem lst;
+        dtstore = store.GetAllStore();
+
+        chkstore.Items.Clear();
+
+
+        foreach (ErpDataSet.InMa_Str_LocRow dr in dtstore.Rows)
+        {
+            lst = new ListItem();
+            lst.Text = dr.Str_Loc_Id + ":" + dr.Str_Loc_Name;
+            lst.Value = dr.Str_Loc_Id;
+            lst.Selected = true;
+            chkstore.Items.Add(lst);
+
+        }
+
+    }
+
+    protected void btnview_Click(object sender, EventArgs e)
+    {
+        if (chkstore.SelectedIndex == -1) return;
+        dtItmMovementTableAdapter mov = new dtItmMovementTableAdapter();
+        SCBLQry.dtItmMovementDataTable dtmov = new SCBLQry.dtItmMovementDataTable();
+        InTr_Sr_DetTableAdapter srdet = new InTr_Sr_DetTableAdapter();
+        SCBLIN.InTr_Sr_DetDataTable dtsrdet = new SCBLIN.InTr_Sr_DetDataTable();
+        InMa_Itm_DetTableAdapter itm = new InMa_Itm_DetTableAdapter();
+        InMa_Stk_CtlTableAdapter stk = new InMa_Stk_CtlTableAdapter();
+        ErpDataSet.InMa_Stk_CtlDataTable dtstk = new ErpDataSet.InMa_Stk_CtlDataTable();
+        AccDataSet.AccTransactionDetailsDataTable dtacc = new AccDataSet.AccTransactionDetailsDataTable();
+        LibraryDAL.AccDataSetTableAdapters.AccTransactionDetailsTableAdapter acc = new LibraryDAL.AccDataSetTableAdapters.AccTransactionDetailsTableAdapter();
+
+        DataTable dt = new DataTable();
+        DateTime trndate;
+        
+        string type, det, stockstr, jcode,janal, jvref;
+        double iss, rec, op , opp,clo;
+        lblcurstk.Visible = false;
+
+        string[] tmp = txtitemdet.Text.Split(':');
+        if (tmp.Length < 2) {return; }
+
+        string strname = "";        
+        foreach (ListItem lst in chkstore.Items)
+            if (lst.Selected)
+                if (strname == "") strname = lst.Value.ToString(); else strname += "," + lst.Value.ToString();
+
+        
+        if (itm.GetItemByCode(tmp[0]).Count == 0) return;
+        lblcurstk.Visible = true;
+        dtstk = stk.GetDataByItem(tmp[0]);
+        if (dtstk.Count == 0)
+        {
+            stockstr = "No transaction found";
+            return;
+        }
+        else
+        {
+            stockstr = "Current Free Stock: ";
+            foreach (ErpDataSet.InMa_Stk_CtlRow dr in dtstk.Rows)
+            {
+                stockstr += " [" + dr.Stk_Ctl_SCode + " : " + dr.Stk_Ctl_Cur_Stk.ToString() + "] ";
+            }
+            
+        }
+
+        lblcurstk.Text = stockstr;
+
+        op = Convert.ToDouble(mov.GetOpQty(strname, tmp[0], cldfrdate.SelectedDate));
+
+        dt.Columns.Add("DATE", typeof(string));
+        dt.Columns.Add("REF NO", typeof(string));
+        dt.Columns.Add("STORE", typeof(string));
+        dt.Columns.Add("TYPE", typeof(string));
+        dt.Columns.Add("FROM/TO", typeof(string));
+        dt.Columns.Add("OPENINNG QTY", typeof(string));
+        dt.Columns.Add("RECEIVE QTY", typeof(string));
+        dt.Columns.Add("ISSUE QTY", typeof(string));
+        dt.Columns.Add("CLOSING QTY", typeof(string));
+        dt.Columns.Add("INV RATE", typeof(string));
+        dt.Columns.Add("AMNT", typeof(string));
+        dt.Columns.Add("LINKED BY", typeof(string));
+        dt.Columns.Add("DR/CR CODE", typeof(string));
+        dt.Columns.Add("DR/CR ANAL", typeof(string));
+        dt.Columns.Add("JV REF", typeof(string));
+
+        dtmov = mov.GetDataByItem(strname, tmp[0], cldfrdate.SelectedDate, cldtodate.SelectedDate.AddDays(1).AddSeconds(-1));
+
+        opp = op;
+        
+        foreach (SCBLQry.dtItmMovementRow dr in dtmov.Rows)
+        {
+
+            iss = 0;
+            rec = 0;
+            trndate = dr.Trn_Hdr_DATE;
+            jcode = "";
+            janal = "";
+            jvref = "";
+            //dtacc = new AccDataSet.AccTransactionDetailsDataTable();
+            dtacc = acc.GetDataDcGrnNo(dr.Trn_Hdr_Ref, dr.Trn_Hdr_Ref);
+            if (dtacc.Rows.Count > 0)
+            {
+                jvref = dtacc[0].Trn_Ref_No;
+            }
+            else
+            {
+                dtacc = acc.GetDataDcGrnNo(dr.Trn_Hdr_Com4, dr.Trn_Hdr_Com3);
+                if (dtacc.Rows.Count > 0)
+                {
+                    jvref = dtacc[0].Trn_Ref_No;
+                }
+            }
+
+            switch (dr.Trn_Hdr_Type)
+            {
+                case "II":
+                    type = "SALES";
+                    det =  dr.par_adr_name;
+                    iss = dr.Trn_Det_Lin_Qty;
+                    trndate = dr.Trn_Hdr_Dc_Date;
+                    jcode = dr.Trn_Hdr_Pcode;
+                    janal = dr.Trn_Hdr_Dcode;
+                    break;
+
+                case "RC":
+                    type = "PURCHASE";
+                    det = dr.Expr1;
+                    rec = dr.Trn_Det_Lin_Qty;
+                    jcode = dr.Trn_Hdr_Pcode;
+                    janal = dr.Trn_Hdr_Dcode;
+                    break;
+
+                case "FI":
+                    type = "PRODUCTION";
+                    det = dr.Trn_Hdr_Com5;
+                    rec = dr.Trn_Det_Lin_Qty;
+                    break;
+
+                case "IS":
+                    type = "ISSUE";
+                    det = dr.Trn_Hdr_Com5;
+                    iss = dr.Trn_Det_Lin_Qty;
+                    dtsrdet = new SCBLIN.InTr_Sr_DetDataTable();
+                    dtsrdet = srdet.GetDataByRefItem(dr.Trn_Det_Ord_Ref, dr.Trn_Det_Icode);
+                    if (dtsrdet.Rows.Count > 0)
+                    {
+                        jcode = dtsrdet[0].T_C1;
+                        janal = dtsrdet[0].T_C2;
+                    }
+
+                    break;
+
+                case "IT":
+                    type = "ISSUE TRANSFER";
+                    det = dr.Trn_Hdr_Com5;
+                    iss = dr.Trn_Det_Lin_Qty;
+                    break;
+
+
+                case "RT":
+                    type = "RECEIVE TRANSFER";
+                    det = dr.Trn_Hdr_Com5;
+                    rec = dr.Trn_Det_Lin_Qty;
+                    break;
+
+                default:
+                    type = "";
+                    det = "";
+                    break;
+            }
+
+            clo = opp + rec - iss;
+            dt.Rows.Add(trndate.ToShortDateString(), dr.Trn_Hdr_Ref, dr.Trn_Det_Str_Code, type, det, opp.ToString("N2"), rec.ToString("N2"), iss.ToString("N2"), clo.ToString("N2"), dr.Trn_Det_Inv_Rat.ToString("N2"), dr.Trn_Det_Inv_Amt.ToString("N2"), dr.Trn_Det_Ord_Ref, jcode, janal, jvref);
+            opp = clo;
+
+        }
+
+        if (dt.Rows.Count == 0)
+        {
+            btnexport.Visible = false;
+        }
+        else
+        {
+            btnexport.Visible = true;
+        }
+
+        gditm.DataSource = dt;
+        gditm.DataBind();
+    }
+    protected void btnexport_Click(object sender, EventArgs e)
+    {
+        clsStatic.Export("Item_movement.xls", gditm);
+    }
+}
+
