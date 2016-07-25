@@ -115,6 +115,7 @@
       <Node Id="3_400_17" Text="Business Leave Application"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmBusinessLeaveApplicationAdmin.aspx" Tooltip="Business Leave Application" ImageIndex="3" Permission="" Parameter="" PermType="" />
       <Node Id="3_400_18" Text="Business Leave Apply and Approve"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmBusinessLeaveApplicationApproveByAdmin.aspx" Tooltip="Business Leave Apply and Approve" ImageIndex="3" Permission="" Parameter="" PermType="" />
       <Node Id="3_400_19" Text="Conveyance Application"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/frmConveyanceApplication.aspx" Tooltip="Conveyance Application" ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_400_20" Text="Test Sort Data Table"  Tag="---" FormName="" Tergate="~/modules/HRMS/SelfService/TestSortDataTable.aspx" Tooltip="Test Sort Data Table" ImageIndex="3" Permission="" Parameter="" PermType="" />
       
       
       
