@@ -43,6 +43,7 @@
                 <td>&nbsp;</td>
                 <td>
                     <asp:Button ID="btnSave" runat="server" OnClick="btnSave_Click" Text="Save" Width="100px" />
+                    <asp:Button ID="btnClear" runat="server" OnClick="btnClear_Click" Text="Clear" Width="100px" />
                 </td>
             </tr>
             <tr>
@@ -52,7 +53,11 @@
             </tr>
             <tr>
                 <td colspan="3">
-                    <asp:GridView ID="grdEmployeeRecord" runat="server" Width="100%">
+                    <asp:GridView ID="grdEmployeeRecord" runat="server" Width="100%" EmptyDataText="No data found !" OnRowCommand="grdEmployeeRecord_RowCommand" OnRowDeleting="grdEmployeeRecord_RowDeleting">
+                        <Columns>
+                            <asp:CommandField ShowDeleteButton="True" />
+                            <asp:CommandField ShowSelectButton="True" />
+                        </Columns>
                     </asp:GridView>
                 </td>
             </tr>
