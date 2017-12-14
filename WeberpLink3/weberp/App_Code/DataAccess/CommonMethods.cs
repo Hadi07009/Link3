@@ -59,6 +59,13 @@ public class CommonMethods
         connExcel.Close();
         return dt;
     }
+    public string SqlEmployeeInformation(string employeeCode)
+    {
+        string sqlQuery = null;
+        sqlQuery = "select EmpID,EmpName,Dept,Designation,b.Emp_Mas_Join_Date as Joiningdate from Emp_Details a inner join HrMs_Emp_mas b on a.EmpID=b.Emp_Mas_Emp_Id where EmpID='" + employeeCode + "'";
+        return sqlQuery;
+    }
+
     public string TimeFormatGenerate(string atf)
     {
         try

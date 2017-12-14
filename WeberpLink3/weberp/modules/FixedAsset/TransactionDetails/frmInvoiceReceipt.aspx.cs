@@ -864,7 +864,7 @@ public partial class frmInvoiceReceipt : System.Web.UI.Page
 
                 lineno++;
                 TransactionDetailsDAO tdDao5 = new TransactionDetailsDAO();
-                tdDao5.TrnAcCode = AccCode.ToString(); //DataProcess.GetData(_connectionString, SqlgenerateForFixedAsset.GetLcExpenseHead(expid)).Rows[0]["AccCode"].ToString();
+                tdDao5.TrnAcCode = AccCode.ToString(); //DataProcess.GetData(connectionString, SqlgenerateForFixedAsset.GetLcExpenseHead(expid)).Rows[0]["AccCode"].ToString();
                 tdDao5.TrnAcDesc = DataProcess.GetSingleValueFromtable(_connectionString, "budg", "Gl_Coa_Name", "where Gl_Coa_Code='" + tdDao5.TrnAcCode + "'");
                 tdDao5.TrnAcType = DataProcess.GetSingleValueFromtable(_connectionString, "budg", "Gl_Coa_Type", "where Gl_Coa_Code='" + tdDao5.TrnAcCode + "'");
                 tdDao5.TrnAmount = Convert.ToDouble(amt);

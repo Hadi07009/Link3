@@ -179,7 +179,7 @@ public partial class modules_FixedAsset_Setup_frmItemTypeSetup : System.Web.UI.P
             }
             else
             {
-                //var dtRefNo = DataProcess.GetSingleValueFromtable(_connectionString, SqlgenerateForFixedAsset.GetMaxRefNo());                    
+                //var dtRefNo = DataProcess.GetSingleValueFromtable(connectionString, SqlgenerateForFixedAsset.GetMaxRefNo());                    
                 //int nextRefNo = (dtRefNo == null || Convert.ToInt32(dtRefNo) == 0) ? 1001 : Convert.ToInt32(dtRefNo) + 1;
                 
 

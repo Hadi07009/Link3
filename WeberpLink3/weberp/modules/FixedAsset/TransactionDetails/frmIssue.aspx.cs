@@ -1452,7 +1452,7 @@ public partial class modules_FixedAsset_TransactionDetails_frmIssue : System.Web
 
                 TransactionEntryBLL tBll = new TransactionEntryBLL();
 
-                //string str = tBll.saveData(_connectionString, DaoHdr, tdDaolst, false);
+                //string str = tBll.saveData(connectionString, DaoHdr, tdDaolst, false);
                 string[] str;
                 str = new string[2];  
                 

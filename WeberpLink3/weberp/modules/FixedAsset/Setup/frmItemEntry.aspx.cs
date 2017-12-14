@@ -296,7 +296,7 @@ public partial class modules_FixedAsset_Setup_frmItemEntry : System.Web.UI.Page
 
     //private void LoadAccCode()
     //{
-    //    SqlConnection con = new SqlConnection(_connectionString);
+    //    SqlConnection con = new SqlConnection(connectionString);
     //    con.Open();
     //    string query = "";
     //    try

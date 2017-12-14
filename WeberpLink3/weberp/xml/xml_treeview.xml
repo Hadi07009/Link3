@@ -47,6 +47,7 @@
       <Node Id="3_100_15" Text="Leave Carry forward"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmLeaveCarryForward.aspx" Tooltip="Leave Carry forward"   ImageIndex="3" Permission="" Parameter="" PermType="" />
       <Node Id="3_100_16" Text="Attendance Import Individual"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmAttendanceTransferIndividual.aspx" Tooltip="Attendance Import Individual"   ImageIndex="3" Permission="" Parameter="" PermType="" />
       <Node Id="3_100_17" Text="Manual Attendance"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmManualAttendance.aspx" Tooltip="Manual Attendance"   ImageIndex="3" Permission="" Parameter="" PermType="" />
+      <Node Id="3_100_18" Text="Project Management"  Tag="---" FormName="" Tergate="~/modules/HRMS/Details/frmProjectManagement.aspx" Tooltip="Project Management"   ImageIndex="3" Permission="" Parameter="" PermType="" />
     
     
     </Node>

@@ -12,12 +12,12 @@ using System.Web.UI.WebControls;
 /// </summary>
 public class ClsGridViewLoad
 {
-	public ClsGridViewLoad()
-	{
-		//
-		// TODO: Add constructor logic here
-		//
-	}
+    public ClsGridViewLoad()
+    {
+        //
+        // TODO: Add constructor logic here
+        //
+    }
     public static void GetData(DataTable dt, GridView GridViewName)
     {
         if (dt.Rows.Count > 0)
@@ -73,5 +73,22 @@ public class ClsGridViewLoad
 
         gv.Rows[0].Cells[0].Text = "NO RESULT FOUND!";
         gv.FooterRow.Visible = true;
+    }
+    public static void ShowConfirmDelete(GridView gridViewID, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            foreach (DataControlField gridViewConField in gridViewID.Columns)
+            {
+                if (gridViewConField.ToString() == "CommandField")
+                {
+                    if (((CommandField)gridViewConField).ShowDeleteButton == true)
+                    {
+                        e.Row.Cells[gridViewID.Columns.IndexOf(gridViewConField)].Attributes
+                        .Add("onclick", "return confirm(\"Are you sure?\")");
+                    }
+                }
+            }
+        }
     }
 }

@@ -46,7 +46,7 @@ public partial class UserControls_ucEmployeeInformation : System.Web.UI.UserCont
 
             //sql = "select EmpPhoto from Hrms_Emp_Photo where EmpID='300021'";
             //DataTable dt = new DataTable();
-            //dt = DataProcess.GetData(_connectionString, sql);
+            //dt = DataProcess.GetData(connectionString, sql);
             //image = dt.Rows[0]["EmpPhoto"] as byte[];
 
             SqlConnection con = null;

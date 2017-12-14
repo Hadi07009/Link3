@@ -52,6 +52,31 @@ public class WebService : System.Web.Services.WebService {
     }
 
     [WebMethod]
+    public List<string> GetOnlyEmpId(string prefixText, int count, String contextKey)
+    {
+        List<string> ItemList = new List<string>();
+        DataTable dt = new DataTable();
+        string str = "";
+        string constr = contextKey;
+        if (prefixText == "*")
+        {
+            str = "select Emp_Mas_Emp_Id from HrMs_Emp_mas where Emp_Mas_Term_Flg='N' order by Emp_Mas_Emp_Id ";
+            
+        }
+        else
+        {
+            str = "select top 20 Emp_Mas_Emp_Id from HrMs_Emp_mas where (Emp_Mas_Emp_Id like '%" + prefixText + "%'  or (Emp_Mas_First_Name+space(1)+Emp_Mas_Last_Name like '%" + prefixText + "%')) and Emp_Mas_Term_Flg='N' order by Emp_Mas_Emp_Id ";
+            
+        }
+        dt = DataProcess.GetData(constr, str);
+        foreach (DataRow dr in dt.Rows)
+        {
+            ItemList.Add(dr["Emp_Mas_Emp_Id"].ToString());
+        }
+        return ItemList;
+    }
+
+    [WebMethod]
     public List<string> GetAllEmployeeId(string prefixText, int count, String contextKey)
     {
         List<string> ItemList = new List<string>();

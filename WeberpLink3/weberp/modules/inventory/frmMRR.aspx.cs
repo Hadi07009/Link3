@@ -1008,7 +1008,7 @@ public partial class frmMRR : System.Web.UI.Page
 
             //TransactionEntryBLL tBll = new TransactionEntryBLL();
 
-            //string str = tBll.BookAccountDataOfMRR(_connectionString, DaoHdr, tdDaolst, false);
+            //string str = tBll.BookAccountDataOfMRR(connectionString, DaoHdr, tdDaolst, false);
 
             //if (str != "")
             //{

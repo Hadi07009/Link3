@@ -1536,7 +1536,7 @@ public partial class modules_HRMS_Details_frmAttendanceTransfer : System.Web.UI.
                                                     "'" + dataRow[6].ToString() + "'," +
                                                     "'" + dataRow[7].ToString() + "'," +
                                                     "" + dataRow[8].ToString();
-                    //StoredProcedureExecutor.StoredProcedureExecuteNonQuery(_connectionString, storedProcedureComandTest);
+                    //StoredProcedureExecutor.StoredProcedureExecuteNonQuery(connectionString, storedProcedureComandTest);
 
                     horowinsert = horowinsert+DataProcess.ExecuteQueryNoofRoweffect(_connectionString, storedProcedureComandTest);
 
